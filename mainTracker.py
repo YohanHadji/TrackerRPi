@@ -55,7 +55,7 @@ while True:
         packetType = newPacketReceivedType()
         if (packetType == "controller"):
             joystickX, joystickY, joystickBtn, swUp, swDown, swLeft, swRight = returnLastPacketData(packetType)
-            print(joystickX, joystickY, joystickBtn, swUp, swDown, swLeft, swRight)
+            # print(joystickX, joystickY, joystickBtn, swUp, swDown, swLeft, swRight)
             getLockedPoint(all_light_points, joystickBtn, swUp, swDown, swLeft, swRight)
         elif (packetType == "pointList"):
             LightPointArray = returnLastPacketData(packetType)
@@ -78,6 +78,7 @@ while True:
         pointToSend.isVisible = False
     
     pointToSend.age = np.int32((np.int64(time.time()*1e9)-timeOffset)-sensorTimeStamp)
+    print(pointToSend.age)
 
     sendTargetToTeensy(pointToSend)
 
