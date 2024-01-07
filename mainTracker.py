@@ -47,7 +47,7 @@ while True:
         if (packetType == "controller"):
             joystickX, joystickY, joystickBtn, swUp, swDown, swLeft, swRight = returnLastPacketData(packetType)
             print(joystickX, joystickY, joystickBtn, swUp, swDown, swLeft, swRight)
-            getLockedPoint(joystickBtn, swUp, swDown, swLeft, swRight)
+            getLockedPoint(all_light_points, joystickBtn, swUp, swDown, swLeft, swRight)
         elif (packetType == "pointList"):
             LightPointArray = returnLastPacketData(packetType)
         elif (packetType == "cameraSettings"):
