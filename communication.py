@@ -35,7 +35,8 @@ cameraSetting = {
     "lightThreshold": 200,
     "switchFrame": 0,  # Assuming it's initially set to 0
     "gain": 1.0,
-    "exposureTime": 100
+    "exposureTime": 100,
+    "trackingEnabled": False
 }
 
 newControllerPacketReceived = False
@@ -105,7 +106,7 @@ def handle_packet(packetId, dataIn, lenIn):
         #     print("Point %d: (%s, %d, %d)" % (i + 1, point.name, point.x, point.y))
     elif (packetId == 0x10):
         newCameraSettingsPacketReceived = True
-        cameraSetting["idRadius"], cameraSetting["lockRadius"], cameraSetting["lightLifetime"], cameraSetting["lightThreshold"], cameraSetting["gain"], cameraSetting["exposureTime"] = struct.unpack('iiiiii', bytearray(dataIn))
+        cameraSetting["idRadius"], cameraSetting["lockRadius"], cameraSetting["lightLifetime"], cameraSetting["lightThreshold"], cameraSetting["gain"], cameraSetting["exposureTime"], cameraSetting["trackingEnabled"] = struct.unpack('iiiiiii', bytearray(dataIn))
 
 capsule_instance = Capsule(lambda packetId, dataIn, len: handle_packet(packetId, dataIn[:len], len))
 

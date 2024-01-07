@@ -105,6 +105,15 @@
                 <input type="range" id="gain" min="1.0" max="22.0" value="1.0" step="1.0">
                 <p id="gainValue">1.0</p>
             </div>
+
+            <!-- Tracking Enabled -->
+            <div>
+                <label for="trackingEnabled">Tracking Enabled:</label>
+                <select id="trackingEnabled">
+                    <option value="True">True</option>
+                    <option value="False">False</option>
+                </select>
+            </div>
         </div>
     </div>
 
@@ -137,6 +146,7 @@
         updateControlValue("switchFrame", "switchFrameValue");
         updateControlValue("exposureTime", "exposureTimeValue");
         updateControlValue("gain", "gainValue");
+        updateControlValue("trackingEnabled", "trackingEnabledValue");
     </script>
 </body>
 </html>

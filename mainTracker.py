@@ -55,6 +55,10 @@ while True:
 
     pointToSend = getLockedPoint(all_light_points, joystickBtn, swUp, swDown, swLeft, swRight)
     # print(pointToSend.name, pointToSend.x, pointToSend.y)
+
+    if (not cameraSetting["trackingEnabled"]):
+        pointToSend.isVisible = False
+
     sendTargetToTeensy(pointToSend)
 
     # Exit if 'q' is pressed

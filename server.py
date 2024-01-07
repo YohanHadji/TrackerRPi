@@ -26,7 +26,8 @@ input_values = {
     "lightThreshold": 200,
     "switchFrame": 0,  # Assuming it's initially set to 0
     "gain": 1.0,
-    "exposureTime": 100
+    "exposureTime": 100,
+    "trackingEnabled": False
 }
 
 picam2.set_controls({"AnalogueGain": np.int32(input_values["gain"]), "ExposureTime": np.int32(input_values["exposureTime"])})
@@ -64,7 +65,7 @@ def sendSettingToTracker():
     packet_id = 0x10
     # Pack the struct in a byte array
 
-    payload_data = struct.pack('iiiiii', np.int32(input_values["idRadius"]), np.int32(input_values["lockRadius"]), np.int32(input_values["lightLifetime"]), np.int32(input_values["lightThreshold"]), np.int32(input_values["switchFrame"]), np.int32(input_values["exposureTime"]))
+    payload_data = struct.pack('iiiiiii', np.int32(input_values["idRadius"]), np.int32(input_values["lockRadius"]), np.int32(input_values["lightLifetime"]), np.int32(input_values["lightThreshold"]), np.int32(input_values["switchFrame"]), np.int32(input_values["exposureTime"], np.int32(input_values["trackingEnabled"])))
     packet_length = len(payload_data)
     encoded_packet = capsule_instance.encode(packet_id, payload_data, packet_length)
     encoded_packet = bytearray(encoded_packet)
@@ -90,7 +91,7 @@ def generate_frames():
         _dummy, b_frame = cv2.threshold(gray_frame,np.int32(input_values["lightThreshold"]), 255, cv2.THRESH_BINARY)
                 
         printFps()
-        
+
         # Encode the frame
         if (input_values["switchFrame"] == 0):
             cv2.circle(b_frame, (400,303), input_values["lockRadius"], 255, 2)
