@@ -63,3 +63,7 @@ def printFps():
                 print(round(fpsAverage), round(fpsDeviation))
 
     prev_time_sec = current_time_sec
+
+def setCameraSettings(gain, exposureTime):
+    global picam2
+    # picam2.set_controls({"AnalogGain": gain, "ExposureTime": exposureTime})
