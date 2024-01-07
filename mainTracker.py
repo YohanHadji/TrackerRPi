@@ -96,7 +96,7 @@ while True:
         
         # pointToSend.age = np.int32((np.int64((time.time()-startTime)*1e9)-timeOffsetAverage)-sensorTimeStamp)
         # print(sensorTimeStamp, timeOffsetAverage)
-        pointToSend.age = (sensorTimeStamp+timeOffsetAverage)-np.int64((time.time()-startTime)*1e9)
+        pointToSend.age = ((time.time()-startTime)*1e9)-(sensorTimeStamp+timeOffsetAverage)
         print(pointToSend.age)
 
         sendTargetToTeensy(pointToSend)
