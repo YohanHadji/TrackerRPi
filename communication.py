@@ -87,7 +87,7 @@ def handle_packet(packetId, dataIn, lenIn):
     #print(f"Received packet {packetId}: {dataIn[:lenIn]}")
     #print(len(bytearray(dataIn)))
     # Joystick packet received
-    if (packetId == 0x01):
+    if (packetId == 99):
         newControllerPacketReceived = True
          # Assuming the first 4 bytes are preamble data, and the rest is 2 floats and 5 bools
         joystickX, joystickY, joystickBtn, swUp, swDown, swLeft, swRight = struct.unpack('ffbbbbb', bytearray(dataIn)) 
