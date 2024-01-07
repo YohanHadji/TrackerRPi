@@ -117,6 +117,7 @@ def process_and_store_light_points(new_points, sensorTimeStamp):
 
     # Get the current timestamp
     current_time = sensorTimeStamp
+    age = 0
 
     # Process new points
     for new_x, new_y in new_points:
