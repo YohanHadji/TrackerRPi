@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control Panel</title>
+    <style>
+        /* Add some basic styling to align sliders and values inline */
+        div {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+
+        label {
+            margin-right: 10px;
+        }
+
+        input[type="range"] {
+            width: 200px; /* Set the width of the slider as needed */
+        }
+
+        p {
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Control Panel</h1>
+
+    <!-- Video Feed -->
+    <div> <img src="{{ url_for('video_feed') }}" alt="Video Feed"> </div>
+
+    <!-- Radius Slider -->
+    <div>
+        <label for="idRadius">ID Radius (px):</label>
+        <input type="range" id="idRadius" min="0" max="100" value="10">
+        <p id="idRadiusValue">10</p>
+    </div>
+
+    <!-- Lock Radius Slider -->
+    <div>
+        <label for="lockRadius">Lock Radius (px):</label>
+        <input type="range" id="lockRadius" min="0" max="500" value="50">
+        <p id="lockRadiusValue">50</p>
+    </div>
+
+    <!-- Light Lifetime Slider -->
+    <div>
+        <label for="lightLifetime">Light Lifetime (ms):</label>
+        <input type="range" id="lightLifetime" min="0" max="1000" value="200">
+        <p id="lightLifetimeValue">200</p>
+    </div>
+
+    <!-- Light Threshold Slider -->
+    <div>
+        <label for="lightThreshold">Light Threshold:</label>
+        <input type="range" id="lightThreshold" min="0" max="255" value="128">
+        <p id="lightThresholdValue">128</p>
+    </div>
+
+    <!-- Switch Frame Slider -->
+    <div>
+        <label for="switchFrame">Switch Frame:</label>
+        <input type="range" id="switchFrame" min="0" max="1" value="0" step="1">
+        <p id="switchFrameValue">0</p>
+    </div>
+
+    <!-- ISO Dropdown -->
+    <div>
+        <label for="gain">Gain:</label>
+        <select id="gain">
+            <option value="1.0">Gain 1.0</option>
+            <option value="2.0">Gain 2.0</option>
+            <option value="3.0">Gain 3.0</option>
+        </select>
+        <p id="1.0">Gain 1.0</p>
+    </div>
+
+    <!-- Exposure Time Dropdown -->
+    <div>
+        <label for="exposureTime">Exposure Time:</label>
+        <select id="exposureTime">
+            <option value="100">100 us</option>
+            <option value="500">500 us</option>
+            <option value="1000">1000 us</option>
+        </select>
+        <p id="100">100 us</p>
+    </div>
+
+    <script>
+        // Function to update the Python variable whenever a slider or dropdown value changes
+        function updateControlValue(controlId, displayId) {
+            var control = document.getElementById(controlId);
+            var controlValueDisplay = document.getElementById(displayId);
+
+            control.addEventListener("input", function() {
+                var controlValue = control.value || control.options[control.selectedIndex].value;
+                controlValueDisplay.textContent = controlValue;
+
+                // Use JavaScript to send the control value and control ID to the server
+                fetch("/update_variable", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ id: controlId, value: controlValue }),
+                });
+            });
+        }
+
+        // Update the radius sliders
+        updateControlValue("idRadius", "idRadiusValue");
+        updateControlValue("lockRadius", "lockRadiusValue");
+        updateControlValue("lightLifetime", "lightLifetimeValue");
+        updateControlValue("lightThreshold", "lightThresholdValue");
+        updateControlValue("switchFrame", "switchFrameValue");
+
+        // Update the dropdowns
+        updateControlValue("gain", "gainValue");
+        updateControlValue("exposureTime", "exposureTimeValue");
+    </script>
+</body>
+</html>
