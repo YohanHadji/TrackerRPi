@@ -43,11 +43,11 @@ while True:
     if (not firstTimeNoted):
         frame, sensorTimeStamp = getFrame()
         firstTimeNoted = True
-        print("First frame received")
+        # print("First frame received")
 
         numberOfFrames = 0
 
-        while (numberOfFrames < 100):
+        while (numberOfFrames < 500):
             frame, sensorTimeStamp = getFrame()
             print(np.int64((time.time()-startTime)*1e9), sensorTimeStamp)
             timeOffset += (np.int64((time.time()-startTime)*1e9) - sensorTimeStamp)
@@ -55,8 +55,8 @@ while True:
 
         timeOffset /= numberOfFrames
         timeOffsetAverage = np.int64(timeOffset)
-        print("Time offset calculated")
-        print(timeOffsetAverage)
+        # print("Time offset calculated")
+        # print(timeOffsetAverage)
 
     else:
         frame, sensorTimeStamp = getFrame()
@@ -96,7 +96,7 @@ while True:
         
         # pointToSend.age = np.int32((np.int64((time.time()-startTime)*1e9)-timeOffsetAverage)-sensorTimeStamp)
         # print(sensorTimeStamp, timeOffsetAverage)
-        pointToSend.age = ((time.time()-startTime)*1e9)-(sensorTimeStamp+timeOffsetAverage)
+        pointToSend.age = np.int32((((time.time()-startTime)*1e9)-(sensorTimeStamp+timeOffsetAverage))/1e6)
         print(pointToSend.age)
 
         sendTargetToTeensy(pointToSend)
