@@ -46,6 +46,7 @@ while True:
         packetType = newPacketReceivedType()
         if (packetType == "controller"):
             joystickX, joystickY, joystickBtn, swUp, swDown, swLeft, swRight = returnLastPacketData(packetType)
+            print(joystickX, joystickY, joystickBtn, swUp, swDown, swLeft, swRight)
             getLockedPoint(joystickBtn, swUp, swDown, swLeft, swRight)
         elif (packetType == "pointList"):
             LightPointArray = returnLastPacketData(packetType)
