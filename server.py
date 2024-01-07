@@ -14,7 +14,7 @@ picam2 = Picamera2()
 camera_config = picam2.create_video_configuration(main={"format": "BGR888", "size": (800, 606)}, raw={"format": "SRGGB10", "size": (1332, 990)})
 picam2.configure(camera_config)
 
-picam2.set_controls({"AnalogueGain": 1.0, "ExposureTime": 31})
+picam2.set_controls({"AnalogueGain": 1.0, "ExposureTime": 300})
 picam2.set_controls({"FrameRate": 30})
 picam2.start()
 
