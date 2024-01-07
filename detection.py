@@ -136,7 +136,7 @@ def process_and_store_light_points(new_points, sensorTimeStamp):
             # Add new point to the list with acceleration and speed = 0 for both x and y
             name = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(4))
             # Make sure the name doesn't already exist in the current list:
-            while name in [existing_name for existing_name, _, _, _, _, _, _, _, _ in all_light_points]:
+            while name in [existing_name for existing_name, _, _, _, _, _, _, _, _, _ in all_light_points]:
                 name = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(4))
 
             all_light_points.append((name, current_time, new_x, new_y, age, current_time, 0, 0, 0, 0))
