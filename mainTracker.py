@@ -25,6 +25,8 @@ swDown      = False
 swLeft      = False
 swRight     = False
 
+trackingEnabled = False
+
 setCameraSettings(cameraSetting["gain"], cameraSetting["exposureTime"])
 setDetectionSettings(cameraSetting["idRadius"], cameraSetting["lockRadius"], cameraSetting["lightLifetime"], cameraSetting["lightThreshold"])
 
@@ -53,17 +55,19 @@ while True:
             print("Applied camera settings")
             setDetectionSettings(cameraSetting["idRadius"], cameraSetting["lockRadius"], cameraSetting["lightLifetime"], cameraSetting["lightThreshold"])
 
+            if (not cameraSetting["trackingEnabled"]):
+                trackingEnabled = False
+            else:
+                trackingEnabled = True
+
     pointToSend = getLockedPoint(all_light_points, joystickBtn, swUp, swDown, swLeft, swRight)
     # print(pointToSend.name, pointToSend.x, pointToSend.y)
 
-    if (not cameraSetting["trackingEnabled"]):
+    if (not trackingEnabled):
         print("Tracking disabled")
-        print (cameraSetting["trackingEnabled"])
         pointToSend.isVisible = False
     else:
         print("Tracking enabled")
-        print (cameraSetting["trackingEnabled"])
-
 
     sendTargetToTeensy(pointToSend)
 
