@@ -59,8 +59,9 @@ while True:
     if (not cameraSetting["trackingEnabled"]):
         print("Tracking disabled")
         pointToSend.isVisible = False
+    else:
+        print("Tracking enabled")
 
-    print("Tracking enabled")
 
     sendTargetToTeensy(pointToSend)
 
