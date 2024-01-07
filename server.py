@@ -86,7 +86,7 @@ def generate_frames():
                 
         # Encode the frame
         if (input_values["switchFrame"] == 0):
-            cv2.circle(b_frame, resolution, input_values["lockRadius"], 255, 10)
+            cv2.circle(b_frame, (resolution[0]/2,resolution[1]/2), input_values["lockRadius"], 255, 10)
             for point in LightPointArray:
                 cv2.circle(b_frame, (point.x, point.y), 5, 255, -1)
                 cv2.putText(b_frame, point.name, (point.x, point.y), cv2.FONT_HERSHEY_SIMPLEX, 1, 255, 2, cv2.LINE_AA)
@@ -95,7 +95,7 @@ def generate_frames():
             yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + b_frame + b'\r\n')
         else:
-            cv2.circle(frame, resolution, input_values["lockRadius"], (0, 0, 255), 10)
+            cv2.circle(frame, (resolution[0]/2,resolution[1]/2), input_values["lockRadius"], (0, 0, 255), 10)
             for point in LightPointArray:
                 cv2.circle(frame, (point.x, point.y), 5, (0, 0, 255), -1)
                 cv2.putText(frame, point.name, (point.x, point.y), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2, cv2.LINE_AA)
