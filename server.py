@@ -20,10 +20,10 @@ camInit(30)
 
 # Variables to store slider and dropdown values
 input_values = {
-    "idRadius": 50,
-    "lockRadius": 50,
-    "lightLifetime": 50,
-    "lightThreshold": 50,
+    "idRadius": 10,
+    "lockRadius": 100,
+    "lightLifetime": 200,
+    "lightThreshold": 200,
     "switchFrame": 0,  # Assuming it's initially set to 0
     "gain": 1.0,
     "exposureTime": 100
