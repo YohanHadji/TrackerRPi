@@ -222,7 +222,7 @@ def getLockedPoint(all_light_points, isButtonPressed=False,swLeft=False,swRight=
         lockedName = nameDown
         currentlyLocked = True
     
-    lockedPoint = LightPoint(name="ABCD", isVisible=False, x=0, y=0)
+    lockedPoint = LightPoint(name="ABCD", isVisible=False, x=0, y=0, age=0)
         
     for i, (name, firstSeen, x, y, age, timestamp, _, _, _, _) in enumerate(all_light_points):
         if (name == lockedName):
