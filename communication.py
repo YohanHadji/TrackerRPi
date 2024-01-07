@@ -27,8 +27,20 @@ swDown = False
 swLeft = False 
 swRight = False
 
+# Variables to store slider and dropdown values
+cameraSetting = {
+    "idRadius": 50,
+    "lockRadius": 50,
+    "lightLifetime": 50,
+    "lightThreshold": 50,
+    "switchFrame": 0,  # Assuming it's initially set to 0
+    "gain": 1.0,
+    "exposureTime": 100
+}
+
 newControllerPacketReceived = False
 newPointListPacketReceived = False
+newCameraSettingsPacketReceived = False
 
 class LightPoint:
     def __init__(self, name, isVisible, x, y):
@@ -45,34 +57,39 @@ class Foo:
     pass
 
 def newPacketReceived():
-    global newControllerPacketReceived, newPointListPacketReceived
-    return newControllerPacketReceived or newPointListPacketReceived
+    global newControllerPacketReceived, newPointListPacketReceived, newCameraSettingsPacketReceived
+    return newControllerPacketReceived or newPointListPacketReceived or newCameraSettingsPacketReceived
 
 def newPacketReceivedType():
-    global newControllerPacketReceived, newPointListPacketReceived
+    global newControllerPacketReceived, newPointListPacketReceived, newCameraSettingsPacketReceived
     if (newControllerPacketReceived):
         return "controller"
     if (newPointListPacketReceived):
         return "pointList"
+    if (newCameraSettingsPacketReceived):
+        return "cameraSettings"
 
 def returnLastPacketData(packetType):
-    global joystickX, joystickY, joystickBtn, swUp, swDown, swLeft, swRight, LightPointArray, newControllerPacketReceived, newPointListPacketReceived
+    global joystickX, joystickY, joystickBtn, swUp, swDown, swLeft, swRight, LightPointArray, cameraSetting, newControllerPacketReceived, newPointListPacketReceived, newCameraSettingsPacketReceived
     if (packetType == "controller"):
         newControllerPacketReceived = False
         return joystickX, joystickY, joystickBtn, swUp, swDown, swLeft, swRight
     elif (packetType == "pointList"):
         newPointListPacketReceived = False
         return LightPointArray
+    elif (packetType == "cameraSettings"):
+        newCameraSettingsPacketReceived = False
+        return cameraSetting
 
 def handle_packet(packetId, dataIn, lenIn):
-    global joystickX, joystickY, joystickBtn, swUp, swDown, swLeft, swRight, LightPointArray, newControllerPacketReceived, newPointListPacketReceived
+    global joystickX, joystickY, joystickBtn, swUp, swDown, swLeft, swRight, LightPointArray, newControllerPacketReceived, newPointListPacketReceived, cameraSetting, newCameraSettingsPacketReceived
     #print(f"Received packet {packetId}: {dataIn[:lenIn]}")
     #print(len(bytearray(dataIn)))
     # Joystick packet received
     if (packetId == 0x01):
         newControllerPacketReceived = True
          # Assuming the first 4 bytes are preamble data, and the rest is 2 floats and 5 bools
-        joystickX, joystickY, joystickBtn, swUp, swDown, swLeft, swRight = struct.unpack('ffbbbbb', dataIn) 
+        joystickX, joystickY, joystickBtn, swUp, swDown, swLeft, swRight = struct.unpack('ffbbbbb', bytearray(dataIn)) 
     # List of tracked points packet
     elif (packetId == 0x02):
         newPointListPacketReceived = True
@@ -86,6 +103,9 @@ def handle_packet(packetId, dataIn, lenIn):
         # print(len(LightPointArray))
         # for i, point in enumerate(LightPointArray):
         #     print("Point %d: (%s, %d, %d)" % (i + 1, point.name, point.x, point.y))
+    elif (packetId == 0x10):
+        newCameraSettingsPacketReceived = True
+        cameraSetting["idRadius"], cameraSetting["lockRadius"], cameraSetting["lightLifetime"], cameraSetting["lightThreshold"], cameraSetting["gain"], cameraSetting["exposureTime"] = struct.unpack('iiiiii', bytearray(dataIn))
 
 capsule_instance = Capsule(lambda packetId, dataIn, len: handle_packet(packetId, dataIn[:len], len))
 
@@ -125,7 +145,7 @@ def sendLightPointListToRaspi(all_light_points, n):
 
     # Print only the first 3 light points with their name, position x and y only.
     for i, (name, _, x, y, _, speed_x, speed_y, acceleration_x, acceleration_y) in enumerate(all_light_points[:n]):
-        print("Point %d: (%s, %d, %d, %d, %d, %d, %d)" % (i + 1, name, x, y, speed_x, speed_y, acceleration_x, acceleration_y))
+        # print("Point %d: (%s, %d, %d, %d, %d, %d, %d)" % (i + 1, name, x, y, speed_x, speed_y, acceleration_x, acceleration_y))
         LightPointArray[i] = LightPoint(name, 1, x, y)
 
     arrayToSend = bytearray()
