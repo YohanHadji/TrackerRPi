@@ -34,11 +34,14 @@ trackingEnabled = False
 setCameraSettings(cameraSetting["gain"], cameraSetting["exposureTime"])
 setDetectionSettings(cameraSetting["idRadius"], cameraSetting["lockRadius"], cameraSetting["lightLifetime"], cameraSetting["lightThreshold"])
 
+startTime = time.time()
+
 while True:
 
     timeOffsetAverage = 0
 
     if (not firstTimeNoted):
+        frame, sensorTimeStamp = getFrame()
         firstTimeNoted = True
         print("First frame received")
 
@@ -46,8 +49,8 @@ while True:
 
         while (numberOfFrames < 100):
             frame, sensorTimeStamp = getFrame()
-            print(time.time(),np.int64(time.time()),np.int64(time.time()*1e9), sensorTimeStamp)
-            timeOffset += (np.int64(time.time()*1e9) - sensorTimeStamp)
+            print(np.int64((time.time()-startTime)*1e9), sensorTimeStamp)
+            timeOffset += (np.int64((time.time()-startTime)*1e9) - sensorTimeStamp)
             numberOfFrames += 1
 
         timeOffset /= numberOfFrames
