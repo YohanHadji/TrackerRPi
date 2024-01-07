@@ -54,7 +54,9 @@ while True:
             numberOfFrames += 1
 
         timeOffset /= numberOfFrames
-        timeOffset = np.int64(timeOffset)
+        timeOffsetAverage = np.int64(timeOffset)
+        print("Time offset calculated")
+        print(timeOffsetAverage)
     else:
         frame, sensorTimeStamp = getFrame()
         # Detect light points
