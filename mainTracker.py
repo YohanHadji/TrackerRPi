@@ -94,6 +94,7 @@ while True:
             pointToSend.isVisible = False
         
         # pointToSend.age = np.int32((np.int64((time.time()-startTime)*1e9)-timeOffsetAverage)-sensorTimeStamp)
+        print(sensorTimeStamp, timeOffsetAverage)
         pointToSend.age = (sensorTimeStamp+timeOffsetAverage)
         print(pointToSend.age)
 
