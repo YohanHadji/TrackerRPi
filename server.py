@@ -27,7 +27,7 @@ input_values = {
     "switchFrame": 0,  # Assuming it's initially set to 0
     "gain": 1.0,
     "exposureTime": 100,
-    "trackingEnabled": False
+    "trackingEnabled": 0
 }
 
 picam2.set_controls({"AnalogueGain": np.int32(input_values["gain"]), "ExposureTime": np.int32(input_values["exposureTime"])})

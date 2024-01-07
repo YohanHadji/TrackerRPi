@@ -36,7 +36,7 @@ cameraSetting = {
     "switchFrame": 0,  # Assuming it's initially set to 0
     "gain": 1.0,
     "exposureTime": 100,
-    "trackingEnabled": False
+    "trackingEnabled": 0
 }
 
 newControllerPacketReceived = False
