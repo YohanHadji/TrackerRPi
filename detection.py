@@ -14,14 +14,15 @@ lightThreshold = 200
 
 
 class LightPoint:
-    def __init__(self, name, isVisible, x, y):
+    def __init__(self, name, isVisible, x, y, age):
         self.name = str(name)
         self.isVisible = bool(isVisible)  # Ensure boolean type
         self.x = int(x)  # Ensure integer type
         self.y = int(y)  # Ensure integer type
+        self.age = int(age)
 
 # Create an array of structures without specifying values
-LightPointArray = [LightPoint(name="ABCD", isVisible=False, x=0, y=0) for _ in range(10)]
+LightPointArray = [LightPoint(name="ABCD", isVisible=False, x=0, y=0, age=0) for _ in range(10)]
 
 def obtain_top_contours(b_frame, n=10):
     """
@@ -121,12 +122,12 @@ def process_and_store_light_points(new_points, sensorTimeStamp):
     for new_x, new_y in new_points:
         point_found = False
 
-        for i, (existing_name, existing_firstSeen, existing_x, existing_y, existing_timestamp, existing_speed_x, existing_speed_y, existing_acceleration_x, existing_acceleration_Y)in enumerate(all_light_points):
+        for i, (existing_name, existing_firstSeen, existing_x, existing_y, age, existing_timestamp, existing_speed_x, existing_speed_y, existing_acceleration_x, existing_acceleration_Y)in enumerate(all_light_points):
             if is_point_close_with_motion_estimation(existing_x, existing_y, new_x, new_y, existing_speed_x, existing_speed_y, existing_acceleration_x, existing_acceleration_Y, existing_timestamp, current_time, idRadius):
                 # Replace old point values with the most recent and compute new acceleration and speed
                 speed_x, speed_y, acceleration_x, acceleration_y = calculate_speed_and_acceleration((existing_x, existing_y), (new_x, new_y), existing_timestamp, current_time)
                 #  print("Point %d updated: (%d, %d, %f, %f, %f, %f)" % (i + 1, new_x, new_y, speed_x, speed_y, acceleration_x, acceleration_y))
-                all_light_points[i] = (existing_name, existing_firstSeen, new_x, new_y, current_time, speed_x, speed_y, acceleration_x, acceleration_y)
+                all_light_points[i] = (existing_name, existing_firstSeen, new_x, new_y, age, current_time, speed_x, speed_y, acceleration_x, acceleration_y)
                 point_found = True
                 break
 
@@ -137,9 +138,9 @@ def process_and_store_light_points(new_points, sensorTimeStamp):
             while name in [existing_name for existing_name, _, _, _, _, _, _, _, _ in all_light_points]:
                 name = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(4))
 
-            all_light_points.append((name, current_time, new_x, new_y, current_time, 0, 0, 0, 0))
+            all_light_points.append((name, current_time, new_x, new_y, age, current_time, 0, 0, 0, 0))
 
-    all_light_points = [(name, firstSeen, x, y, timestamp, speed_x, speed_y, acceleration_x, acceleration_y) for name, firstSeen, x, y, timestamp, speed_x, speed_y, acceleration_x, acceleration_y in all_light_points if current_time - timestamp <= lightLifetime*1e6]
+    all_light_points = [(name, firstSeen, x, y, age, timestamp, speed_x, speed_y, acceleration_x, acceleration_y) for name, firstSeen, x, y, age, timestamp, speed_x, speed_y, acceleration_x, acceleration_y in all_light_points if current_time - timestamp <= lightLifetime*1e6]
     return all_light_points
 
 def detect(frame, sensorTimeStamp):
@@ -155,13 +156,13 @@ def getLockedPoint(all_light_points, isButtonPressed=False,swLeft=False,swRight=
     global resolution, currentlyLocked, lockedName, lockRadius
 
     if (not currentlyLocked):
-        for i, (name, firstSeen, x, y, _, _, _, _, _) in enumerate(all_light_points):
+        for i, (name, firstSeen, x, y, _, _, _, _, _, _) in enumerate(all_light_points):
             if (abs(x - resolution[0]/2) <= lockRadius and abs(y - resolution[1]/2) <= lockRadius):
                 lockedName = name
                 currentlyLocked = True
                 break
     else: 
-        if (not lockedName in [name for name, firstSeen, _, _, _, _, _, _, _ in all_light_points]):
+        if (not lockedName in [name for name, firstSeen, _, _, _, _, _, _, _, _ in all_light_points]):
             currentlyLocked = False
             lockedName = "ABCD"
 
@@ -183,7 +184,7 @@ def getLockedPoint(all_light_points, isButtonPressed=False,swLeft=False,swRight=
     nameUp = ""
     nameDown = ""
 
-    for i, (name, firstSeen, x, y, _, _, _, _, _) in enumerate(all_light_points):
+    for i, (name, firstSeen, x, y, _, _, _, _, _, _) in enumerate(all_light_points):
         if (x < resolution[0]/2):
             if (nameLeft == ""):
                 nameLeft = name
@@ -222,7 +223,7 @@ def getLockedPoint(all_light_points, isButtonPressed=False,swLeft=False,swRight=
     
     lockedPoint = LightPoint(name="ABCD", isVisible=False, x=0, y=0)
         
-    for i, (name, firstSeen, x, y, timestamp, _, _, _, _) in enumerate(all_light_points):
+    for i, (name, firstSeen, x, y, age, timestamp, _, _, _, _) in enumerate(all_light_points):
         if (name == lockedName):
             lockedPoint.name = name
             lockedPoint.x = x-resolution[0]/2

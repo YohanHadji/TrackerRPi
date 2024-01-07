@@ -44,14 +44,15 @@ newPointListPacketReceived = False
 newCameraSettingsPacketReceived = False
 
 class LightPoint:
-    def __init__(self, name, isVisible, x, y):
+    def __init__(self, name, isVisible, x, y, age):
         self.name = str(name)
         self.isVisible = bool(isVisible)  # Ensure boolean type
         self.x = int(x)  # Ensure integer type
         self.y = int(y)  # Ensure integer type
+        self.age = int(age)
 
 # Create an array of structures without specifying values        
-LightPointArray = [LightPoint(name="ABCD", isVisible=False, x=0, y=0) for _ in range(10)]
+LightPointArray = [LightPoint(name="ABCD", isVisible=False, x=0, y=0, age=0) for _ in range(10)]
 
 # Example of using the Capsule class
 class Foo:
@@ -94,11 +95,11 @@ def handle_packet(packetId, dataIn, lenIn):
     # List of tracked points packet
     elif (packetId == 0x02):
         newPointListPacketReceived = True
-        cutSize = struct.calcsize('4siii')
+        cutSize = struct.calcsize('4siiii')
         # We need to cut the received data in chunks of 16 bytes and then apply the struct.unpack on this
         for i in range(0, len(dataIn), cutSize):
-            point = struct.unpack('4siii', bytearray(dataIn[i:i+cutSize]))
-            LightPointArray[i//cutSize] = LightPoint(point[0].decode('utf-8'), point[1], point[2], point[3])
+            point = struct.unpack('4siiii', bytearray(dataIn[i:i+cutSize]))
+            LightPointArray[i//cutSize] = LightPoint(point[0].decode('utf-8'), point[1], point[2], point[3], point[4])
 
         # print("Received list of ")
         # print(len(LightPointArray))
@@ -124,10 +125,10 @@ def sendTargetToTeensy(pointToSendIn):
     packet_id = 0x01
     # Pack the struct in a byte array
 
-    pointToSend = LightPoint(pointToSendIn.name, pointToSendIn.isVisible, pointToSendIn.x, pointToSendIn.y)
+    pointToSend = LightPoint(pointToSendIn.name, pointToSendIn.isVisible, pointToSendIn.x, pointToSendIn.y, pointToSendIn.age)
 
     pointToSendName = str(pointToSend.name)
-    payload_data = struct.pack('4siii', pointToSendName.encode('utf-8'), pointToSend.isVisible, pointToSend.x, pointToSend.y)
+    payload_data = struct.pack('4siiii', pointToSendName.encode('utf-8'), pointToSend.isVisible, pointToSend.x, pointToSend.y, pointToSend.age)
     packet_length = len(payload_data)
     encoded_packet = capsule_instance.encode(packet_id, payload_data, packet_length)
     # Print the encoded packet
@@ -142,12 +143,12 @@ def sendLightPointListToRaspi(all_light_points, n):
 
     # Light point structure
     # Create an array of structures without specifying values
-    LightPointArray = [LightPoint(name="ABCD", isVisible=False, x=0, y=0) for _ in range(n)]
+    LightPointArray = [LightPoint(name="ABCD", isVisible=False, x=0, y=0, age=0) for _ in range(n)]
 
     # Print only the first 3 light points with their name, position x and y only.
-    for i, (name, _, x, y, _, speed_x, speed_y, acceleration_x, acceleration_y) in enumerate(all_light_points[:n]):
+    for i, (name, _, x, y, age, _, speed_x, speed_y, acceleration_x, acceleration_y) in enumerate(all_light_points[:n]):
         # print("Point %d: (%s, %d, %d, %d, %d, %d, %d)" % (i + 1, name, x, y, speed_x, speed_y, acceleration_x, acceleration_y))
-        LightPointArray[i] = LightPoint(name, 1, x, y)
+        LightPointArray[i] = LightPoint(name, 1, x, y, age)
 
     arrayToSend = bytearray()
     byteToSend = bytearray()
@@ -155,11 +156,11 @@ def sendLightPointListToRaspi(all_light_points, n):
     
     # Fill light point array
     for i, point in enumerate(LightPointArray):
-        pointToSend = LightPoint(point.name, point.isVisible, point.x, point.y)
+        pointToSend = LightPoint(point.name, point.isVisible, point.x, point.y, point.age)
         pointToSendName = str(point.name)
-        byteToSend = struct.pack('4siii', pointToSendName.encode('utf-8'), pointToSend.isVisible, pointToSend.x, pointToSend.y)
+        byteToSend = struct.pack('4siiii', pointToSendName.encode('utf-8'), pointToSend.isVisible, pointToSend.x, pointToSend.y, pointToSend.age)
         # Concatenate the byte to the array
-        sizeToSend = struct.calcsize('4siii')
+        sizeToSend = struct.calcsize('4siiii')
         arrayToSend[i*sizeToSend:(i+1)+sizeToSend] = byteToSend
 
     payload_data = arrayToSend

@@ -7,15 +7,19 @@ from camera import *
 camInit(120)
 UDPInit("tracker")
 
+firstTimeNoted = False
+timeOffset = 0
+
 class LightPoint:
-    def __init__(self, name, isVisible, x, y):
+    def __init__(self, name, isVisible, x, y, age):
         self.name = str(name)
         self.isVisible = bool(isVisible)  # Ensure boolean type
         self.x = int(x)  # Ensure integer type
         self.y = int(y)  # Ensure integer type
+        self.age = int(age)
 
 # Create an array of structures without specifying values
-LightPointArray = [LightPoint(name="ABCD", isVisible=False, x=0, y=0) for _ in range(10)]
+LightPointArray = [LightPoint(name="ABCD", isVisible=False, x=0, y=0, age=0) for _ in range(10)]
 
 joystickX   = 0
 joystickY   = 0
@@ -33,6 +37,11 @@ setDetectionSettings(cameraSetting["idRadius"], cameraSetting["lockRadius"], cam
 while True:
     # Get a frame with metadata
     frame, sensorTimeStamp = getFrame()
+
+    if (not firstTimeNoted):
+        firstTimeNoted = True
+        print("First frame received")
+        timeOffset = np.int64(time.time()*1e9) - sensorTimeStamp
 
     # Detect light points
     all_light_points = detect(frame, sensorTimeStamp)
@@ -67,6 +76,8 @@ while True:
     if (not trackingEnabled):
         # print("Tracking disabled")
         pointToSend.isVisible = False
+    
+    pointToSend.age = np.int32((np.int64(time.time()*1e9)-timeOffset)-sensorTimeStamp)
 
     sendTargetToTeensy(pointToSend)
 
