@@ -36,9 +36,9 @@ setDetectionSettings(cameraSetting["idRadius"], cameraSetting["lockRadius"], cam
 
 startTime = time.time()
 
-while True:
+timeOffsetAverage = 0
 
-    timeOffsetAverage = 0
+while True:
 
     if (not firstTimeNoted):
         frame, sensorTimeStamp = getFrame()
@@ -57,6 +57,7 @@ while True:
         timeOffsetAverage = np.int64(timeOffset)
         print("Time offset calculated")
         print(timeOffsetAverage)
+
     else:
         frame, sensorTimeStamp = getFrame()
         # Detect light points
