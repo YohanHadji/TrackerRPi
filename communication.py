@@ -29,7 +29,7 @@ swRight = False
 
 # Variables to store slider and dropdown values
 cameraSetting = {
-    "idRadius": 10,
+    "idRadius": 25,
     "lockRadius": 100,
     "lightLifetime": 200,
     "lightThreshold": 200,
