@@ -1,21 +1,21 @@
 from flask import Flask, render_template, Response, request, stream_with_context
 import numpy as np
 from communication import *
-# from camera import *
+from camera import *
 import threading 
-from picamera2 import Picamera2
+#from picamera2 import Picamera2
 import cv2
 import time
 from detection import *
 
 app = Flask(__name__)
 
-# camInit(30)
-picam2 = Picamera2()
-camera_config = picam2.create_video_configuration(main={"format": "BGR888", "size": (800, 606)}, raw={"format": "SRGGB10", "size": (1332, 990)})
-picam2.configure(camera_config)
-picam2.set_controls({"FrameRate": 30})
-picam2.start()
+camInit(30)
+# picam2 = Picamera2()
+# camera_config = picam2.create_video_configuration(main={"format": "BGR888", "size": (800, 606)}, raw={"format": "SRGGB10", "size": (1332, 990)})
+# picam2.configure(camera_config)
+# picam2.set_controls({"FrameRate": 30})
+# picam2.start()
 
 
 # Variables to store slider and dropdown values
@@ -28,6 +28,8 @@ input_values = {
     "gain": 1.0,
     "exposureTime": 100
 }
+
+picam2.set_controls({"AnalogueGain": np.int32(input_values["gain"]), "ExposureTime": np.int32(input_values["exposureTime"])})
 
 # input_values = {}  # Assuming you have a global dictionary to store input values
 
@@ -74,7 +76,10 @@ def generate_frames():
 
     while True:
         # Capture the frame
-        frame = picam2.capture_array()
+        # frame = picam2.capture_array()
+
+        # Get a frame with metadata
+        frame, sensorTimeStamp = getFrame()
 
         if (newPacketReceived()):
             packetType = newPacketReceivedType()
@@ -129,7 +134,8 @@ def update_variable():
     else:
         print(f"Unknown control ID: {control_id}")
     
-    picam2.set_controls({"AnalogueGain": np.int32(input_values["gain"]), "ExposureTime": np.int32(input_values["exposureTime"])})
+    #picam2.set_controls({"AnalogueGain": np.int32(input_values["gain"]), "ExposureTime": np.int32(input_values["exposureTime"])})
+    setCameraSettings(input_values["gain"], input_values["exposureTime"])
 
     return "Variable updated successfully!"
 

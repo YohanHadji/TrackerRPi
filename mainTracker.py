@@ -25,6 +25,9 @@ swDown      = False
 swLeft      = False
 swRight     = False
 
+setCameraSettings(cameraSetting["gain"], cameraSetting["exposureTime"])
+setDetectionSettings(cameraSetting["idRadius"], cameraSetting["lockRadius"], cameraSetting["lightLifetime"], cameraSetting["lightThreshold"])
+
 while True:
     # Get a frame with metadata
     frame, sensorTimeStamp = getFrame()
