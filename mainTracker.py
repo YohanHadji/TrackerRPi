@@ -93,7 +93,8 @@ while True:
             # print("Tracking disabled")
             pointToSend.isVisible = False
         
-        pointToSend.age = np.int32((np.int64((time.time()-startTime)*1e9)-timeOffsetAverage)-sensorTimeStamp)
+        # pointToSend.age = np.int32((np.int64((time.time()-startTime)*1e9)-timeOffsetAverage)-sensorTimeStamp)
+        pointToSend.age = (sensorTimeStamp+timeOffsetAverage)-np.int64((time.time()-startTime)*1e9)
         print(pointToSend.age)
 
         sendTargetToTeensy(pointToSend)
