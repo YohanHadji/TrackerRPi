@@ -39,7 +39,7 @@ while True:
 
     sendLightPointListToRaspi(all_light_points, 10)
 
-    printFps()
+    #printFps()
 
     parseIncomingDataFromUDP()
     if (newPacketReceived()):
@@ -54,7 +54,7 @@ while True:
             setCameraSettings(cameraSetting["gain"], cameraSetting["exposureTime"])
             print("Applied camera settings")
             setDetectionSettings(cameraSetting["idRadius"], cameraSetting["lockRadius"], cameraSetting["lightLifetime"], cameraSetting["lightThreshold"])
-
+            print(cameraSetting["trackingEnabled"])
             if (not cameraSetting["trackingEnabled"]):
                 trackingEnabled = False
             else:
