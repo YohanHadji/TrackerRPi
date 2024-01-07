@@ -13,18 +13,19 @@ app = Flask(__name__)
 picam2 = Picamera2()
 camera_config = picam2.create_video_configuration(main={"format": "BGR888", "size": (800, 606)}, raw={"format": "SRGGB10", "size": (1332, 990)})
 picam2.configure(camera_config)
-picam2.set_controls({"FrameRate": 30})
-picam2.start()
+time.sleep(2)
 
 min_exp, max_exp, default_exp = picam2.camera_controls["ExposureTime"]
 min_gain, max_gain, default_gain = picam2.camera_controls["AnalogueGain"]
-
-time.sleep(2)
 
 print(f"Exposure time: {min_exp}, {max_exp}, {default_exp}")
 print(f"Gain: {min_gain}, {max_gain}, {default_gain}")
 
 time.sleep(10)
+
+picam2.set_controls({"FrameRate": 30})
+picam2.start()
+
 
 # Variables to store slider and dropdown values
 input_values = {
