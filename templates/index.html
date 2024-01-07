@@ -67,26 +67,18 @@
         <p id="switchFrameValue">0</p>
     </div>
 
-    <!-- ISO Dropdown -->
+    <!-- Exposure Time Slider -->
     <div>
-        <label for="gain">Gain:</label>
-        <select id="gain">
-            <option value="1.0">Gain 1.0</option>
-            <option value="2.0">Gain 2.0</option>
-            <option value="3.0">Gain 3.0</option>
-        </select>
-        <p id="1.0">Gain 1.0</p>
+        <label for="exposureTime">Exposure Time (us):</label>
+        <input type="range" id="exposureTime" min="100" max="10000" value="1000">
+        <p id="exposureTimeValue">1000</p>
     </div>
 
-    <!-- Exposure Time Dropdown -->
+    <!-- Gain Slider -->
     <div>
-        <label for="exposureTime">Exposure Time:</label>
-        <select id="exposureTime">
-            <option value="100">100 us</option>
-            <option value="500">500 us</option>
-            <option value="1000">1000 us</option>
-        </select>
-        <p id="100">100 us</p>
+        <label for="gain">Gain:</label>
+        <input type="range" id="gain" min="1.0" max="22.0" value="1.0" step="1.0">
+        <p id="gainValue">1.0</p>
     </div>
 
     <script>
@@ -116,10 +108,8 @@
         updateControlValue("lightLifetime", "lightLifetimeValue");
         updateControlValue("lightThreshold", "lightThresholdValue");
         updateControlValue("switchFrame", "switchFrameValue");
-
-        // Update the dropdowns
-        updateControlValue("gain", "gainValue");
         updateControlValue("exposureTime", "exposureTimeValue");
+        updateControlValue("gain", "gainValue");
     </script>
 </body>
 </html>
