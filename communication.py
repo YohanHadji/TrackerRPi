@@ -27,6 +27,9 @@ swDown = False
 swLeft = False 
 swRight = False
 
+trackerAzm = 0
+trackerElv = 0
+
 # Variables to store slider and dropdown values
 cameraSetting = {
     "idRadius": 25,
@@ -42,6 +45,7 @@ cameraSetting = {
 newControllerPacketReceived = False
 newPointListPacketReceived = False
 newCameraSettingsPacketReceived = False
+newDataFromTrackerReceived = False
 
 class LightPoint:
     def __init__(self, name, isVisible, x, y, age):
@@ -59,20 +63,22 @@ class Foo:
     pass
 
 def newPacketReceived():
-    global newControllerPacketReceived, newPointListPacketReceived, newCameraSettingsPacketReceived
-    return newControllerPacketReceived or newPointListPacketReceived or newCameraSettingsPacketReceived
+    global newControllerPacketReceived, newPointListPacketReceived, newCameraSettingsPacketReceived, newDataFromTrackerReceived
+    return newControllerPacketReceived or newPointListPacketReceived or newCameraSettingsPacketReceived or newDataFromTrackerReceived
 
 def newPacketReceivedType():
-    global newControllerPacketReceived, newPointListPacketReceived, newCameraSettingsPacketReceived
+    global newControllerPacketReceived, newPointListPacketReceived, newCameraSettingsPacketReceived, newDataFromTrackerReceived
     if (newControllerPacketReceived):
         return "controller"
     if (newPointListPacketReceived):
         return "pointList"
     if (newCameraSettingsPacketReceived):
         return "cameraSettings"
+    if (newDataFromTrackerReceived):   
+        return "dataFromTracker"
 
 def returnLastPacketData(packetType):
-    global joystickX, joystickY, joystickBtn, swUp, swDown, swLeft, swRight, LightPointArray, cameraSetting, newControllerPacketReceived, newPointListPacketReceived, newCameraSettingsPacketReceived
+    global joystickX, joystickY, joystickBtn, swUp, swDown, swLeft, swRight, LightPointArray, cameraSetting, newControllerPacketReceived, newPointListPacketReceived, newCameraSettingsPacketReceived, newDataFromTrackerReceived, trackerAzm, trackerElv
     if (packetType == "controller"):
         newControllerPacketReceived = False
         return joystickX, joystickY, joystickBtn, swUp, swDown, swLeft, swRight
@@ -82,9 +88,13 @@ def returnLastPacketData(packetType):
     elif (packetType == "cameraSettings"):
         newCameraSettingsPacketReceived = False
         return cameraSetting
+    elif (packetType == "dataFromTracker"):
+        newDataFromTrackerReceived = False
+        return trackerAzm, trackerElv
+    
 
 def handle_packet(packetId, dataIn, lenIn):
-    global joystickX, joystickY, joystickBtn, swUp, swDown, swLeft, swRight, LightPointArray, newControllerPacketReceived, newPointListPacketReceived, cameraSetting, newCameraSettingsPacketReceived
+    global joystickX, joystickY, joystickBtn, swUp, swDown, swLeft, swRight, LightPointArray, newControllerPacketReceived, newPointListPacketReceived, cameraSetting, newCameraSettingsPacketReceived, newDataFromTrackerReceived, trackerAzm, trackerElv
     #print(f"Received packet {packetId}: {dataIn[:lenIn]}")
     #print(len(bytearray(dataIn)))
     # Joystick packet received
@@ -108,6 +118,13 @@ def handle_packet(packetId, dataIn, lenIn):
     elif (packetId == 0x10):
         newCameraSettingsPacketReceived = True
         cameraSetting["idRadius"], cameraSetting["lockRadius"], cameraSetting["lightLifetime"], cameraSetting["lightThreshold"], cameraSetting["gain"], cameraSetting["exposureTime"], cameraSetting["trackingEnabled"] = struct.unpack('iiiiiii', bytearray(dataIn))
+
+    elif (packetId == 33):
+        newDataFromTrackerReceived = True
+        trackerAzm, trackerElv = struct.unpack('ff', bytearray(dataIn))
+        # print("Received data from tracker: ")
+        # print(trackerAzm)
+        # print(trackerElv)
 
 capsule_instance = Capsule(lambda packetId, dataIn, len: handle_packet(packetId, dataIn[:len], len))
 
