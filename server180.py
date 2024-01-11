@@ -17,8 +17,8 @@ camInit180(30)
 img_width = 2028
 img_height = 1520
 
-azimuth = 270
-elevation = 90
+# azimuth = 270
+# elevation = 90
 
 xPos = 0
 yPos = 0
@@ -108,11 +108,11 @@ def fisheye_to_pixel(azimuth, elevation, img_width, img_height):
     # Convertir coordenadas polares a coordenadas cartesianas
     x = radius * math.sin(azimuth_rad) + img_width / 2
     y = radius * math.cos(azimuth_rad) + img_height / 2
-    print(x,y)
+    # print(x,y)
     return int(x), int(y)
 
 def generate_frames():
-    global LightPointArray, input_values, resolution, picam2, xPos, yPos
+    global LightPointArray, input_values, resolution, picam2, xPos, yPos, img_width, img_height
 
     while True:
         # Capture the frame
@@ -127,8 +127,8 @@ def generate_frames():
                 LightPointArray = returnLastPacketData(packetType)
             if (packetType == "dataFromTracker"):
                 trackerAzm, trackerElv = returnLastPacketData(packetType)
-                print(trackerAzm)
-                print(trackerElv)
+                # print(trackerAzm)
+                # print(trackerElv)
                 xPos, yPos = fisheye_to_pixel(trackerAzm, trackerElv, img_width, img_height)
                 # Draw a white point on the frame at coordinate x and y (in pixels)
 
