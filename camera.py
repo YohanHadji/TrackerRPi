@@ -40,6 +40,15 @@ def camInit(framerate):
     picam2.set_controls({"FrameRate": framerate})
     picam2.start()
 
+def camInit180(framerate):
+    global picam2
+    #config = picam2.create_video_configuration(raw={'format': 'SRGGB10', 'size': (1332, 990)})
+    camera_config = picam2.create_video_configuration(main={"format": "XRGB8888", "size": (2028, 1520)})
+    picam2.configure(camera_config)
+    picam2.set_controls({"FrameRate": framerate})
+    picam2.start()
+
+
 def getFrame():
     global picam2
     # Get a frame with metadata
