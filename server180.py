@@ -18,7 +18,7 @@ img_height = 1520
 azimuth = 270
 elevation = 90
 # Inicializar Picamera2
-picam2 = Picamera2()
+#picam2 = Picamera2()
 #config = picam2.create_video_configuration(raw={'format': 'SRGGB10', 'size': (1332, 990)})
 camera_config = picam2.create_video_configuration(main={"format": "XRGB8888", "size": (2028, 1520)})
 picam2.configure(camera_config)
