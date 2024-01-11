@@ -129,7 +129,7 @@ def generate_frames():
                 trackerAzm, trackerElv = returnLastPacketData(packetType)
                 # print(trackerAzm)
                 # print(trackerElv)
-                xPos, yPos = fisheye_to_pixel(trackerAzm, trackerElv, img_width, img_height)
+                xPos, yPos = fisheye_to_pixel(trackerAzm, 90-trackerElv, img_width, img_height)
                 # Draw a white point on the frame at coordinate x and y (in pixels)
 
 
