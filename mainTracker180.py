@@ -68,25 +68,25 @@ while True:
 
         printFps()
 
-        # parseIncomingDataFromUDP()
-        # if (newPacketReceived()):
-        #     packetType = newPacketReceivedType()
-        #     if (packetType == "controller"):
-        #         joystickX, joystickY, joystickBtn, swUp, swDown, swLeft, swRight = returnLastPacketData(packetType)
-        #         # print(joystickX, joystickY, joystickBtn, swUp, swDown, swLeft, swRight)
-        #         getLockedPoint(all_light_points, joystickBtn, swUp, swDown, swLeft, swRight)
-        #     elif (packetType == "pointList"):
-        #         LightPointArray = returnLastPacketData(packetType)
-        #     elif (packetType == "cameraSettings"):
-        #         cameraSetting = returnLastPacketData(packetType)
-        #         setCameraSettings(cameraSetting["gain"], cameraSetting["exposureTime"])
-        #         print("Applied camera settings")
-        #         setDetectionSettings(cameraSetting["idRadius"], cameraSetting["lockRadius"], cameraSetting["lightLifetime"], cameraSetting["lightThreshold"])
-        #         print(cameraSetting["trackingEnabled"])
-        #         if (not cameraSetting["trackingEnabled"]):
-        #             trackingEnabled = False
-        #         else:
-        #             trackingEnabled = True
+        parseIncomingDataFromUDP()
+        if (newPacketReceived()):
+            packetType = newPacketReceivedType()
+            if (packetType == "controller"):
+                joystickX, joystickY, joystickBtn, swUp, swDown, swLeft, swRight = returnLastPacketData(packetType)
+                # print(joystickX, joystickY, joystickBtn, swUp, swDown, swLeft, swRight)
+                getLockedPoint(all_light_points, joystickBtn, swUp, swDown, swLeft, swRight)
+            elif (packetType == "pointList"):
+                LightPointArray = returnLastPacketData(packetType)
+            elif (packetType == "cameraSettings"):
+                cameraSetting = returnLastPacketData(packetType)
+                setCameraSettings(cameraSetting["gain"], cameraSetting["exposureTime"])
+                print("Applied camera settings")
+                setDetectionSettings(cameraSetting["idRadius"], cameraSetting["lockRadius"], cameraSetting["lightLifetime"], cameraSetting["lightThreshold"])
+                print(cameraSetting["trackingEnabled"])
+                if (not cameraSetting["trackingEnabled"]):
+                    trackingEnabled = False
+                else:
+                    trackingEnabled = True
 
         # pointToSend = getLockedPoint(all_light_points, joystickBtn, swUp, swDown, swLeft, swRight)
         # # print(pointToSend.name, pointToSend.x, pointToSend.y)
