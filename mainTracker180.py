@@ -66,7 +66,7 @@ while True:
 
         # sendLightPointListToRaspi(all_light_points, 10)
 
-        # printFps()
+        printFps()
 
         # parseIncomingDataFromUDP()
         # if (newPacketReceived()):
