@@ -145,7 +145,7 @@ def UDPInit(name):
     elif (name == "tracker180"):
         sock.bind((UDP_IP_TRACKER180, UDP_PORT))
         sockImage.bind((UDP_IP_TRACKER180, IMAGE_PORT))
-        sockImage.connect('localhost', IMAGE_PORT)
+        sockImage.connect(('localhost', IMAGE_PORT))
     sock.setblocking(0)
 
 def sendFrameToSelf(frame):
