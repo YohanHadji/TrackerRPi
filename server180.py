@@ -148,8 +148,9 @@ def generate_frames():
             # for point in LightPointArray:
             #     cv2.circle(b_frame, (point.x, point.y), 5, 255, -1)
             #     cv2.putText(b_frame, point.name, (point.x, point.y), cv2.FONT_HERSHEY_SIMPLEX, 1, 255, 2, cv2.LINE_AA)
-            cv2.circle(frame, (xPos, yPos), 5, 255, -1)
-            _, buffer = cv2.imencode('.jpg', b_frame)
+            #cv2.circle(frame, (xPos, yPos), 5, 255, -1)
+            #_, buffer = cv2.imencode('.jpg', b_frame)
+            buffer = None
             b_frame = buffer.tobytes()
             yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + b_frame + b'\r\n')
@@ -158,8 +159,9 @@ def generate_frames():
             # for point in LightPointArray:
             #     cv2.circle(frame, (point.x, point.y), 5, (0, 0, 255), -1)
             #     cv2.putText(frame, point.name, (point.x, point.y), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2, cv2.LINE_AA)
-            cv2.circle(frame, (xPos, yPos), 5, (0,0, 255), -1)
-            _, buffer = cv2.imencode('.jpg', frame)
+            #cv2.circle(frame, (xPos, yPos), 5, (0,0, 255), -1)
+            #_, buffer = cv2.imencode('.jpg', frame)
+            buffer = None
             b_frame = buffer.tobytes() 
             yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + b_frame + b'\r\n')
