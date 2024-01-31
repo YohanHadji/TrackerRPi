@@ -62,7 +62,7 @@ while True:
     else:
         frame, sensorTimeStamp = getFrame()
         # Detect light points
-        # all_light_points = detect(frame, sensorTimeStamp)
+        all_light_points = detect(frame, sensorTimeStamp)
 
         # sendLightPointListToRaspi(all_light_points, 10)
 
@@ -88,7 +88,7 @@ while True:
                 else:
                     trackingEnabled = True
 
-        pointToSend = getLockedPoint(all_light_points, joystickBtn, swUp, swDown, swLeft, swRight)
+        #pointToSend = getLockedPoint(all_light_points, joystickBtn, swUp, swDown, swLeft, swRight)
         # print(pointToSend.name, pointToSend.x, pointToSend.y)
 
         # if (not trackingEnabled):
