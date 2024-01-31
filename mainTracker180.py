@@ -62,6 +62,7 @@ while True:
     else:
         frame, sensorTimeStamp = getFrameLores()
         # Detect light points
+        sendFrameToSelf(frame)
         all_light_points = detect(frame, sensorTimeStamp)
 
         sendLightPointListToRaspi(all_light_points, 10)

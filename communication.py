@@ -5,6 +5,7 @@ import socket
 import struct
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+sockImage = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
 TEENSY_IP = "192.168.1.100"
 TEENSY_PORT = 8888
@@ -20,6 +21,10 @@ UDP_PORT = 8888
 GUSTAVO_IP = "192.168.1.181"
 GUSTAVO_PORT = 8888
 
+SELF_IP = "0.0.0.0"
+
+IMAGE_PORT = 9999
+
 joystickX = 0
 joystickY = 0
 joystickBtn = 0
@@ -30,6 +35,8 @@ swRight = False
 
 trackerAzm = 0
 trackerElv = 0
+
+lastFrame = None
 
 # Variables to store slider and dropdown values
 cameraSetting = {
@@ -137,7 +144,13 @@ def UDPInit(name):
         sock.bind((UDP_IP_DISPLAY, UDP_PORT))
     elif (name == "tracker180"):
         sock.bind((UDP_IP_TRACKER180, UDP_PORT))
+        sockImage.bind((UDP_IP_TRACKER180, IMAGE_PORT))
     sock.setblocking(0)
+
+def sendFrameToSelf(frame):
+    global sockImage
+    print("Sent frame to self")
+    sockImage.sendto(frame, (SELF_IP, IMAGE_PORT))
 
 def sendTargetToTeensy(pointToSendIn):
     global sock
@@ -202,3 +215,18 @@ def parseIncomingDataFromUDP():
 
     except socket.error as e:
         pass
+
+def parseImageFromUDP():
+    global sockImage, lastFrame
+    try:
+        lastFrame, addr = sockImage.recvfrom(10e6)  # Adjust the buffer size as needed
+        # print(f"Received {len(data)} bytes from {addr}")
+        return True
+
+    except socket.error as e:
+        pass
+        return False
+
+def returnLastFrame():
+    global lastFrame
+    return lastFrame
