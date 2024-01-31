@@ -1,70 +1,102 @@
-import cv2
-import gi
-import http.server
+#!/usr/bin/python3
+
+# Mostly copied from https://picamera.readthedocs.io/en/release-1.13/recipes2.html
+# Run this script, then point a web browser at http:<this-ip-address>:8000
+# Note: needs simplejpeg to be installed (pip3 install simplejpeg).
+
+import io
+import logging
 import socketserver
-import threading
-from io import BytesIO
-from picamera2.array import PiRGBArray
-from picamera2 import PiCamera2
+from http import server
+from threading import Condition
 
-# Initialize GStreamer
-gi.require_version('Gst', '1.0')
-from gi.repository import Gst, GLib
+from picamera2 import Picamera2
+from picamera2.encoders import JpegEncoder
+from picamera2.outputs import FileOutput
 
-# Set up the PiCamera
-camera = PiCamera2()
-camera.resolution = (640, 480)
-raw_capture = PiRGBArray(camera, size=(640, 480))
-stream = camera.capture_continuous(raw_capture, format="bgr", use_video_port=True)
+PAGE = """\
+<html>
+<head>
+<title>picamera2 MJPEG streaming demo</title>
+</head>
+<body>
+<h1>Picamera2 MJPEG Streaming Demo</h1>
+<img src="stream.mjpg" width="640" height="480" />
+</body>
+</html>
+"""
 
-# GStreamer pipeline
-pipeline_str = (
-    'appsrc name=source ! videoconvert ! '
-    'video/x-raw,format=(string)BGR ! '
-    'jpegenc ! rtpjpegpay ! '
-    'udpsink host=127.0.0.1 port=5000'
-)
-pipeline = Gst.parse_launch(pipeline_str)
-appsrc = pipeline.get_by_name('source')
 
-# Start the GStreamer pipeline
-pipeline.set_state(Gst.State.PLAYING)
+class StreamingOutput(io.BufferedIOBase):
+    def __init__(self):
+        self.frame = None
+        self.condition = Condition()
 
-# HTTP server handler
-class MyHandler(http.server.SimpleHTTPRequestHandler):
+    def write(self, buf):
+        with self.condition:
+            self.frame = buf
+            self.condition.notify_all()
+
+
+class StreamingHandler(server.BaseHTTPRequestHandler):
     def do_GET(self):
         if self.path == '/':
-            self.send_response(200)
-            self.send_header('Content-type', 'text/html')
+            self.send_response(301)
+            self.send_header('Location', '/index.html')
             self.end_headers()
-            self.wfile.write(open('index.html', 'rb').read())
+        elif self.path == '/index.html':
+            content = PAGE.encode('utf-8')
+            self.send_response(200)
+            self.send_header('Content-Type', 'text/html')
+            self.send_header('Content-Length', len(content))
+            self.end_headers()
+            self.wfile.write(content)
+        elif self.path == '/stream.mjpg':
+            self.send_response(200)
+            self.send_header('Age', 0)
+            self.send_header('Cache-Control', 'no-cache, private')
+            self.send_header('Pragma', 'no-cache')
+            self.send_header('Content-Type', 'multipart/x-mixed-replace; boundary=FRAME')
+            self.end_headers()
+            try:
+                while True:
+                    with output.condition:
+                        output.condition.wait()
+                        frame = output.frame
+                    self.wfile.write(b'--FRAME\r\n')
+                    self.send_header('Content-Type', 'image/jpeg')
+                    self.send_header('Content-Length', len(frame))
+                    self.end_headers()
+                    self.wfile.write(frame)
+                    self.wfile.write(b'\r\n')
+            except Exception as e:
+                logging.warning(
+                    'Removed streaming client %s: %s',
+                    self.client_address, str(e))
         else:
-            super().do_GET()
+            self.send_error(404)
+            self.end_headers()
 
-# Start the HTTP server in a separate thread
-http_thread = threading.Thread(target=lambda: socketserver.TCPServer(('0.0.0.0', 8000), MyHandler).serve_forever())
-http_thread.daemon = True
-http_thread.start()
+
+class StreamingServer(socketserver.ThreadingMixIn, server.HTTPServer):
+    allow_reuse_address = True
+    daemon_threads = True
+
+
+picam2 = Picamera2()
+#picam2.configure(picam2.create_video_configuration(main={"size": (640, 480)}))
+#config = picam2.create_video_configuration(raw={'format': 'SRGGB10', 'size': (1332, 990)})
+camera_config = picam2.create_video_configuration(main={"format": "BGR888", "size": (2028, 1520)}, 
+                                                    raw={"format": "SRGGB12", "size": (2028, 1520)},
+                                                    lores={"size": (2028, 1520), "format": "YUV420"})
+picam2.configure(camera_config)
+picam2.set_controls({"FrameRate": 40})
+output = StreamingOutput()
+picam2.start_recording(JpegEncoder(), FileOutput(output))
 
 try:
-    for frame in stream:
-        image = frame.array
-
-        # Process the frame (you can add your processing logic here)
-
-        # Convert the frame to GStreamer format
-        data = image.tobytes()
-        buffer = Gst.Buffer.new_wrapped(data)
-
-        # Push the buffer to the GStreamer pipeline
-        appsrc.emit("push-buffer", buffer)
-
-        # Clear the stream in preparation for the next frame
-        raw_capture.truncate(0)
-
-except KeyboardInterrupt:
-    pass
-
+    address = ('', 8000)
+    server = StreamingServer(address, StreamingHandler)
+    server.serve_forever()
 finally:
-    # Stop the GStreamer pipeline
-    pipeline.set_state(Gst.State.NULL)
+    picam2.stop_recording()
