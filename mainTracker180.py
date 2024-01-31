@@ -4,7 +4,8 @@ from communication import *
 from detection import * 
 from camera import *
 
-camInit(120)
+#camInit(120)
+camInit180(30)
 UDPInit("tracker")
 
 firstTimeNoted = False
