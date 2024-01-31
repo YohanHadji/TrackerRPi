@@ -62,45 +62,45 @@ while True:
     else:
         frame, sensorTimeStamp = getFrame()
         # Detect light points
-        all_light_points = detect(frame, sensorTimeStamp)
+        # all_light_points = detect(frame, sensorTimeStamp)
 
-        sendLightPointListToRaspi(all_light_points, 10)
+        # sendLightPointListToRaspi(all_light_points, 10)
 
-        printFps()
+        # printFps()
 
-        parseIncomingDataFromUDP()
-        if (newPacketReceived()):
-            packetType = newPacketReceivedType()
-            if (packetType == "controller"):
-                joystickX, joystickY, joystickBtn, swUp, swDown, swLeft, swRight = returnLastPacketData(packetType)
-                # print(joystickX, joystickY, joystickBtn, swUp, swDown, swLeft, swRight)
-                getLockedPoint(all_light_points, joystickBtn, swUp, swDown, swLeft, swRight)
-            elif (packetType == "pointList"):
-                LightPointArray = returnLastPacketData(packetType)
-            elif (packetType == "cameraSettings"):
-                cameraSetting = returnLastPacketData(packetType)
-                setCameraSettings(cameraSetting["gain"], cameraSetting["exposureTime"])
-                print("Applied camera settings")
-                setDetectionSettings(cameraSetting["idRadius"], cameraSetting["lockRadius"], cameraSetting["lightLifetime"], cameraSetting["lightThreshold"])
-                print(cameraSetting["trackingEnabled"])
-                if (not cameraSetting["trackingEnabled"]):
-                    trackingEnabled = False
-                else:
-                    trackingEnabled = True
+        # parseIncomingDataFromUDP()
+        # if (newPacketReceived()):
+        #     packetType = newPacketReceivedType()
+        #     if (packetType == "controller"):
+        #         joystickX, joystickY, joystickBtn, swUp, swDown, swLeft, swRight = returnLastPacketData(packetType)
+        #         # print(joystickX, joystickY, joystickBtn, swUp, swDown, swLeft, swRight)
+        #         getLockedPoint(all_light_points, joystickBtn, swUp, swDown, swLeft, swRight)
+        #     elif (packetType == "pointList"):
+        #         LightPointArray = returnLastPacketData(packetType)
+        #     elif (packetType == "cameraSettings"):
+        #         cameraSetting = returnLastPacketData(packetType)
+        #         setCameraSettings(cameraSetting["gain"], cameraSetting["exposureTime"])
+        #         print("Applied camera settings")
+        #         setDetectionSettings(cameraSetting["idRadius"], cameraSetting["lockRadius"], cameraSetting["lightLifetime"], cameraSetting["lightThreshold"])
+        #         print(cameraSetting["trackingEnabled"])
+        #         if (not cameraSetting["trackingEnabled"]):
+        #             trackingEnabled = False
+        #         else:
+        #             trackingEnabled = True
 
-        pointToSend = getLockedPoint(all_light_points, joystickBtn, swUp, swDown, swLeft, swRight)
-        # print(pointToSend.name, pointToSend.x, pointToSend.y)
+        # pointToSend = getLockedPoint(all_light_points, joystickBtn, swUp, swDown, swLeft, swRight)
+        # # print(pointToSend.name, pointToSend.x, pointToSend.y)
 
-        if (not trackingEnabled):
-            # print("Tracking disabled")
-            pointToSend.isVisible = False
+        # if (not trackingEnabled):
+        #     # print("Tracking disabled")
+        #     pointToSend.isVisible = False
         
-        # pointToSend.age = np.int32((np.int64((time.time()-startTime)*1e9)-timeOffsetAverage)-sensorTimeStamp)
-        # print(sensorTimeStamp, timeOffsetAverage)
-        pointToSend.age = np.int32((((time.time()-startTime)*1e9)-(sensorTimeStamp+timeOffsetAverage))/1e6)
-        # print(pointToSend.age)
+        # # pointToSend.age = np.int32((np.int64((time.time()-startTime)*1e9)-timeOffsetAverage)-sensorTimeStamp)
+        # # print(sensorTimeStamp, timeOffsetAverage)
+        # pointToSend.age = np.int32((((time.time()-startTime)*1e9)-(sensorTimeStamp+timeOffsetAverage))/1e6)
+        # # print(pointToSend.age)
 
-        sendTargetToTeensy(pointToSend)
+        # sendTargetToTeensy(pointToSend)
 
         # Exit if 'q' is pressed
         if cv2.waitKey(1) & 0xFF == ord('q'):
