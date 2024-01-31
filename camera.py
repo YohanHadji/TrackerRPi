@@ -43,7 +43,7 @@ def camInit(framerate):
 def camInit180(framerate):
     global picam2
     #config = picam2.create_video_configuration(raw={'format': 'SRGGB10', 'size': (1332, 990)})
-    camera_config = picam2.create_video_configuration(main={"format": "BRG888", "size": (2028, 1520)}, raw={"format": "SRGGB12", "size": (2028, 1520)})
+    camera_config = picam2.create_video_configuration(main={"format": "BGR888", "size": (2028, 1520)}, raw={"format": "SRGGB12", "size": (2028, 1520)})
     picam2.configure(camera_config)
     picam2.set_controls({"FrameRate": framerate})
     picam2.start()
