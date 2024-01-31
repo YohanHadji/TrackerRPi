@@ -25,7 +25,7 @@ class MovingAverageCalculator:
 
         return None  # Return None until the window is filled
 
-window_size = 500
+window_size = 50
 fpsCalculator = MovingAverageCalculator(window_size)
 fpsDeviationCalculator = MovingAverageCalculator(window_size)
 fpsAverage = 0
