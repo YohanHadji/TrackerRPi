@@ -145,12 +145,13 @@ def UDPInit(name):
     elif (name == "tracker180"):
         sock.bind((UDP_IP_TRACKER180, UDP_PORT))
         sockImage.bind((UDP_IP_TRACKER180, IMAGE_PORT))
+        sockImage.connect('localhost', IMAGE_PORT)
     sock.setblocking(0)
 
 def sendFrameToSelf(frame):
     global sockImage
     print("Sent frame to self")
-    sockImage.sendto(frame, (SELF_IP, IMAGE_PORT))
+    sockImage.sendall(frame, (SELF_IP, IMAGE_PORT))
 
 def sendTargetToTeensy(pointToSendIn):
     global sock
