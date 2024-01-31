@@ -4,7 +4,7 @@ import http.server
 import socketserver
 import threading
 from io import BytesIO
-from picamera.array import PiRGBArray
+from picamera2.array import PiRGBArray
 from picamera2 import PiCamera2
 
 # Initialize GStreamer
