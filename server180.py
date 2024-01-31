@@ -153,8 +153,7 @@ def generate_frames():
             file_path = 'imgTest.jpg'  # Update with the correct file path
             # Read all bytes from the image file into a buffer
             with open(file_path, 'rb') as file:
-                buffer = file.read()
-                b_frame = buffer.tobytes()
+                b_frame = file.read()
                 yield (b'--frame\r\n'
                     b'Content-Type: image/jpeg\r\n\r\n' + b_frame + b'\r\n')
         else:
@@ -168,8 +167,7 @@ def generate_frames():
 
             # Read all bytes from the image file into a buffer
             with open(file_path, 'rb') as file:
-                buffer = file.read()
-                b_frame = buffer.tobytes() 
+                b_frame = file.read()
                 yield (b'--frame\r\n'
                     b'Content-Type: image/jpeg\r\n\r\n' + b_frame + b'\r\n')
 
