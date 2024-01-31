@@ -5,7 +5,7 @@ from detection import *
 from camera import *
 
 #camInit(120)
-camInit180(30)
+camInit180(20)
 UDPInit("tracker180")
 
 firstTimeNoted = False

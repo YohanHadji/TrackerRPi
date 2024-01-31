@@ -150,7 +150,7 @@ def detect(frame, sensorTimeStamp):
     _dummy, b_frame = cv2.threshold(gray_frame,lightThreshold, 255, cv2.THRESH_BINARY)
 
     result = obtain_top_contours(b_frame, 10)
-    #all_light_points = process_and_store_light_points(result, sensorTimeStamp)
+    all_light_points = process_and_store_light_points(result, sensorTimeStamp)
     return all_light_points
 
 def getLockedPoint(all_light_points, isButtonPressed=False,swLeft=False,swRight=False,swUp=False,swDown=False):
