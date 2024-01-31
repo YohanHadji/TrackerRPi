@@ -149,9 +149,9 @@ def UDPInit(name):
     sock.setblocking(0)
 
 def sendFrameToSelf(frame):
-    global sockImage
+    global sockImage 
     print("Sent frame to self")
-    sockImage.sendall(frame, (SELF_IP, IMAGE_PORT))
+    sockImage.sendall(frame.tobytes())
 
 def sendTargetToTeensy(pointToSendIn):
     global sock
