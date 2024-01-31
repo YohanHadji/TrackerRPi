@@ -60,7 +60,7 @@ while True:
         # print(timeOffsetAverage)
 
     else:
-        frame, sensorTimeStamp = getFrame()
+        frame, sensorTimeStamp = getFrameLores()
         # Detect light points
         all_light_points = detect(frame, sensorTimeStamp)
 

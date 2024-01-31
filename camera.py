@@ -43,7 +43,9 @@ def camInit(framerate):
 def camInit180(framerate):
     global picam2
     #config = picam2.create_video_configuration(raw={'format': 'SRGGB10', 'size': (1332, 990)})
-    camera_config = picam2.create_video_configuration(main={"format": "BGR888", "size": (2028, 1520)}, raw={"format": "SRGGB12", "size": (2028, 1520)})
+    camera_config = picam2.create_video_configuration(main={"format": "BGR888", "size": (2028, 1520)}, 
+                                                      raw={"format": "SRGGB12", "size": (2028, 1520)},
+                                                      lores={"size": (2028, 1520), "format": "YUV420"})
     picam2.configure(camera_config)
     picam2.set_controls({"FrameRate": framerate})
     picam2.start()
@@ -54,6 +56,16 @@ def getFrame():
     # Get a frame with metadata
     request = picam2.capture_request()
     frame = request.make_array("main")
+    metadata = request.get_metadata()
+    request.release()
+    sensorTimeStamp = metadata['SensorTimestamp']
+    return frame, sensorTimeStamp
+
+def getFrameLores():
+    global picam2
+    # Get a frame with metadata
+    request = picam2.capture_request()
+    frame = request.make_array("lores")
     metadata = request.get_metadata()
     request.release()
     sensorTimeStamp = metadata['SensorTimestamp']

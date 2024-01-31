@@ -146,7 +146,7 @@ def process_and_store_light_points(new_points, sensorTimeStamp):
 
 def detect(frame, sensorTimeStamp):
     # Convert to grayscale and then to binary
-    gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    gray_frame = frame # cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     _dummy, b_frame = cv2.threshold(gray_frame,lightThreshold, 255, cv2.THRESH_BINARY)
 
     result = obtain_top_contours(b_frame, 10)
