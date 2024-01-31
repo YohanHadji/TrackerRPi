@@ -64,7 +64,7 @@ while True:
         # Detect light points
         all_light_points = detect(frame, sensorTimeStamp)
 
-        # sendLightPointListToRaspi(all_light_points, 10)
+        sendLightPointListToRaspi(all_light_points, 10)
 
         printFps()
 
@@ -88,19 +88,19 @@ while True:
                 else:
                     trackingEnabled = True
 
-        #pointToSend = getLockedPoint(all_light_points, joystickBtn, swUp, swDown, swLeft, swRight)
-        # print(pointToSend.name, pointToSend.x, pointToSend.y)
+        pointToSend = getLockedPoint(all_light_points, joystickBtn, swUp, swDown, swLeft, swRight)
+        print(pointToSend.name, pointToSend.x, pointToSend.y)
 
-        # if (not trackingEnabled):
-        #     # print("Tracking disabled")
-        #     pointToSend.isVisible = False
+        if (not trackingEnabled):
+            # print("Tracking disabled")
+            pointToSend.isVisible = False
         
-        # # pointToSend.age = np.int32((np.int64((time.time()-startTime)*1e9)-timeOffsetAverage)-sensorTimeStamp)
-        # # print(sensorTimeStamp, timeOffsetAverage)
-        # pointToSend.age = np.int32((((time.time()-startTime)*1e9)-(sensorTimeStamp+timeOffsetAverage))/1e6)
-        # # print(pointToSend.age)
+        # pointToSend.age = np.int32((np.int64((time.time()-startTime)*1e9)-timeOffsetAverage)-sensorTimeStamp)
+        # print(sensorTimeStamp, timeOffsetAverage)
+        pointToSend.age = np.int32((((time.time()-startTime)*1e9)-(sensorTimeStamp+timeOffsetAverage))/1e6)
+        # print(pointToSend.age)
 
-        # sendTargetToTeensy(pointToSend)
+        sendTargetToTeensy(pointToSend)
 
         # Exit if 'q' is pressed
         if cv2.waitKey(1) & 0xFF == ord('q'):
