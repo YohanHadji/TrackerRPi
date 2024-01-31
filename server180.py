@@ -123,7 +123,6 @@ def generate_frames():
 
         # Get a frame with metadata
         frame, sensorTimeStamp = getFrame()
-        frame = cv2.resize(frame, (507, 380))
 
         if (newPacketReceived()):
             packetType = newPacketReceivedType()
@@ -139,6 +138,8 @@ def generate_frames():
 
         gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         _dummy, b_frame = cv2.threshold(gray_frame,np.int32(input_values["lightThreshold"]), 255, cv2.THRESH_BINARY)
+
+        frame = cv2.resize(frame, (507, 380))
                 
         printFps()
 
