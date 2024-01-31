@@ -100,7 +100,7 @@ while True:
         pointToSend.age = np.int32((((time.time()-startTime)*1e9)-(sensorTimeStamp+timeOffsetAverage))/1e6)
         # print(pointToSend.age)
 
-        sendTargetToTeensy(pointToSend)
+        #sendTargetToTeensy(pointToSend)
 
         # Exit if 'q' is pressed
         if cv2.waitKey(1) & 0xFF == ord('q'):
