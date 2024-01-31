@@ -149,7 +149,7 @@ def detect(frame, sensorTimeStamp):
     gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     _dummy, b_frame = cv2.threshold(gray_frame,lightThreshold, 255, cv2.THRESH_BINARY)
 
-    #result = obtain_top_contours(b_frame, 10)
+    result = obtain_top_contours(b_frame, 10)
     #all_light_points = process_and_store_light_points(result, sensorTimeStamp)
     return all_light_points
 
