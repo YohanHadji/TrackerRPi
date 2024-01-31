@@ -154,7 +154,7 @@ def generate_frames():
             # Read all bytes from the image file into a buffer
             with open(file_path, 'rb') as file:
                 buffer = file.read()
-                buffer = cv2.imread(file_path)
+                b_frame = buffer.tobytes()
                 yield (b'--frame\r\n'
                     b'Content-Type: image/jpeg\r\n\r\n' + b_frame + b'\r\n')
         else:
