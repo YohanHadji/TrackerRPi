@@ -88,8 +88,8 @@ while True:
                 else:
                     trackingEnabled = True
 
-        # pointToSend = getLockedPoint(all_light_points, joystickBtn, swUp, swDown, swLeft, swRight)
-        # # print(pointToSend.name, pointToSend.x, pointToSend.y)
+        pointToSend = getLockedPoint(all_light_points, joystickBtn, swUp, swDown, swLeft, swRight)
+        # print(pointToSend.name, pointToSend.x, pointToSend.y)
 
         # if (not trackingEnabled):
         #     # print("Tracking disabled")
