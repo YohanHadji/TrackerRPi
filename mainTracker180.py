@@ -6,7 +6,7 @@ from camera import *
 
 #camInit(120)
 camInit180(30)
-UDPInit("tracker")
+UDPInit("tracker180")
 
 firstTimeNoted = False
 timeOffset = 0
