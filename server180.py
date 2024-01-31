@@ -123,6 +123,7 @@ def generate_frames():
 
         # Get a frame with metadata
         frame, sensorTimeStamp = getFrame()
+        frame = cv2.resize(frame, (507, 380))
 
         if (newPacketReceived()):
             packetType = newPacketReceivedType()
@@ -139,7 +140,6 @@ def generate_frames():
         gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         _dummy, b_frame = cv2.threshold(gray_frame,np.int32(input_values["lightThreshold"]), 255, cv2.THRESH_BINARY)
 
-        frame = cv2.resize(frame, (507, 380))
                 
         printFps()
 
@@ -150,7 +150,7 @@ def generate_frames():
             #     cv2.circle(b_frame, (point.x, point.y), 5, 255, -1)
             #     cv2.putText(b_frame, point.name, (point.x, point.y), cv2.FONT_HERSHEY_SIMPLEX, 1, 255, 2, cv2.LINE_AA)
             cv2.circle(frame, (xPos, yPos), 5, 255, -1)
-            _, buffer = cv2.imencode('.bmp', b_frame)
+            _, buffer = cv2.imencode('.jpg', frame,  [int(cv2.IMWRITE_JPEG_QUALITY), 100])
             b_frame = buffer.tobytes()
             yield (b'--frame\r\n'
                b'Content-Type: image/bmp\r\n\r\n' + b_frame + b'\r\n')
@@ -160,7 +160,7 @@ def generate_frames():
             #     cv2.circle(frame, (point.x, point.y), 5, (0, 0, 255), -1)
             #     cv2.putText(frame, point.name, (point.x, point.y), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2, cv2.LINE_AA)
             cv2.circle(frame, (xPos, yPos), 5, (0,0, 255), -1)
-            _, buffer = cv2.imencode('.bmp', frame)
+            _, buffer = cv2.imencode('.jpg', frame,  [int(cv2.IMWRITE_JPEG_QUALITY), 100])
             b_frame = buffer.tobytes() 
             yield (b'--frame\r\n'
                b'Content-Type: image/bmp\r\n\r\n' + b_frame + b'\r\n')
