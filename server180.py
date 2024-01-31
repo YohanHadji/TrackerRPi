@@ -12,10 +12,13 @@ import math
 app = Flask(__name__)
 
 #camInit(30)
-#camInit180(30)
+camInit180(30)
 
 img_width = 2028
 img_height = 1520
+
+img_width = 800
+img_height = 606
 
 # azimuth = 270
 # elevation = 90
@@ -35,7 +38,7 @@ input_values = {
     "trackingEnabled": 0
 }
 
-#picam2.set_controls({"AnalogueGain": np.int32(input_values["gain"]), "ExposureTime": np.int32(input_values["exposureTime"])})
+picam2.set_controls({"AnalogueGain": np.int32(input_values["gain"]), "ExposureTime": np.int32(input_values["exposureTime"])})
 
 # input_values = {}  # Assuming you have a global dictionary to store input values
 
@@ -119,51 +122,47 @@ def generate_frames():
         # frame = picam2.capture_array()
 
         # Get a frame with metadata
-        #frame, sensorTimeStamp = getFrame()
+        frame, sensorTimeStamp = getFrame()
+        frame = cv2.resize(frame, (800, 606))
 
-        if (parseImageFromUDP()):
-            print("Received frame from self")
-
-            frame = returnLastFrame()
-
-            if (newPacketReceived()):
-                packetType = newPacketReceivedType()
-                if (packetType == "pointList"):
-                    LightPointArray = returnLastPacketData(packetType)
-                if (packetType == "dataFromTracker"):
-                    trackerAzm, trackerElv = returnLastPacketData(packetType)
-                    # print(trackerAzm)
-                    # print(trackerElv)
-                    xPos, yPos = fisheye_to_pixel(trackerAzm, 90-trackerElv, img_width, img_height)
-                    # Draw a white point on the frame at coordinate x and y (in pixels)
+        if (newPacketReceived()):
+            packetType = newPacketReceivedType()
+            if (packetType == "pointList"):
+                LightPointArray = returnLastPacketData(packetType)
+            if (packetType == "dataFromTracker"):
+                trackerAzm, trackerElv = returnLastPacketData(packetType)
+                # print(trackerAzm)
+                # print(trackerElv)
+                xPos, yPos = fisheye_to_pixel(trackerAzm, 90-trackerElv, img_width, img_height)
+                # Draw a white point on the frame at coordinate x and y (in pixels)
 
 
-            gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-            _dummy, b_frame = cv2.threshold(gray_frame,np.int32(input_values["lightThreshold"]), 255, cv2.THRESH_BINARY)
-                    
-            printFps()
+        gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        _dummy, b_frame = cv2.threshold(gray_frame,np.int32(input_values["lightThreshold"]), 255, cv2.THRESH_BINARY)
+                
+        printFps()
 
-            # Encode the frame
-            if (input_values["switchFrame"] == 0):
-                # cv2.circle(b_frame, (400,303), input_values["lockRadius"], 255, 2)
-                # for point in LightPointArray:
-                #     cv2.circle(b_frame, (point.x, point.y), 5, 255, -1)
-                #     cv2.putText(b_frame, point.name, (point.x, point.y), cv2.FONT_HERSHEY_SIMPLEX, 1, 255, 2, cv2.LINE_AA)
-                cv2.circle(frame, (xPos, yPos), 5, 255, -1)
-                _, buffer = cv2.imencode('.jpg', b_frame)
-                b_frame = buffer.tobytes()
-                yield (b'--frame\r\n'
-                b'Content-Type: image/jpeg\r\n\r\n' + b_frame + b'\r\n')
-            else:
-                # cv2.circle(frame, (400,303), input_values["lockRadius"], (0, 0, 255), 2)
-                # for point in LightPointArray:
-                #     cv2.circle(frame, (point.x, point.y), 5, (0, 0, 255), -1)
-                #     cv2.putText(frame, point.name, (point.x, point.y), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2, cv2.LINE_AA)
-                cv2.circle(frame, (xPos, yPos), 5, (0,0, 255), -1)
-                _, buffer = cv2.imencode('.jpg', frame)
-                b_frame = buffer.tobytes() 
-                yield (b'--frame\r\n'
-                b'Content-Type: image/jpeg\r\n\r\n' + b_frame + b'\r\n')
+        # Encode the frame
+        if (input_values["switchFrame"] == 0):
+            # cv2.circle(b_frame, (400,303), input_values["lockRadius"], 255, 2)
+            # for point in LightPointArray:
+            #     cv2.circle(b_frame, (point.x, point.y), 5, 255, -1)
+            #     cv2.putText(b_frame, point.name, (point.x, point.y), cv2.FONT_HERSHEY_SIMPLEX, 1, 255, 2, cv2.LINE_AA)
+            cv2.circle(frame, (xPos, yPos), 5, 255, -1)
+            _, buffer = cv2.imencode('.jpg', b_frame)
+            b_frame = buffer.tobytes()
+            yield (b'--frame\r\n'
+               b'Content-Type: image/jpeg\r\n\r\n' + b_frame + b'\r\n')
+        else:
+            # cv2.circle(frame, (400,303), input_values["lockRadius"], (0, 0, 255), 2)
+            # for point in LightPointArray:
+            #     cv2.circle(frame, (point.x, point.y), 5, (0, 0, 255), -1)
+            #     cv2.putText(frame, point.name, (point.x, point.y), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2, cv2.LINE_AA)
+            cv2.circle(frame, (xPos, yPos), 5, (0,0, 255), -1)
+            _, buffer = cv2.imencode('.jpg', frame)
+            b_frame = buffer.tobytes() 
+            yield (b'--frame\r\n'
+               b'Content-Type: image/jpeg\r\n\r\n' + b_frame + b'\r\n')
 
 
 @app.route('/video_feed')
@@ -187,7 +186,7 @@ def update_variable():
         input_values[control_id] = int(value)
         print(f"Slider {control_id} updated to {value}")
         sendSettingToTracker()
-        #setCameraSettings(input_values["gain"], input_values["exposureTime"])
+        setCameraSettings(input_values["gain"], input_values["exposureTime"])
     else:
         print(f"Unknown control ID: {control_id}")
     
