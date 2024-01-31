@@ -14,6 +14,7 @@ OTHER_RASPI_PORT = 8888
 
 UDP_IP_TRACKER = "192.168.1.114"
 UDP_IP_DISPLAY = "192.168.1.178"
+UDP_IP_TRACKER180 = "192.168.1.184"
 UDP_PORT = 8888
 
 GUSTAVO_IP = "192.168.1.181"
@@ -134,6 +135,8 @@ def UDPInit(name):
         sock.bind((UDP_IP_TRACKER, UDP_PORT))
     elif (name == "display"):
         sock.bind((UDP_IP_DISPLAY, UDP_PORT))
+    elif (name == "tracker180"):
+        sock.bind((UDP_IP_TRACKER180, UDP_PORT))
     sock.setblocking(0)
 
 def sendTargetToTeensy(pointToSendIn):
