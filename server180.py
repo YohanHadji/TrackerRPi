@@ -148,28 +148,21 @@ def generate_frames():
             # for point in LightPointArray:
             #     cv2.circle(b_frame, (point.x, point.y), 5, 255, -1)
             #     cv2.putText(b_frame, point.name, (point.x, point.y), cv2.FONT_HERSHEY_SIMPLEX, 1, 255, 2, cv2.LINE_AA)
-            #cv2.circle(frame, (xPos, yPos), 5, 255, -1)
-            #_, buffer = cv2.imencode('.jpg', b_frame)
-            file_path = 'imgTest.jpg'  # Update with the correct file path
-            # Read all bytes from the image file into a buffer
-            with open(file_path, 'rb') as file:
-                b_frame = file.read()
-                yield (b'--frame\r\n'
-                    b'Content-Type: image/jpeg\r\n\r\n' + b_frame + b'\r\n')
+            cv2.circle(frame, (xPos, yPos), 5, 255, -1)
+            _, buffer = cv2.imencode('.bmp', b_frame)
+            b_frame = buffer.tobytes()
+            yield (b'--frame\r\n'
+               b'Content-Type: image/bmp\r\n\r\n' + b_frame + b'\r\n')
         else:
             # cv2.circle(frame, (400,303), input_values["lockRadius"], (0, 0, 255), 2)
             # for point in LightPointArray:
             #     cv2.circle(frame, (point.x, point.y), 5, (0, 0, 255), -1)
             #     cv2.putText(frame, point.name, (point.x, point.y), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2, cv2.LINE_AA)
-            #cv2.circle(frame, (xPos, yPos), 5, (0,0, 255), -1)
-            #_, buffer = cv2.imencode('.jpg', frame)
-            file_path = 'imgTest.jpg'  # Update with the correct file path
-
-            # Read all bytes from the image file into a buffer
-            with open(file_path, 'rb') as file:
-                b_frame = file.read()
-                yield (b'--frame\r\n'
-                    b'Content-Type: image/jpeg\r\n\r\n' + b_frame + b'\r\n')
+            cv2.circle(frame, (xPos, yPos), 5, (0,0, 255), -1)
+            _, buffer = cv2.imencode('.bmp', frame)
+            b_frame = buffer.tobytes() 
+            yield (b'--frame\r\n'
+               b'Content-Type: image/bmp\r\n\r\n' + b_frame + b'\r\n')
 
 
 @app.route('/video_feed')
