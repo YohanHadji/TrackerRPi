@@ -123,7 +123,7 @@ def generate_frames():
 
         # Get a frame with metadata
         frame, sensorTimeStamp = getFrame()
-        frame = cv2.resize(frame, (800, 606))
+        frame = cv2.resize(frame, (507, 380))
 
         if (newPacketReceived()):
             packetType = newPacketReceivedType()
