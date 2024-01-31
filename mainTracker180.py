@@ -48,7 +48,7 @@ while True:
 
         numberOfFrames = 0
 
-        while (numberOfFrames < 500):
+        while (numberOfFrames < 100):
             frame, sensorTimeStamp = getFrame()
             print(np.int64((time.time()-startTime)*1e9), sensorTimeStamp)
             timeOffset += (np.int64((time.time()-startTime)*1e9) - sensorTimeStamp)
