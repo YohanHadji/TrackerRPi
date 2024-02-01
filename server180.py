@@ -141,7 +141,6 @@ def generate_frames():
         gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         _dummy, b_frame = cv2.threshold(gray_frame,np.int32(input_values["lightThreshold"]), 255, cv2.THRESH_BINARY)
 
-                
         printFps()
 
         # Encode the frame
@@ -199,25 +198,8 @@ def update_variable():
 if __name__ == '__main__':
     try:
 
-        thread_abort = False
-        thread1_count = 0
-        thread2_count = 0
-        thread1 = Thread(target=thread1_func)
-        thread2 = Thread(target=thread2_func)
-
         server = FrameServer(picam2)
-        # thread1.start()
-        # thread2.start()
         server.start()
-
-        # time.sleep(5)
-
-        # thread_abort = True
-        # thread1.join()
-        # thread2.join()
-        # print("Thread1 received", thread1_count, "frames")
-        # print("Thread2 received", thread2_count, "frames")
-        # print("Server received", server.count, "frames")
 
         udp_thread = threading.Thread(target=udp_listener)
         udp_thread.start()
