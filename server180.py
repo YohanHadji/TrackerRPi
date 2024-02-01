@@ -191,9 +191,10 @@ def update_variable():
 
 if __name__ == '__main__':
     try:
-
+        thread1 = Thread(target=tracking_loop)
         server = FrameServer(picam2)
         server.start()
+        thread1.start()
 
         udp_thread = threading.Thread(target=udp_listener)
         udp_thread.start()
