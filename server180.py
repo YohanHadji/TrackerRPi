@@ -17,9 +17,6 @@ camInit180(30)
 img_width = 2028
 img_height = 1520
 
-img_width = 800
-img_height = 606
-
 # azimuth = 270
 # elevation = 90
 
