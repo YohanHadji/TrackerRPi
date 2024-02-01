@@ -119,13 +119,12 @@ def generate_frames():
     while True:
         frame, sensorTimeStamp = server.wait_for_frame(frame)
 
-        gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        _dummy, b_frame = cv2.threshold(gray_frame,np.int32(input_values["lightThreshold"]), 255, cv2.THRESH_BINARY)
-
         # Encode the frame
         if (input_values["switchFrame"] == 0):
-            cv2.circle(frame, (xPos, yPos), 5, 255, -1)
-            _, buffer = cv2.imencode('.jpg', frame,  [int(cv2.IMWRITE_JPEG_QUALITY), 100])
+            gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+            _dummy, b_frame = cv2.threshold(gray_frame,np.int32(input_values["lightThreshold"]), 255, cv2.THRESH_BINARY)
+            cv2.circle(b_frame, (xPos, yPos), 5, 255, -1)
+            _, buffer = cv2.imencode('.jpg', b_frame,  [int(cv2.IMWRITE_JPEG_QUALITY), 100])
             b_frame = buffer.tobytes()
             yield (b'--frame\r\n'
                b'Content-Type: image/jpg\r\n\r\n' + b_frame + b'\r\n')
