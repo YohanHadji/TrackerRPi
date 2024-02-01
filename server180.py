@@ -117,7 +117,7 @@ def generate_frames():
     frame = None
 
     while True:
-        frame = server.wait_for_frame(frame)
+        frame, sensorTimeStamp = server.wait_for_frame(frame)
 
         gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         _dummy, b_frame = cv2.threshold(gray_frame,np.int32(input_values["lightThreshold"]), 255, cv2.THRESH_BINARY)
