@@ -67,7 +67,7 @@ class FrameServer:
         """
         with self._condition:
             if previous is not None and self._array is not previous:
-                return self._array
+                return self._array, self._timestamp
             while True:
                 self._condition.wait()
                 if self._array is not previous:
