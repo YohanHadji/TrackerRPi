@@ -117,6 +117,8 @@ def fisheye_to_pixel(azimuth, elevation, img_width, img_height):
 def generate_frames():
     global LightPointArray, input_values, resolution, picam2, xPos, yPos, img_width, img_height
 
+    frame = None
+
     while True:
         # Capture the frame
         # frame = picam2.capture_array()
