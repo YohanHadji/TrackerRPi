@@ -146,9 +146,10 @@ def tracking_loop():
         all_light_points = detect(frame, sensorTimeStamp)
         
         # Print in line the first 3 points in all light points
-        for i in range(3):
-            print(all_light_points[i].name, all_light_points[i].x, all_light_points[i].y, all_light_points[i].age, all_light_points[i].isVisible)
-            print(" --- ")
+        for i, (existing_name, existing_firstSeen, existing_x, existing_y, age, existing_timestamp, existing_speed_x, existing_speed_y, existing_acceleration_x, existing_acceleration_Y)in enumerate(all_light_points):
+            print(existing_name, existing_x, existing_y)
+        
+        print(" --- ")
 
         if (newPacketReceived()):
             packetType = newPacketReceivedType()
