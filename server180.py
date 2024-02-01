@@ -122,7 +122,8 @@ def generate_frames():
         # frame = picam2.capture_array()
 
         # Get a frame with metadata
-        frame, sensorTimeStamp = getFrame()
+        #frame, sensorTimeStamp = getFrame()
+        frame = server.wait_for_frame(frame)
         #frame = cv2.resize(frame, (507, 380))
 
         if (newPacketReceived()):
@@ -197,8 +198,31 @@ def update_variable():
 
 if __name__ == '__main__':
     try:
+
+        thread_abort = False
+        thread1_count = 0
+        thread2_count = 0
+        thread1 = Thread(target=thread1_func)
+        thread2 = Thread(target=thread2_func)
+
+        server = FrameServer(picam2)
+        # thread1.start()
+        # thread2.start()
+        server.start()
+
+        # time.sleep(5)
+
+        # thread_abort = True
+        # thread1.join()
+        # thread2.join()
+        # print("Thread1 received", thread1_count, "frames")
+        # print("Thread2 received", thread2_count, "frames")
+        # print("Server received", server.count, "frames")
+
         udp_thread = threading.Thread(target=udp_listener)
         udp_thread.start()
         app.run(host='0.0.0.0', port=5000, threaded=True)
+
     finally:
+        server.stop()
         picam2.stop()
