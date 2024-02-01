@@ -19,6 +19,7 @@ class FrameServer:
         self._picam2 = picam2
         self._stream = stream
         self._array = None
+        self._timestamp = None
         self._condition = Condition()
         self._running = True
         self._count = 0
@@ -54,6 +55,7 @@ class FrameServer:
             self._count += 1
             with self._condition:
                 self._array = array
+                self._timestamp = metadata['SensorTimestamp']
                 self._condition.notify_all()
 
     def wait_for_frame(self, previous=None):
@@ -69,7 +71,7 @@ class FrameServer:
             while True:
                 self._condition.wait()
                 if self._array is not previous:
-                    return self._array
+                    return self._array, self._timestamp
 
 
 # Moving average calculator for fps measurement

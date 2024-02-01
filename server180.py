@@ -122,6 +122,9 @@ def generate_frames():
     while True:
         frame = server.wait_for_frame(frame)
 
+        gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        _dummy, b_frame = cv2.threshold(gray_frame,np.int32(input_values["lightThreshold"]), 255, cv2.THRESH_BINARY)
+
         # Encode the frame
         if (input_values["switchFrame"] == 0):
             cv2.circle(frame, (xPos, yPos), 5, 255, -1)
@@ -141,7 +144,15 @@ def tracking_loop():
 
     frame = None
     while True:
-        frame = server.wait_for_frame(frame)
+        frame,sensorTimeStamp = server.wait_for_frame(frame)
+
+        all_light_points = detect(frame, sensorTimeStamp)
+        
+        # Print in line the first 3 points in all light points
+        for i in range(3):
+            print(all_light_points[i].name, all_light_points[i].x, all_light_points[i].y, all_light_points[i].age, all_light_points[i].isVisible)
+            print(" --- ")
+
         if (newPacketReceived()):
             packetType = newPacketReceivedType()
             if (packetType == "pointList"):
@@ -152,10 +163,6 @@ def tracking_loop():
                 # print(trackerElv)
                 xPos, yPos = fisheye_to_pixel(trackerAzm, 90-trackerElv, img_width, img_height)
                 # Draw a white point on the frame at coordinate x and y (in pixels)
-
-
-        gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        _dummy, b_frame = cv2.threshold(gray_frame,np.int32(input_values["lightThreshold"]), 255, cv2.THRESH_BINARY)
 
         printFps()
 
