@@ -202,6 +202,9 @@ def sendLightPointListToRaspi(all_light_points, n):
     encoded_packet = capsule_instance.encode(0x02, payload_data, packet_length)
     # Convert encoded_packet to a bytearray
     encoded_packet = bytearray(encoded_packet)
+    print(encoded_packet)
+    print(OTHER_RASPI_IP)
+    print(OTHER_RASPI_PORT)
     sock.sendto(encoded_packet, (OTHER_RASPI_IP, OTHER_RASPI_PORT))
 
 def parseIncomingDataFromUDP():
