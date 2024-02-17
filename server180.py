@@ -12,7 +12,7 @@ import math
 app = Flask(__name__)
 
 #camInit(30)
-camInit180(30)
+camInit180(60)
 
 img_width = 2028
 img_height = 1520
