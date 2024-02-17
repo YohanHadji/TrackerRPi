@@ -206,7 +206,7 @@ def sendLightPointListToRaspi(all_light_points, n):
     #print(encoded_packet)
     #print(OTHER_RASPI_IP)
     #print(OTHER_RASPI_PORT)
-    sock.sendto(encoded_packet, "192.168.1.178", 8888)
+    sock.sendto(encoded_packet, ('192.168.1.178', 8888))
 
 def parseIncomingDataFromUDP():
     global sock
