@@ -139,7 +139,7 @@ capsule_instance = Capsule(lambda packetId, dataIn, len: handle_packet(packetId,
 def UDPInit(name):
     global sock
     if (name == "tracker"):
-        sock.bind(('192.128.1.220', UDP_PORT))
+        sock.bind(('192.168.1.220', UDP_PORT))
     elif (name == "display"):
         sock.bind((UDP_IP_DISPLAY, UDP_PORT))
     elif (name == "tracker180"):
