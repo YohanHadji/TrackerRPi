@@ -202,6 +202,7 @@ def sendLightPointListToRaspi(all_light_points, n):
     encoded_packet = capsule_instance.encode(0x02, payload_data, packet_length)
     # Convert encoded_packet to a bytearray
     encoded_packet = bytearray(encoded_packet)
+    encoded_packet = 0xAC
     print(encoded_packet)
     print(OTHER_RASPI_IP)
     print(OTHER_RASPI_PORT)
