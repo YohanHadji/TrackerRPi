@@ -23,6 +23,16 @@ img_height = 606
 xPos = 0
 yPos = 0
 
+
+joystickX   = 0
+joystickY   = 0
+joystickBtn = False
+swUp        = False
+swDown      = False
+swLeft      = False
+swRight     = False
+
+
 # Variables to store slider and dropdown values
 input_values = {
     "idRadius": 25,
@@ -120,7 +130,7 @@ def generate_frames():
                b'Content-Type: image/jpg\r\n\r\n' + b_frame + b'\r\n')
 
 def tracking_loop():
-    global LightPointArray, input_values, resolution, picam2, xPos, yPos, img_width, img_height, startTime, firstTimeNoted, timeOffset, timeOffsetAverage, trackingEnabled, trackingEnabled
+    global LightPointArray, input_values, resolution, picam2, xPos, yPos, img_width, img_height, startTime, firstTimeNoted, timeOffset, timeOffsetAverage, trackingEnabled, trackingEnabled, joystickX, joystickY, joystickBtn, swUp, swDown, swLeft, swRight
 
     frame = None
     while True:
