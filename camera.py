@@ -106,7 +106,13 @@ prev_time_sec = 0
 def camInit(framerate):
     global picam2
     # Camera Init
-    camera_config = picam2.create_video_configuration(main={"format": "BGR888", "size": (1332, 990)}, raw={"format": "SRGGB10", "size": (1332, 990)})
+    camera_config = picam2.create_video_configuration(main={"format": "BGR888", "size": (800, 606)}, raw={"format": "SRGGB10", "size": (800, 606)})
+    # Rotate image by 90 deg left
+    camera_config['rotation'] = 90
+    # Flip image vertically
+    camera_config['vflip'] = True
+    # Flip image horizontally
+    camera_config['hflip'] = True
     picam2.configure(camera_config)
     picam2.set_controls({"FrameRate": framerate})
     picam2.start()
