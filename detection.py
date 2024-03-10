@@ -3,8 +3,8 @@ import random
 import string
 
 all_light_points = []
-resolution = (800, 606)
-resolution = (1332, 990)
+resolution = (606, 800)
+#resolution = (1332, 990)
 currentlyLocked = False
 lockedName = "ABCD"
 
