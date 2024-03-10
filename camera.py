@@ -108,7 +108,7 @@ def camInit(framerate):
     # Camera Init
     camera_config = picam2.create_video_configuration(main={"format": "BGR888", "size": (800, 606)}, raw={"format": "SRGGB10", "size": (800, 606)})
     # Rotate image by 90 deg left
-    camera_config['rotation'] = 90
+    camera_config['Rotation'] = 90
     # Flip image vertically
     camera_config['vflip'] = True
     # Flip image horizontally
