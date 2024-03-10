@@ -14,8 +14,8 @@ app = Flask(__name__)
 #camInit(30)
 camInit(120)
 
-img_width = 1332
-img_height = 990
+img_width = 800
+img_height = 606
 
 # azimuth = 270
 # elevation = 90
@@ -85,6 +85,7 @@ def generate_frames():
 
     while True:
         frame, sensorTimeStamp = server.wait_for_frame(frame)
+        frame = cv2.rotate(frame, cv2.ROTATE_90_COUNTERCLOCKWISE)
 
         # Encode the frame
         if (input_values["switchFrame"] == 0):
@@ -108,9 +109,9 @@ def tracking_loop():
     frame = None
     while True:
         frame,sensorTimeStamp = server.wait_for_frame(frame)
+        frame = cv2.rotate(frame, cv2.ROTATE_90_COUNTERCLOCKWISE)
 
         # Rotate frame by 90° to the left
-        frame = cv2.rotate(frame, cv2.ROTATE_90_COUNTERCLOCKWISE)
 
         all_light_points = detect(frame, sensorTimeStamp)
         
