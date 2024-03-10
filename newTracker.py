@@ -51,6 +51,8 @@ class LightPoint:
 # Create an array of structures without specifying values
 LightPointArray = [LightPoint(name="ABCD", isVisible=False, x=0, y=0, age = 0) for _ in range(10)]
 
+startTime = time.time()
+
 def udp_listener():
     UDP_IP = "0.0.0.0" 
     UDP_PORT = 8888
@@ -97,7 +99,7 @@ def generate_frames():
             gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
             _dummy, b_frame = cv2.threshold(gray_frame,np.int32(input_values["lightThreshold"]), 255, cv2.THRESH_BINARY)
 
-            cv2.circle(b_frame, (303,400), input_values["lockRadius"], 255, 2)
+            cv2.circle(b_frame, (400,303), input_values["lockRadius"], 255, 2)
             for point in LightPointArray:
                 cv2.circle(b_frame, (point.x, point.y), 5, 255, -1)
                 cv2.putText(b_frame, point.name, (point.x, point.y), cv2.FONT_HERSHEY_SIMPLEX, 1, 255, 2, cv2.LINE_AA)
@@ -114,39 +116,97 @@ def generate_frames():
                b'Content-Type: image/jpg\r\n\r\n' + b_frame + b'\r\n')
 
 def tracking_loop():
-    global LightPointArray, input_values, resolution, picam2, xPos, yPos, img_width, img_height
+    global LightPointArray, input_values, resolution, picam2, xPos, yPos, img_width, img_height, startTime
 
     frame = None
     while True:
-        frame,sensorTimeStamp = server.wait_for_frame(frame)
-        # frame = cv2.rotate(frame, cv2.ROTATE_90_COUNTERCLOCKWISE)
-        # frame = cv2.rotate(frame, cv2.ROTATE_90_COUNTERCLOCKWISE)
-        # Vertical flip 
-        # frame = cv2.flip(frame, 0)
-        # Horizontal flip
-        # frame = cv2.flip(frame, 1)
 
-        # Rotate frame by 90° to the left
+        if (not firstTimeNoted):
+            frame,sensorTimeStamp = server.wait_for_frame(frame)
+            firstTimeNoted = True
+            # print("First frame received")
 
-        all_light_points = detect(frame, sensorTimeStamp)
-        
-        # Print in line the first 3 points in all light points
-        for i, (existing_name, existing_firstSeen, existing_x, existing_y, age, existing_timestamp, existing_speed_x, existing_speed_y, existing_acceleration_x, existing_acceleration_Y)in enumerate(all_light_points):
-            print(existing_name, existing_x, existing_y)
-        
-        print(" --- ")
+            numberOfFrames = 0
 
-        if (newPacketReceived()):
-            packetType = newPacketReceivedType()
-            if (packetType == "pointList"):
-                LightPointArray = returnLastPacketData(packetType)
-            if (packetType == "dataFromTracker"):
-                trackerAzm, trackerElv = returnLastPacketData(packetType)
-                # print(trackerAzm)
-                # print(trackerElv)
-                # Draw a white point on the frame at coordinate x and y (in pixels)
+            while (numberOfFrames < 500):
+                frame, sensorTimeStamp = getFrame()
+                print(np.int64((time.time()-startTime)*1e9), sensorTimeStamp)
+                timeOffset += (np.int64((time.time()-startTime)*1e9) - sensorTimeStamp)
+                numberOfFrames += 1
 
-        printFps()
+            timeOffset /= numberOfFrames
+            timeOffsetAverage = np.int64(timeOffset)
+            # print("Time offset calculated")
+            # print(timeOffsetAverage)
+
+        else:
+            frame,sensorTimeStamp = server.wait_for_frame(frame)
+            # frame = cv2.rotate(frame, cv2.ROTATE_90_COUNTERCLOCKWISE)
+            # frame = cv2.rotate(frame, cv2.ROTATE_90_COUNTERCLOCKWISE)
+            # Vertical flip 
+            # frame = cv2.flip(frame, 0)
+            # Horizontal flip
+            # frame = cv2.flip(frame, 1)
+
+            # Rotate frame by 90° to the left
+
+            all_light_points = detect(frame, sensorTimeStamp)
+            
+            # Print in line the first 3 points in all light points
+            for i, (existing_name, existing_firstSeen, existing_x, existing_y, age, existing_timestamp, existing_speed_x, existing_speed_y, existing_acceleration_x, existing_acceleration_Y)in enumerate(all_light_points):
+                print(existing_name, existing_x, existing_y)
+            
+            print(" --- ")
+
+            # if (newPacketReceived()):
+            #     packetType = newPacketReceivedType()
+            #     if (packetType == "pointList"):
+            #         LightPointArray = returnLastPacketData(packetType)
+            #     if (packetType == "dataFromTracker"):
+            #         trackerAzm, trackerElv = returnLastPacketData(packetType)
+            #         # print(trackerAzm)
+            #         # print(trackerElv)
+            #         # Draw a white point on the frame at coordinate x and y (in pixels)
+
+            # parseIncomingDataFromUDP()
+
+            if (newPacketReceived()):
+                packetType = newPacketReceivedType()
+                if (packetType == "controller"):
+                    joystickX, joystickY, joystickBtn, swUp, swDown, swLeft, swRight = returnLastPacketData(packetType)
+                    # print(joystickX, joystickY, joystickBtn, swUp, swDown, swLeft, swRight)
+                    getLockedPoint(all_light_points, joystickBtn, swUp, swDown, swLeft, swRight)
+                elif (packetType == "pointList"):
+                    LightPointArray = returnLastPacketData(packetType)
+                elif (packetType == "cameraSettings"):
+                    cameraSetting = returnLastPacketData(packetType)
+                    setCameraSettings(cameraSetting["gain"], cameraSetting["exposureTime"])
+                    print("Applied camera settings")
+                    setDetectionSettings(cameraSetting["idRadius"], cameraSetting["lockRadius"], cameraSetting["lightLifetime"], cameraSetting["lightThreshold"])
+                    print(cameraSetting["trackingEnabled"])
+                    if (not cameraSetting["trackingEnabled"]):
+                        trackingEnabled = False
+                    else:
+                        trackingEnabled = True
+
+            pointToSend = getLockedPoint(all_light_points, joystickBtn, swUp, swDown, swLeft, swRight)
+            # print(pointToSend.name, pointToSend.x, pointToSend.y)
+
+            if (not trackingEnabled):
+                # print("Tracking disabled")
+                pointToSend.isVisible = False
+            
+            # pointToSend.age = np.int32((np.int64((time.time()-startTime)*1e9)-timeOffsetAverage)-sensorTimeStamp)
+            # print(sensorTimeStamp, timeOffsetAverage)
+            pointToSend.age = np.int32((((time.time()-startTime)*1e9)-(sensorTimeStamp+timeOffsetAverage))/1e6)
+            # print(pointToSend.age)
+            oldX = pointToSend.x
+            pointToSend.x = -pointToSend.y
+            pointToSend.y = oldX
+
+            sendTargetToTeensy(pointToSend)
+
+            printFps()
 
 
 @app.route('/video_feed')
