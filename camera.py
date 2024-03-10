@@ -7,6 +7,7 @@ import time
 from threading import Condition, Thread
 
 from picamera2 import Picamera2
+from libcamera import Transform
 
 
 class FrameServer:
@@ -106,11 +107,7 @@ prev_time_sec = 0
 def camInit(framerate):
     global picam2
     # Camera Init
-    camera_config = picam2.create_video_configuration(main={"format": "BGR888", "size": (800, 606)}, raw={"format": "SRGGB10", "size": (800, 606)})
-    # Flip image vertically
-    camera_config['vflip'] = True
-    # Flip image horizontally
-    camera_config['hflip'] = True
+    camera_config = picam2.create_video_configuration(main={"format": "BGR888", "size": (800, 606)}, raw={"format": "SRGGB10", "size": (800, 606)}, transform=Transform(hflip=True, vflip=True))
     picam2.configure(camera_config)
     picam2.set_controls({"FrameRate": framerate})
     picam2.start()
