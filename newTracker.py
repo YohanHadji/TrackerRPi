@@ -52,6 +52,10 @@ class LightPoint:
 LightPointArray = [LightPoint(name="ABCD", isVisible=False, x=0, y=0, age = 0) for _ in range(10)]
 
 startTime = time.time()
+firstTimeNoted = False
+timeOffset = 0
+timeOffsetAverage = 0
+trackingEnabled = False
 
 def udp_listener():
     UDP_IP = "0.0.0.0" 
@@ -116,7 +120,7 @@ def generate_frames():
                b'Content-Type: image/jpg\r\n\r\n' + b_frame + b'\r\n')
 
 def tracking_loop():
-    global LightPointArray, input_values, resolution, picam2, xPos, yPos, img_width, img_height, startTime
+    global LightPointArray, input_values, resolution, picam2, xPos, yPos, img_width, img_height, startTime, firstTimeNoted, timeOffset, timeOffsetAverage, trackingEnabled, trackingEnabled
 
     frame = None
     while True:
