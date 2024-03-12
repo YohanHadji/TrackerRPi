@@ -159,6 +159,6 @@ def printFps():
 
 def setCameraSettings(gain, exposureTime):
     global picam2
-    print("Setting camera settings")
-    print(gain, exposureTime)
+    # print("Setting camera settings")
+    # print(gain, exposureTime)
     picam2.set_controls({"AnalogueGain": gain, "ExposureTime": exposureTime})

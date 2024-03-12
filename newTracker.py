@@ -243,12 +243,12 @@ def update_variable():
     if control_id in input_values:
         input_values[control_id] = int(value)
         print(f"Slider {control_id} updated to {value}")
-        sendSettingToTracker()
+        # sendSettingToTracker()
         setCameraSettings(input_values["gain"], input_values["exposureTime"])
     else:
         print(f"Unknown control ID: {control_id}")
     
-    picam2.set_controls({"AnalogueGain": np.int32(input_values["gain"]), "ExposureTime": np.int32(input_values["exposureTime"])})
+    # picam2.set_controls({"AnalogueGain": np.int32(input_values["gain"]), "ExposureTime": np.int32(input_values["exposureTime"])})
 
     return "Variable updated successfully!"
 
