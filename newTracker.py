@@ -248,7 +248,7 @@ def update_variable():
     else:
         print(f"Unknown control ID: {control_id}")
     
-    #picam2.set_controls({"AnalogueGain": np.int32(input_values["gain"]), "ExposureTime": np.int32(input_values["exposureTime"])})
+    picam2.set_controls({"AnalogueGain": np.int32(input_values["gain"]), "ExposureTime": np.int32(input_values["exposureTime"])})
 
     return "Variable updated successfully!"
 
