@@ -167,8 +167,8 @@ def tracking_loop():
             all_light_points = detect(frame, sensorTimeStamp)
             
             # Print in line the first 3 points in all light points
-            for i, (existing_name, existing_firstSeen, existing_x, existing_y, age, existing_timestamp, existing_speed_x, existing_speed_y, existing_acceleration_x, existing_acceleration_Y)in enumerate(all_light_points):
-                print(existing_name, existing_x, existing_y)
+            # for i, (existing_name, existing_firstSeen, existing_x, existing_y, age, existing_timestamp, existing_speed_x, existing_speed_y, existing_acceleration_x, existing_acceleration_Y)in enumerate(all_light_points):
+            #     print(existing_name, existing_x, existing_y)
             
             print(" --- ")
 
@@ -204,7 +204,7 @@ def tracking_loop():
                         trackingEnabled = True
 
             pointToSend = getLockedPoint(all_light_points, joystickBtn, swUp, swDown, swLeft, swRight)
-            # print(pointToSend.name, pointToSend.x, pointToSend.y)
+            print(pointToSend.name, pointToSend.x, pointToSend.y)
 
             if (not trackingEnabled):
                 # print("Tracking disabled")
