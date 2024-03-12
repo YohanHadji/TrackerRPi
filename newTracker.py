@@ -130,7 +130,7 @@ def generate_frames():
                b'Content-Type: image/jpg\r\n\r\n' + b_frame + b'\r\n')
 
 def tracking_loop():
-    global LightPointArray, input_values, resolution, picam2, xPos, yPos, img_width, img_height, startTime, firstTimeNoted, timeOffset, timeOffsetAverage, trackingEnabled, trackingEnabled, joystickX, joystickY, joystickBtn, swUp, swDown, swLeft, swRight
+    global LightPointArray, input_values, resolution, picam2, xPos, yPos, img_width, img_height, startTime, firstTimeNoted, timeOffset, timeOffsetAverage, trackingEnabled, joystickX, joystickY, joystickBtn, swUp, swDown, swLeft, swRight
 
     frame = None
     while True:
@@ -237,7 +237,7 @@ def index():
 
 @app.route('/update_variable', methods=['POST'])
 def update_variable():
-    global input_values
+    global input_values, trackingEnabled
 
     data = request.get_json()
     control_id = data.get("id")
@@ -248,6 +248,11 @@ def update_variable():
         print(f"Slider {control_id} updated to {value}")
         # sendSettingToTracker()
         setCameraSettings(input_values["gain"], input_values["exposureTime"])
+        setDetectionSettings(input_values["idRadius"], input_values["lockRadius"], input_values["lightLifetime"], input_values["lightThreshold"])
+        if (not cameraSetting["trackingEnabled"]):
+            trackingEnabled = False
+        else:
+            trackingEnabled = True
     else:
         print(f"Unknown control ID: {control_id}")
     
