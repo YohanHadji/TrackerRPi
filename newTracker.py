@@ -171,7 +171,7 @@ def tracking_loop():
             # for i, (existing_name, existing_firstSeen, existing_x, existing_y, age, existing_timestamp, existing_speed_x, existing_speed_y, existing_acceleration_x, existing_acceleration_Y)in enumerate(all_light_points):
             #     print(existing_name, existing_x, existing_y)
             
-            print(" --- ")
+            # print(" --- ")
 
             # if (newPacketReceived()):
             #     packetType = newPacketReceivedType()
@@ -208,7 +208,7 @@ def tracking_loop():
             # print(pointToSend.name, pointToSend.x, pointToSend.y)
 
             if (not trackingEnabled):
-                print("Tracking disabled")
+                # print("Tracking disabled")
                 pointToSend.isVisible = False
             
             # pointToSend.age = np.int32((np.int64((time.time()-startTime)*1e9)-timeOffsetAverage)-sensorTimeStamp)
@@ -219,11 +219,11 @@ def tracking_loop():
             pointToSend.x = -pointToSend.y
             pointToSend.y = oldX
 
-            print(pointToSend.name, pointToSend.x, pointToSend.y, pointToSend.age, pointToSend.isVisible)
+            # print(pointToSend.name, pointToSend.x, pointToSend.y, pointToSend.age, pointToSend.isVisible)
 
             sendTargetToTeensy(pointToSend)
 
-            printFps()
+            # printFps()
 
 
 @app.route('/video_feed')
