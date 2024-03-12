@@ -32,6 +32,8 @@ swDown      = False
 swLeft      = False
 swRight     = False
 
+all_light_points = None
+
 
 # Variables to store slider and dropdown values
 input_values = {
@@ -95,7 +97,7 @@ def sendSettingToTracker():
     print("Sent settings to tracker")
 
 def generate_frames():
-    global LightPointArray, input_values, resolution, picam2, xPos, yPos, img_width, img_height
+    global LightPointArray, input_values, resolution, picam2, xPos, yPos, img_width, img_height, all_light_points
 
     frame = None
 
@@ -114,7 +116,7 @@ def generate_frames():
             _dummy, b_frame = cv2.threshold(gray_frame,np.int32(input_values["lightThreshold"]), 255, cv2.THRESH_BINARY)
 
             cv2.circle(b_frame, (400,303), input_values["lockRadius"], 255, 2)
-            for point in LightPointArray:
+            for point in all_light_points:
                 cv2.circle(b_frame, (point.x, point.y), 5, 255, -1)
                 cv2.putText(b_frame, point.name, (point.x, point.y), cv2.FONT_HERSHEY_SIMPLEX, 1, 255, 2, cv2.LINE_AA)
 
@@ -130,7 +132,7 @@ def generate_frames():
                b'Content-Type: image/jpg\r\n\r\n' + b_frame + b'\r\n')
 
 def tracking_loop():
-    global LightPointArray, input_values, resolution, picam2, xPos, yPos, img_width, img_height, startTime, firstTimeNoted, timeOffset, timeOffsetAverage, trackingEnabled, trackingEnabled, joystickX, joystickY, joystickBtn, swUp, swDown, swLeft, swRight
+    global LightPointArray, input_values, resolution, picam2, xPos, yPos, img_width, img_height, startTime, firstTimeNoted, timeOffset, timeOffsetAverage, trackingEnabled, trackingEnabled, joystickX, joystickY, joystickBtn, swUp, swDown, swLeft, swRight, all_light_points
 
     frame = None
     while True:
@@ -165,6 +167,7 @@ def tracking_loop():
             # Rotate frame by 90° to the left
 
             all_light_points = detect(frame, sensorTimeStamp)
+
             
             # Print in line the first 3 points in all light points
             # for i, (existing_name, existing_firstSeen, existing_x, existing_y, age, existing_timestamp, existing_speed_x, existing_speed_y, existing_acceleration_x, existing_acceleration_Y)in enumerate(all_light_points):
