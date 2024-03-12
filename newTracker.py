@@ -208,7 +208,7 @@ def tracking_loop():
             # print(pointToSend.name, pointToSend.x, pointToSend.y)
 
             if (not trackingEnabled):
-                # print("Tracking disabled")
+                print("Tracking disabled")
                 pointToSend.isVisible = False
             
             # pointToSend.age = np.int32((np.int64((time.time()-startTime)*1e9)-timeOffsetAverage)-sensorTimeStamp)
