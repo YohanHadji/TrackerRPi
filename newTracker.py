@@ -249,7 +249,7 @@ def update_variable():
         # sendSettingToTracker()
         setCameraSettings(input_values["gain"], input_values["exposureTime"])
         setDetectionSettings(input_values["idRadius"], input_values["lockRadius"], input_values["lightLifetime"], input_values["lightThreshold"])
-        if (not cameraSetting["trackingEnabled"]):
+        if (not input_values["trackingEnabled"]):
             trackingEnabled = False
         else:
             trackingEnabled = True
