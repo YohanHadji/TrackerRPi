@@ -219,7 +219,7 @@ def tracking_loop():
             pointToSend.x = -pointToSend.y
             pointToSend.y = oldX
 
-            print(pointToSend)
+            print(pointToSend.name, pointToSend.x, pointToSend.y, pointToSend.age, pointToSend.isVisible)
 
             sendTargetToTeensy(pointToSend)
 
