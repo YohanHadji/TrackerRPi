@@ -1,10 +1,12 @@
 from picamera2 import Picamera2
 import picamera
+from picamera.array import PiRGBArray
 import time
 
 #picam2 = Picamera2()
 picam2 = None
 picam1 = picamera.PiCamera()
+stream = None
 
 import time
 from threading import Condition, Thread
@@ -67,7 +69,9 @@ class FrameServer:
                 # Capture a frame with the old picam library
                 #self._array = bytearray(self._picam.resolution[0] * self._picam.resolution[1] * 3)
                 #print(self._picam.resolution[0] * self._picam.resolution[1] * 3)
-                self._picam.capture(self._array, 'bgr')
+
+                self._picam.capture(self._stream, format='bgr', use_video_port=True)
+                self._array = self._stream.array
                 self._count += 1
                 with self._condition:
                     self._condition.notify_all()        
@@ -118,11 +122,13 @@ fpsDeviation = 0
 prev_time_sec = 0
 
 def oldCamInit(framerate):
-    global picam1
+    global picam1, stream
     # Camera Init
     picam1.resolution = (800, 608)
     picam1.framerate = framerate
     picam1.start_preview()
+
+    stream = PiRGBArray(picam1, size=(800, 608))
 
 def camInit(framerate):
     global picam2

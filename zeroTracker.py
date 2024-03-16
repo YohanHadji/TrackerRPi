@@ -266,7 +266,7 @@ def update_variable():
 if __name__ == '__main__':
     try:
         thread1 = Thread(target=tracking_loop)
-        server = FrameServer(picam1,'old')
+        server = FrameServer(picam1,'old',stream)
         server.start()
         thread1.start()
 
