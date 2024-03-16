@@ -66,7 +66,7 @@ class FrameServer:
             else:
                 # Capture a frame with the old picam library
                 #self._array = bytearray(self._picam.resolution[0] * self._picam.resolution[1] * 3)
-                print(self.picam.resolution[0] * self.picam.resolution[1] * 3)
+                #print(self._picam.resolution[0] * self._picam.resolution[1] * 3)
                 self._picam.capture(self._array, 'bgr')
                 self._count += 1
                 with self._condition:
