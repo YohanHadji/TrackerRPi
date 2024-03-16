@@ -143,7 +143,7 @@ def tracking_loop():
             numberOfFrames = 0
 
             while (numberOfFrames < 500):
-                frame, sensorTimeStamp = getFrame()
+                frame, sensorTimeStamp = getFrame('new')
                 print(np.int64((time.time()-startTime)*1e9), sensorTimeStamp)
                 timeOffset += (np.int64((time.time()-startTime)*1e9) - sensorTimeStamp)
                 numberOfFrames += 1
@@ -265,7 +265,7 @@ def update_variable():
 if __name__ == '__main__':
     try:
         thread1 = Thread(target=tracking_loop)
-        server = FrameServer(picam2)
+        server = FrameServer(picam2,'new')
         server.start()
         thread1.start()
 
