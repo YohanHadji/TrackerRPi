@@ -2,7 +2,8 @@ from picamera2 import Picamera2
 import picamera
 import time
 
-picam2 = Picamera2()
+#picam2 = Picamera2()
+picam2 = None
 picam1 = picamera.PiCamera()
 
 import time
