@@ -46,7 +46,7 @@ input_values = {
     "trackingEnabled": 0
 }
 
-picam2.set_controls({"AnalogueGain": np.int32(input_values["gain"]), "ExposureTime": np.int32(input_values["exposureTime"])})
+#picam2.set_controls({"AnalogueGain": np.int32(input_values["gain"]), "ExposureTime": np.int32(input_values["exposureTime"])})
 
 # input_values = {}  # Assuming you have a global dictionary to store input values
 
