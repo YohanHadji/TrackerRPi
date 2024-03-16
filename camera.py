@@ -1,12 +1,7 @@
 from picamera2 import Picamera2
-import picamera
-from picamera.array import PiRGBArray
 import time
 
-#picam2 = Picamera2()
-picam2 = None
-picam1 = picamera.PiCamera()
-stream = None
+picam2 = Picamera2()
 
 import time
 from threading import Condition, Thread
@@ -16,20 +11,19 @@ from libcamera import Transform
 
 
 class FrameServer:
-    def __init__(self, picam, version, stream='main'):
+    def __init__(self, picam2, stream='main'):
         """A simple class that can serve up frames from one of the Picamera2's configured streams to multiple other threads.
 
         Pass in the Picamera2 object and the name of the stream for which you want
         to serve up frames.
         """
-        self._picam = picam
+        self._picam2 = picam2
         self._stream = stream
         self._array = None
         self._timestamp = None
         self._condition = Condition()
         self._running = True
         self._count = 0
-        self._version = version
         self._thread = Thread(target=self._thread_func, daemon=True)
 
     @property
@@ -46,34 +40,25 @@ class FrameServer:
 
         First stop any client threads (that might be
         blocked in wait_for_frame), then call this stop method. Don't stop the
-        Picamera object until the FrameServer has been stopped.
+        Picamera2 object until the FrameServer has been stopped.
         """
         self._running = False
         self._thread.join()
 
     def _thread_func(self):
         while self._running:
-            if (self._version == 'new'): 
-                # Capture a frame with the new picam library
-                request = self._picam.capture_request()
-                array = request.make_array("main")
-                metadata = request.get_metadata()
-                request.release()
+            # array = self._picam2.capture_array(self._stream)
+            request = self._picam2.capture_request()
+            array = request.make_array("main")
+            metadata = request.get_metadata()
+            request.release()
 
-                self._count += 1
-                with self._condition:
-                    self._array = array
-                    self._timestamp = metadata['SensorTimestamp']
-                    self._condition.notify_all()
-            else:
-                # Capture a frame with the old picam library
-                #self._array = bytearray(self._picam.resolution[0] * self._picam.resolution[1] * 3)
-                print(self.picam.resolution[0] * self.picam.resolution[1] * 3)
-                self._picam.capture(self._array, 'bgr')
-                self._count += 1
-                with self._condition:
-                    self._condition.notify_all()        
- 
+            self._count += 1
+            with self._condition:
+                self._array = array
+                self._timestamp = metadata['SensorTimestamp']
+                self._condition.notify_all()
+
     def wait_for_frame(self, previous=None):
         """You may optionally pass in the previous frame that you got last time you called this function.
 
@@ -119,15 +104,6 @@ fpsAverage = 0
 fpsDeviation = 0
 prev_time_sec = 0
 
-def oldCamInit(framerate):
-    global picam1, stream
-    # Camera Init
-    picam1.resolution = (800, 608)
-    picam1.framerate = framerate
-    picam1.start_preview()
-
-    stream = PiRGBArray(picam1, size=(800, 608))
-
 def camInit(framerate):
     global picam2
     # Camera Init
@@ -147,20 +123,15 @@ def camInit180(framerate):
     picam2.start()
 
 
-def getFrame(version):
-    global picam2, picam1
-    if (version == 'new'): 
-        # Get a frame with metadata
-        request = picam2.capture_request()
-        frame = request.make_array("main")
-        metadata = request.get_metadata()
-        request.release()
-        sensorTimeStamp = metadata['SensorTimestamp']
-        return frame, sensorTimeStamp
-    else:
-        frame = bytearray(picam1.resolution[0] * picam1.resolution[1] * 3)
-        picam1.capture(frame, 'bgr')
-        return frame, time.time()*1e9
+def getFrame():
+    global picam2
+    # Get a frame with metadata
+    request = picam2.capture_request()
+    frame = request.make_array("main")
+    metadata = request.get_metadata()
+    request.release()
+    sensorTimeStamp = metadata['SensorTimestamp']
+    return frame, sensorTimeStamp
 
 def getFrameLores():
     global picam2
@@ -186,15 +157,8 @@ def printFps():
 
     prev_time_sec = current_time_sec
 
-def setCameraSettings(version, gain, exposureTime):
-    global picam2, picam1
+def setCameraSettings(gain, exposureTime):
+    global picam2
     # print("Setting camera settings")
     # print(gain, exposureTime)
-    if (version == 'new'): 
-        picam2.set_controls({"AnalogueGain": gain, "ExposureTime": exposureTime})
-    else:
-        picam1.exposure_mode = 'off'
-        picam1.awb_mode = 'off'
-        picam1.awb_gains = (1, 1)
-        picam1.shutter_speed = int(exposureTime * 1e6)
-        picam1.iso = int(gain)
+    picam2.set_controls({"AnalogueGain": gain, "ExposureTime": exposureTime})
