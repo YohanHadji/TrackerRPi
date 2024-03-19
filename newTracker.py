@@ -60,6 +60,7 @@ class LightPoint:
 
 # Create an array of structures without specifying values
 LightPointArray = [LightPoint(name="ABCD", isVisible=False, x=0, y=0, age = 0) for _ in range(10)]
+all_light_points = []
 
 startTime = time.time()
 firstTimeNoted = False
@@ -95,7 +96,7 @@ def sendSettingToTracker():
     print("Sent settings to tracker")
 
 def generate_frames():
-    global LightPointArray, input_values, resolution, picam2, xPos, yPos, img_width, img_height
+    global LightPointArray, input_values, resolution, picam2, xPos, yPos, img_width, img_height, all_light_points
 
     frame = None
 
@@ -106,6 +107,13 @@ def generate_frames():
         # frame = cv2.flip(frame, 0)
         # Horizontal flip
         # frame = cv2.flip(frame, 1)
+
+        LightPointArray = [LightPoint(name="ABCD", isVisible=False, x=0, y=0, age=0) for _ in range(n)]
+
+        # Print only the first 3 light points with their name, position x and y only.
+        for i, (name, _, x, y, age, _, speed_x, speed_y, acceleration_x, acceleration_y) in enumerate(all_light_points[:n]):
+            # print("Point %d: (%s, %d, %d, %d, %d, %d, %d)" % (i + 1, name, x, y, speed_x, speed_y, acceleration_x, acceleration_y))
+            LightPointArray[i] = LightPoint(name, 1, x, y, age)
 
 
         # Encode the frame
@@ -130,7 +138,7 @@ def generate_frames():
                b'Content-Type: image/jpg\r\n\r\n' + b_frame + b'\r\n')
 
 def tracking_loop():
-    global LightPointArray, input_values, resolution, picam2, xPos, yPos, img_width, img_height, startTime, firstTimeNoted, timeOffset, timeOffsetAverage, trackingEnabled, joystickX, joystickY, joystickBtn, swUp, swDown, swLeft, swRight
+    global LightPointArray, all_light_points, input_values, resolution, picam2, xPos, yPos, img_width, img_height, startTime, firstTimeNoted, timeOffset, timeOffsetAverage, trackingEnabled, joystickX, joystickY, joystickBtn, swUp, swDown, swLeft, swRight
 
     frame = None
     while True:
@@ -208,10 +216,10 @@ def tracking_loop():
             # print(pointToSend.name, pointToSend.x, pointToSend.y)
 
             if (not trackingEnabled):
-                print("Tracking disabled")
+                # print("Tracking disabled")
                 pointToSend.isVisible = False
-            else:
-                print("Tracking enabled")
+            #else:
+                # print("Tracking enabled")
             
             # pointToSend.age = np.int32((np.int64((time.time()-startTime)*1e9)-timeOffsetAverage)-sensorTimeStamp)
             # print(sensorTimeStamp, timeOffsetAverage)
@@ -221,11 +229,11 @@ def tracking_loop():
             pointToSend.x = -pointToSend.y
             pointToSend.y = oldX
 
-            # print(pointToSend.name, pointToSend.x, pointToSend.y, pointToSend.age, pointToSend.isVisible)
+            print(pointToSend.name, pointToSend.x, pointToSend.y, pointToSend.age, pointToSend.isVisible)
 
             sendTargetToTeensy(pointToSend)
 
-            # printFps()
+            printFps()
 
 
 @app.route('/video_feed')
