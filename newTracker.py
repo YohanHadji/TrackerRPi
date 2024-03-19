@@ -143,7 +143,7 @@ def tracking_loop():
             numberOfFrames = 0
 
             while (numberOfFrames < 500):
-                frame, sensorTimeStamp = getFrame('new')
+                frame, sensorTimeStamp = getFrame()
                 print(np.int64((time.time()-startTime)*1e9), sensorTimeStamp)
                 timeOffset += (np.int64((time.time()-startTime)*1e9) - sensorTimeStamp)
                 numberOfFrames += 1
