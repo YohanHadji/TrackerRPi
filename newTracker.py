@@ -108,10 +108,10 @@ def generate_frames():
         # Horizontal flip
         # frame = cv2.flip(frame, 1)
 
-        LightPointArray = [LightPoint(name="ABCD", isVisible=False, x=0, y=0, age=0) for _ in range(3)]
+        LightPointArray = [LightPoint(name="ABCD", isVisible=False, x=0, y=0, age=0) for _ in range(10)]
 
         # Print only the first 3 light points with their name, position x and y only.
-        for i, (name, _, x, y, age, _, speed_x, speed_y, acceleration_x, acceleration_y) in enumerate(all_light_points[:3]):
+        for i, (name, _, x, y, age, _, speed_x, speed_y, acceleration_x, acceleration_y) in enumerate(all_light_points[:10]):
             # print("Point %d: (%s, %d, %d, %d, %d, %d, %d)" % (i + 1, name, x, y, speed_x, speed_y, acceleration_x, acceleration_y))
             LightPointArray[i] = LightPoint(name, 1, x, y, age)
 
