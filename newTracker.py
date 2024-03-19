@@ -141,7 +141,7 @@ def generate_frames():
             
         gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         _dummy, b_frame = cv2.threshold(gray_frame,np.int32(input_values["lightThreshold"]), 255, cv2.THRESH_BINARY)
-        
+
         if (input_values["switchFrame"] == 0):
             cv2.circle(b_frame, (400,303), input_values["lockRadius"], 255, 2)
             for point in LightPointArray:
@@ -174,7 +174,7 @@ def tracking_loop():
 
             numberOfFrames = 0
 
-            while (numberOfFrames < 500):
+            while (numberOfFrames < 100):
                 frame, sensorTimeStamp = getFrame()
                 print(np.int64((time.time()-startTime)*1e9), sensorTimeStamp)
                 timeOffset += (np.int64((time.time()-startTime)*1e9) - sensorTimeStamp)
