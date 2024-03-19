@@ -122,9 +122,9 @@ def generate_frames():
             _dummy, b_frame = cv2.threshold(gray_frame,np.int32(input_values["lightThreshold"]), 255, cv2.THRESH_BINARY)
 
             cv2.circle(b_frame, (400,303), input_values["lockRadius"], 255, 2)
-            # for point in LightPointArray:
-            #     cv2.circle(b_frame, (point.x, point.y), 5, 255, -1)
-            #     cv2.putText(b_frame, point.name, (point.x, point.y), cv2.FONT_HERSHEY_SIMPLEX, 1, 255, 2, cv2.LINE_AA)
+            for point in LightPointArray:
+                cv2.circle(b_frame, (point.x, point.y), 5, 255, -1)
+                cv2.putText(b_frame, point.name, (point.x, point.y), cv2.FONT_HERSHEY_SIMPLEX, 1, 255, 2, cv2.LINE_AA)
 
             _, buffer = cv2.imencode('.jpg', b_frame,  [int(cv2.IMWRITE_JPEG_QUALITY), 100])
             b_frame = buffer.tobytes()
@@ -132,9 +132,9 @@ def generate_frames():
                b'Content-Type: image/jpg\r\n\r\n' + b_frame + b'\r\n')
         else:
             cv2.circle(frame, (400,303), input_values["lockRadius"], (0, 0, 255), 2)
-            # for point in LightPointArray:
-            #    cv2.circle(frame, (point.x, point.y), 5, (0, 0, 255), -1)
-            #    cv2.putText(frame, point.name, (point.x, point.y), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2, cv2.LINE_AA)
+            for point in LightPointArray:
+               cv2.circle(frame, (point.x, point.y), 5, (0, 0, 255), -1)
+               cv2.putText(frame, point.name, (point.x, point.y), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2, cv2.LINE_AA)
             _, buffer = cv2.imencode('.jpg', frame,  [int(cv2.IMWRITE_JPEG_QUALITY), 100])
             b_frame = buffer.tobytes() 
             yield (b'--frame\r\n'
