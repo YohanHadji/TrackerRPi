@@ -260,7 +260,7 @@ def tracking_loop():
 
             sendTargetToTeensy(pointToSend)
 
-            printFps()
+            #printFps()
 
 
 @app.route('/video_feed')

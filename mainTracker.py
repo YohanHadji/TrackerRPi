@@ -88,7 +88,7 @@ while True:
                     trackingEnabled = True
 
         pointToSend = getLockedPoint(all_light_points, joystickBtn, swUp, swDown, swLeft, swRight)
-        # print(pointToSend.name, pointToSend.x, pointToSend.y)
+        print(pointToSend.name, pointToSend.x, pointToSend.y)
 
         if (not trackingEnabled):
             # print("Tracking disabled")
@@ -97,7 +97,7 @@ while True:
         # pointToSend.age = np.int32((np.int64((time.time()-startTime)*1e9)-timeOffsetAverage)-sensorTimeStamp)
         # print(sensorTimeStamp, timeOffsetAverage)
         pointToSend.age = np.int32((((time.time()-startTime)*1e9)-(sensorTimeStamp+timeOffsetAverage))/1e6)
-        # print(pointToSend.age)
+        #print(pointToSend.age)
 
         sendTargetToTeensy(pointToSend)
 
