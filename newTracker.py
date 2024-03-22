@@ -122,17 +122,17 @@ def generate_frames():
 
             # Create a second frame with only the blue channel using cv2.cvtColor
             # Split the frame into its individual channels
-            blue_channel, green_channel, red_channel = cv2.split(frame)
+            # blue_channel, green_channel, red_channel = cv2.split(frame)
 
-            # Set green and red channels to zero
-            green_channel[:] = 0
-            red_channel[:] = 0
+            # # Set green and red channels to zero
+            # green_channel[:] = 0
+            # red_channel[:] = 0
 
-            # Merge the channels back into a BGR frame
-            blue_frame = cv2.merge((blue_channel, green_channel, red_channel))
+            # # Merge the channels back into a BGR frame
+            # blue_frame = cv2.merge((blue_channel, green_channel, red_channel))
 
 
-            _dummy, b_frame = cv2.threshold(blue_frame,np.int32(input_values["lightThreshold"]), 255, cv2.THRESH_BINARY)
+            _dummy, b_frame = cv2.threshold(gray_frame,np.int32(input_values["lightThreshold"]), 255, cv2.THRESH_BINARY)
 
             cv2.circle(b_frame, (400,303), input_values["lockRadius"], 255, 2)
             for point in LightPointArray:
