@@ -119,7 +119,20 @@ def generate_frames():
         # Encode the frame
         if (input_values["switchFrame"] == 0):
             gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-            _dummy, b_frame = cv2.threshold(gray_frame,np.int32(input_values["lightThreshold"]), 255, cv2.THRESH_BINARY)
+
+            # Create a second frame with only the blue channel using cv2.cvtColor
+            # Split the frame into its individual channels
+            blue_channel, green_channel, red_channel = cv2.split(frame)
+
+            # Set green and red channels to zero
+            green_channel[:] = 0
+            red_channel[:] = 0
+
+            # Merge the channels back into a BGR frame
+            blue_frame = cv2.merge((blue_channel, green_channel, red_channel))
+
+
+            _dummy, b_frame = cv2.threshold(blue_frame,np.int32(input_values["lightThreshold"]), 255, cv2.THRESH_BINARY)
 
             cv2.circle(b_frame, (400,303), input_values["lockRadius"], 255, 2)
             for point in LightPointArray:
