@@ -1,4 +1,5 @@
 import cv2
+import numpy as np
 import random
 import string
 
@@ -148,7 +149,19 @@ def process_and_store_light_points(new_points, sensorTimeStamp):
 def detect(frame, sensorTimeStamp):
     # Convert to grayscale and then to binary
     gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    _dummy, b_frame = cv2.threshold(gray_frame,lightThreshold, 255, cv2.THRESH_BINARY)
+
+
+    # _dummy, b_frame = cv2.threshold(gray_frame,lightThreshold, 255, cv2.THRESH_BINARY)
+
+    # Apply morphological dilation
+    kernel = np.ones((3, 3), np.uint8)
+    dilated = cv2.dilate(gray_frame, kernel)
+
+    # Compute the difference between the original and dilated image
+    diff = cv2.absdiff(dilated, gray_frame)
+
+    # Optionally, you can further threshold the difference image
+    _, b_frame = cv2.threshold(diff, lightThreshold, 255, cv2.THRESH_BINARY)
 
     result = obtain_top_contours(b_frame, 10)
     all_light_points = process_and_store_light_points(result, sensorTimeStamp)

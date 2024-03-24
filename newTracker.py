@@ -131,8 +131,17 @@ def generate_frames():
             # # Merge the channels back into a BGR frame
             # blue_frame = cv2.merge((blue_channel, green_channel, red_channel))
 
+            # _dummy, b_frame = cv2.threshold(gray_frame,np.int32(input_values["lightThreshold"]), 255, cv2.THRESH_BINARY)
 
-            _dummy, b_frame = cv2.threshold(gray_frame,np.int32(input_values["lightThreshold"]), 255, cv2.THRESH_BINARY)
+            # Apply morphological dilation
+            kernel = np.ones((3, 3), np.uint8)
+            dilated = cv2.dilate(gray_frame, kernel)
+
+            # Compute the difference between the original and dilated image
+            diff = cv2.absdiff(dilated, gray_frame)
+
+            # Optionally, you can further threshold the difference image
+            _, b_frame = cv2.threshold(diff, np.int32(input_values["lightThreshold"]), 255, cv2.THRESH_BINARY)
 
             cv2.circle(b_frame, (400,303), input_values["lockRadius"], 255, 2)
             for point in LightPointArray:
