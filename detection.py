@@ -150,18 +150,34 @@ def detect(frame, sensorTimeStamp):
     # Convert to grayscale and then to binary
     gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
-
+    # Method 1: Apply a simple threshold
     # _dummy, b_frame = cv2.threshold(gray_frame,lightThreshold, 255, cv2.THRESH_BINARY)
 
-    # Apply morphological dilation
-    kernel = np.ones((3, 3), np.uint8)
-    dilated = cv2.dilate(gray_frame, kernel)
+    # Method 2: Apply adaptive threshold
+    # # Apply morphological dilation
+    # kernel = np.ones((3, 3), np.uint8)
+    # dilated = cv2.dilate(gray_frame, kernel)
 
-    # Compute the difference between the original and dilated image
-    diff = cv2.absdiff(dilated, gray_frame)
+    # # Compute the difference between the original and dilated image
+    # diff = cv2.absdiff(dilated, gray_frame)
 
-    # Optionally, you can further threshold the difference image
-    _, b_frame = cv2.threshold(diff, lightThreshold, 255, cv2.THRESH_BINARY)
+    # # Optionally, you can further threshold the difference image
+    # _, b_frame = cv2.threshold(diff, lightThreshold, 255, cv2.THRESH_BINARY)
+
+    # Method 3: Apply adaptive threshold
+    # Compute the gradient magnitude using Sobel operators
+    gradient_x = cv2.Sobel(gray_frame, cv2.CV_64F, 1, 0, ksize=3)
+    gradient_y = cv2.Sobel(gray_frame, cv2.CV_64F, 0, 1, ksize=3)
+    gradient_magnitude = np.sqrt(gradient_x**2 + gradient_y**2)
+
+    # Normalize gradient magnitude to [0, 255]
+    gradient_magnitude_normalized = cv2.normalize(gradient_magnitude, None, 0, 255, cv2.NORM_MINMAX, cv2.CV_8U)
+
+    # Threshold the gradient magnitude image
+    _, thresh = cv2.threshold(gradient_magnitude_normalized, lightThreshold, 255, cv2.THRESH_BINARY)
+
+    # Perform non-maximum suppression
+    b_frame = cv2.dilate(thresh, None)
 
     result = obtain_top_contours(b_frame, 10)
     all_light_points = process_and_store_light_points(result, sensorTimeStamp)
