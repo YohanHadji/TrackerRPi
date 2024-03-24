@@ -133,7 +133,7 @@ def generate_frames():
 
 
             # METHOD 1
-            # _dummy, b_frame = cv2.threshold(gray_frame,np.int32(input_values["lightThreshold"]), 255, cv2.THRESH_BINARY)
+            _dummy, b_frame = cv2.threshold(gray_frame,np.int32(input_values["lightThreshold"]), 255, cv2.THRESH_BINARY)
 
             # METHOD 2
             # # Apply morphological dilation
@@ -148,18 +148,18 @@ def generate_frames():
 
             # METHOD 3 
             # Compute the gradient magnitude using Sobel operators
-            gradient_x = cv2.Sobel(gray_frame, cv2.CV_64F, 1, 0, ksize=3)
-            gradient_y = cv2.Sobel(gray_frame, cv2.CV_64F, 0, 1, ksize=3)
-            gradient_magnitude = np.sqrt(gradient_x**2 + gradient_y**2)
+            # gradient_x = cv2.Sobel(gray_frame, cv2.CV_64F, 1, 0, ksize=3)
+            # gradient_y = cv2.Sobel(gray_frame, cv2.CV_64F, 0, 1, ksize=3)
+            # gradient_magnitude = np.sqrt(gradient_x**2 + gradient_y**2)
 
-            # Normalize gradient magnitude to [0, 255]
-            gradient_magnitude_normalized = cv2.normalize(gradient_magnitude, None, 0, 255, cv2.NORM_MINMAX, cv2.CV_8U)
+            # # Normalize gradient magnitude to [0, 255]
+            # gradient_magnitude_normalized = cv2.normalize(gradient_magnitude, None, 0, 255, cv2.NORM_MINMAX, cv2.CV_8U)
 
-            # Threshold the gradient magnitude image
-            _, thresh = cv2.threshold(gradient_magnitude_normalized, np.int32(input_values["lightThreshold"]), 255, cv2.THRESH_BINARY)
+            # # Threshold the gradient magnitude image
+            # _, thresh = cv2.threshold(gradient_magnitude_normalized, np.int32(input_values["lightThreshold"]), 255, cv2.THRESH_BINARY)
 
-            # Perform non-maximum suppression
-            b_frame = cv2.dilate(thresh, None)
+            # # Perform non-maximum suppression
+            # b_frame = cv2.dilate(thresh, None)
 
             cv2.circle(b_frame, (400,303), input_values["lockRadius"], 255, 2)
             for point in LightPointArray:
@@ -300,7 +300,7 @@ def tracking_loop():
 
             sendTargetToTeensy(pointToSend)
 
-            #printFps()
+            printFps()
 
 
 @app.route('/video_feed')
