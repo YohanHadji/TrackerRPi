@@ -23,7 +23,7 @@ while True:
             successWrite = True
         except serial.SerialException as e:
             print("Serial write issue:", e)
-        time.sleep(0.1)
+            time.sleep(0.1)
 
     successWrite = False
     while (not successWrite):
@@ -32,7 +32,7 @@ while True:
             successWrite = True
         except serial.SerialException as e:
             print("Serial write issue:", e)
-        time.sleep(0.1)
+            time.sleep(0.1)
     
     time.sleep(3.0)
 
@@ -45,7 +45,7 @@ while True:
             successWrite = True
         except serial.SerialException as e:
             print("Serial write issue:", e)
-        time.sleep(0.1)
+            time.sleep(0.1)
 
     successWrite = False
     while (not successWrite):
@@ -54,7 +54,7 @@ while True:
             successWrite = True
         except serial.SerialException as e:
             print("Serial write issue:", e)
-        time.sleep(0.1)
+            time.sleep(0.1)
 
     time.sleep(3.0)
     
