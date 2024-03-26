@@ -12,7 +12,16 @@ time.sleep(1.0)
 pos =0
 
 while True: 
-    MightyZap.GoalPosition(Actuator_ID,3000)
+
+    successWrite = False
+    while (not successWrite):
+        try:
+            MightyZap.GoalPosition(Actuator_ID,3000)
+            successWrite = True
+        except serial.SerialException as e:
+            print("Serial write issue:", e)
+        time.sleep(0.1)
+
     while pos < 2990 :
         try:
             pos = MightyZap.PresentPosition(Actuator_ID)
@@ -22,7 +31,15 @@ while True:
         time.sleep(0.1)
     time.sleep(2.0)
 
-    MightyZap.GoalPosition(Actuator_ID,0)
+    successWrite = False
+    while (not successWrite):
+        try:
+            MightyZap.GoalPosition(Actuator_ID,3000)
+            successWrite = True
+        except serial.SerialException as e:
+            print("Serial write issue:", e)
+        time.sleep(0.1)
+
     while pos > 10 :
         try:
             pos = MightyZap.PresentPosition(Actuator_ID)
