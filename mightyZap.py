@@ -13,6 +13,8 @@ pos =0
 
 while True: 
 
+    print("Moving to 3000")
+
     successWrite = False
     while (not successWrite):
         try:
@@ -24,10 +26,12 @@ while True:
     
     time.sleep(3.0)
 
+    print("Moving to 0")
+
     successWrite = False
     while (not successWrite):
         try:
-            MightyZap.GoalPosition(Actuator_ID,3000)
+            MightyZap.GoalPosition(Actuator_ID,0)
             successWrite = True
         except serial.SerialException as e:
             print("Serial write issue:", e)
