@@ -21,15 +21,8 @@ while True:
         except serial.SerialException as e:
             print("Serial write issue:", e)
         time.sleep(0.1)
-
-    while pos < 2990 :
-        try:
-            pos = MightyZap.PresentPosition(Actuator_ID)
-        except serial.SerialException as e:
-            print("Serial read issue:", e)
-        print(pos)
-        time.sleep(0.1)
-    time.sleep(2.0)
+    
+    time.sleep(3.0)
 
     successWrite = False
     while (not successWrite):
@@ -40,12 +33,5 @@ while True:
             print("Serial write issue:", e)
         time.sleep(0.1)
 
-    while pos > 10 :
-        try:
-            pos = MightyZap.PresentPosition(Actuator_ID)
-        except serial.SerialException as e:
-            print("Serial read issue:", e)
-        print(pos) 
-        time.sleep(0.1)
-    time.sleep(2.0)
+    time.sleep(3.0)
     
