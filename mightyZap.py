@@ -5,13 +5,15 @@ import time
 
 MightyZap = PythonLibMightyZap_Rasp_PC
 
-Actuator_ID = 1
+Actuator_ID_X = 100
+Actuator_ID_Y = 100
 
 MightyZap.OpenMightyZap('/dev/ttyAMA0',57600)
 time.sleep(1.0)
 pos =0
 
-MightyZap.Acceleration(Actuator_ID, 255)
+MightyZap.Acceleration(Actuator_ID_X, 255)
+MightyZap.Acceleration(Actuator_ID_Y, 255)
 
 while True: 
 
@@ -20,7 +22,16 @@ while True:
     successWrite = False
     while (not successWrite):
         try:
-            MightyZap.GoalPosition(Actuator_ID,3000)
+            MightyZap.GoalPosition(Actuator_ID_X,3000)
+            successWrite = True
+        except serial.SerialException as e:
+            print("Serial write issue:", e)
+        time.sleep(0.1)
+
+    successWrite = False
+    while (not successWrite):
+        try:
+            MightyZap.GoalPosition(Actuator_ID_Y,3000)
             successWrite = True
         except serial.SerialException as e:
             print("Serial write issue:", e)
@@ -33,7 +44,16 @@ while True:
     successWrite = False
     while (not successWrite):
         try:
-            MightyZap.GoalPosition(Actuator_ID,0)
+            MightyZap.GoalPosition(Actuator_ID_X,1000)
+            successWrite = True
+        except serial.SerialException as e:
+            print("Serial write issue:", e)
+        time.sleep(0.1)
+
+    successWrite = False
+    while (not successWrite):
+        try:
+            MightyZap.GoalPosition(Actuator_ID_Y,1000)
             successWrite = True
         except serial.SerialException as e:
             print("Serial write issue:", e)
