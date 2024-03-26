@@ -12,9 +12,6 @@ MightyZap.OpenMightyZap('/dev/ttyAMA0',57600)
 time.sleep(1.0)
 pos =0
 
-MightyZap.Acceleration(Actuator_ID_X, 255)
-MightyZap.Acceleration(Actuator_ID_Y, 255)
-
 while True: 
 
     print("Moving to 3000")
