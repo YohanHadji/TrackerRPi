@@ -13,11 +13,17 @@ pos =0
 
 MightyZap.GoalPosition(Actuator_ID,3000)
 while pos < 2990 :
-    pos = MightyZap.PresentPosition(Actuator_ID)
+    try:
+        pos = MightyZap.PresentPosition(Actuator_ID)
+    except serial.SerialException as e:
+        print("Serial read issue:", e)
     print(pos)
 
 MightyZap.GoalPosition(Actuator_ID,0)
 while pos > 10 :
-    pos = MightyZap.PresentPosition(Actuator_ID)
+    try:
+        pos = MightyZap.PresentPosition(Actuator_ID)
+    except serial.SerialException as e:
+        print("Serial read issue:", e)
     print(pos) 
     
