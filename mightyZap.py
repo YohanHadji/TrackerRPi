@@ -20,19 +20,20 @@ while True:
     while (not successWrite):
         try:
             MightyZap.GoalPosition(Actuator_ID_X,3000)
-            successWrite = True
-        except serial.SerialException as e:
-            print("Serial write issue:", e)
-            time.sleep(0.1)
-
-    successWrite = False
-    while (not successWrite):
-        try:
             MightyZap.GoalPosition(Actuator_ID_Y,3000)
             successWrite = True
         except serial.SerialException as e:
             print("Serial write issue:", e)
             time.sleep(0.1)
+
+    # successWrite = False
+    # while (not successWrite):
+    #     try:
+    #         MightyZap.GoalPosition(Actuator_ID_Y,3000)
+    #         successWrite = True
+    #     except serial.SerialException as e:
+    #         print("Serial write issue:", e)
+    #         time.sleep(0.1)
     
     time.sleep(3.0)
 
@@ -42,19 +43,20 @@ while True:
     while (not successWrite):
         try:
             MightyZap.GoalPosition(Actuator_ID_X,1000)
-            successWrite = True
-        except serial.SerialException as e:
-            print("Serial write issue:", e)
-            time.sleep(0.1)
-
-    successWrite = False
-    while (not successWrite):
-        try:
             MightyZap.GoalPosition(Actuator_ID_Y,1000)
             successWrite = True
         except serial.SerialException as e:
             print("Serial write issue:", e)
             time.sleep(0.1)
+
+    # successWrite = False
+    # while (not successWrite):
+    #     try:
+    #         MightyZap.GoalPosition(Actuator_ID_Y,1000)
+    #         successWrite = True
+    #     except serial.SerialException as e:
+    #         print("Serial write issue:", e)
+    #         time.sleep(0.1)
 
     time.sleep(3.0)
     
