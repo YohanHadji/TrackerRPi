@@ -6,7 +6,7 @@ import time
 MightyZap = PythonLibMightyZap_Rasp_PC
 
 Actuator_ID_X = 100
-Actuator_ID_Y = 100
+Actuator_ID_Y = 101
 
 MightyZap.OpenMightyZap('/dev/ttyAMA0',57600)
 time.sleep(1.0)
