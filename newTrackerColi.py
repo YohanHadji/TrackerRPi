@@ -83,19 +83,6 @@ def udp_listener():
         # Decode the data with capsule
         for byte in data:
             capsule_instance.decode(byte)
-        
-        # Read data from serial port with no timeout and try and except if error 
-        try:
-            ser_bytes = ser.readline()
-            # ser_bytes = ser_bytes.decode("utf-8")
-            # ser_bytes = ser_bytes.replace("\r\n", "")
-            # ser_bytes = ser_bytes.split(",")
-            # ser_bytes = [int(i) for i in ser_bytes]
-            # print(ser_bytes)
-            # print("Data received from serial port")
-
-        except:
-            pass
 
 
 def sendSettingToTracker():
