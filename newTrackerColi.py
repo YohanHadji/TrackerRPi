@@ -84,25 +84,6 @@ def udp_listener():
             capsule_instance.decode(byte)
 
 
-def map_quadrilateral_to_rectangle(src_x, src_y):
-    # Define the four corners of the irregular quadrilateral in the source image
-    quad = np.float32([(-175, 232), (-174, -38), (53, -40), (65, 204)])  # Update these coordinates according to your quadrilateral
-
-    # Destination size
-    dest_width = 2000
-    dest_height = 2000
-
-    # Define the four corners of the destination rectangle
-    rect = np.float32([(0, 0), (dest_width, 0), (dest_width, dest_height), (0, dest_height)])
-
-    # Calculate the perspective transformation matrix
-    M = cv2.getPerspectiveTransform(quad, rect)
-
-    # Use the transformation matrix to transform the source coordinates
-    dest = cv2.perspectiveTransform(np.float32([[src_x, src_y]])[np.newaxis], M)
-
-    return dest[0][0], dest[0][1]
-
 def sendSettingToTracker():
     global input_values, sock
     # Send the target point to the teensy, the structure should be copied in a byte array then encoded then sent
@@ -316,8 +297,6 @@ def tracking_loop():
             #oldX = pointToSend.x
             #pointToSend.x = -pointToSend.y
             #pointToSend.y = oldX
-            
-            pointToSend.x, pointToSend.y = map_quadrilateral_to_rectangle(pointToSend.x, pointToSend.y)
 
             print(pointToSend.name, pointToSend.x, pointToSend.y, pointToSend.age, pointToSend.isVisible)
 
