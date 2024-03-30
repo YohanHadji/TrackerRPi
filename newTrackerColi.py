@@ -83,23 +83,25 @@ def udp_listener():
         for byte in data:
             capsule_instance.decode(byte)
 
+
 def map_quadrilateral_to_rectangle(src_x, src_y):
     # Define the four corners of the irregular quadrilateral in the source image
-    quad = [(-175, 232), (-174, -38), (53, -40), (65, 204)]  # Update these coordinates according to your quadrilateral
+    quad = np.float32([(-175, 232), (-174, -38), (53, -40), (65, 204)])  # Update these coordinates according to your quadrilateral
 
     # Destination size
     dest_width = 2000
     dest_height = 2000
 
-    # Calculate normalized coordinates in destination image
-    nx = src_x / (dest_width - 1)
-    ny = src_y / (dest_height - 1)
+    # Define the four corners of the destination rectangle
+    rect = np.float32([(0, 0), (dest_width, 0), (dest_width, dest_height), (0, dest_height)])
 
-    # Map normalized coordinates from destination to source quadrilateral
-    x_source = (quad[0][0] + nx * (quad[1][0] - quad[0][0]) + ny * (quad[3][0] - quad[0][0]))-1000
-    y_source = (quad[0][1] + nx * (quad[1][1] - quad[0][1]) + ny * (quad[3][1] - quad[0][1]))-1000
+    # Calculate the perspective transformation matrix
+    M = cv2.getPerspectiveTransform(quad, rect)
 
-    return x_source, y_source
+    # Use the transformation matrix to transform the source coordinates
+    dest = cv2.perspectiveTransform(np.float32([[src_x, src_y]]), M)
+
+    return dest[0][0], dest[0][1]
 
 def sendSettingToTracker():
     global input_values, sock
