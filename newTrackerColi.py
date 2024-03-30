@@ -83,6 +83,24 @@ def udp_listener():
         for byte in data:
             capsule_instance.decode(byte)
 
+def map_quadrilateral_to_rectangle(src_x, src_y):
+    # Define the four corners of the irregular quadrilateral in the source image
+    quad = [(-175, 232), (-174, -38), (53, -40), (65, 204)]  # Update these coordinates according to your quadrilateral
+
+    # Destination size
+    dest_width = 2000
+    dest_height = 2000
+
+    # Calculate normalized coordinates in destination image
+    nx = src_x / (dest_width - 1)
+    ny = src_y / (dest_height - 1)
+
+    # Map normalized coordinates from destination to source quadrilateral
+    x_source = (quad[0][0] + nx * (quad[1][0] - quad[0][0]) + ny * (quad[3][0] - quad[0][0]))-1000
+    y_source = (quad[0][1] + nx * (quad[1][1] - quad[0][1]) + ny * (quad[3][1] - quad[0][1]))-1000
+
+    return x_source, y_source
+
 def sendSettingToTracker():
     global input_values, sock
     # Send the target point to the teensy, the structure should be copied in a byte array then encoded then sent
@@ -296,10 +314,13 @@ def tracking_loop():
             #oldX = pointToSend.x
             #pointToSend.x = -pointToSend.y
             #pointToSend.y = oldX
+            
+            pointToSend.x, pointToSend.y = map_quadrilateral_to_rectangle(pointToSend.x, pointToSend.y)
 
             print(pointToSend.name, pointToSend.x, pointToSend.y, pointToSend.age, pointToSend.isVisible)
-            
+
             pointToSend.y = -pointToSend.y
+
             # sendTargetToTeensy(pointToSend)
             sendTargetToArduino(pointToSend)
 
