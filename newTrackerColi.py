@@ -298,7 +298,8 @@ def tracking_loop():
             #pointToSend.y = oldX
 
             print(pointToSend.name, pointToSend.x, pointToSend.y, pointToSend.age, pointToSend.isVisible)
-
+            
+            pointToSend.y = -pointToSend.y
             # sendTargetToTeensy(pointToSend)
             sendTargetToArduino(pointToSend)
 
