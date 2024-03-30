@@ -197,8 +197,11 @@ def sendTargetToArduino(pointToSendIn):
     packet_length = len(payload_data)
     encoded_packet = capsule_instance.encode(packet_id, payload_data, packet_length)
 
-    # Send the encoded packet
-    ser.write(encoded_packet)
+    try:
+        # Send the encoded packet
+        ser.write(encoded_packet)
+    except Exception as e:
+        print(f"Error occurred while sending data: {e}")
 
 def sendLightPointListToRaspi(all_light_points, n):
     global sock
