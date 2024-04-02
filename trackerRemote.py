@@ -1,7 +1,7 @@
+import serial
 import struct
 import socket
 import time
-import serial
 
 # Constants for the packet header
 PRA = 0xFF
@@ -9,67 +9,92 @@ PRB = 0xFA
 
 # UDP setup
 udp_target_ip = '192.168.1.100'
+udp_target_ip_2 = '192.168.1.114'
 udp_target_port = 8888  # Replace with the desired UDP port
 
-# Create a serial connection
+baud_rate = 9600
 
-successUsb = False
-usbPortToggle = False
+def open_serial_connection():
+    global baud_rate
+    # Try connecting to either ttyACM0 or ttyACM1
+    for port_suffix in range(2):
+        serial_port = f'/dev/ttyACM{port_suffix}'
+        try:
+            ser = serial.Serial(serial_port, baud_rate)
+            print(f"Connected to {serial_port}")
+            return ser
+        except serial.SerialException:
+            pass
 
-while (not successUsb): 
-    try: 
-        # Set the serial port and baud rate based on your Arduino configuration
-        if (usbPortToggle):
-            serial_port = '/dev/ttyACM0'  # Adjust the port based on your Arduino connection
-            usbPortToggle = False
-        else:
-            serial_port = '/dev/ttyACM1'
-            usbPortToggle = True
-    
-        baud_rate = 9600  # Match this with your Arduino's baud rate
-        ser = serial.Serial(serial_port, baud_rate)
-        print("USB succesfull")
-        successUsb = True
-    except:
-        print("USB not connected, trying again")
-        time.sleep(1)
+    # If no successful connection is established, return None
+    return None
 
-# Create a UDP socket
-udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-
-try:
+def send_udp_packet(packet):
+    global baud_rate
     while True:
-        # Read data from the Arduino
-        line = ser.readline().decode('utf-8').strip()
+        try:
+            udp_socket.sendto(packet, (udp_target_ip, udp_target_port))
+            udp_socket.sendto(packet, (udp_target_ip_2,udp_target_port))
+            print("Packet sent successfully")
+            break
+        except OSError as e:
+            if e.errno == 101:  # Network is unreachable
+                print("Network is unreachable. Retrying in 5 seconds...")
+                time.sleep(5)
+            else:
+                raise
+        # Set the baud rate based on your Arduino configuration
+            
+        # Try to open a serial connection
+        ser = open_serial_connection()
 
-        # Split the line into two values based on the comma
-        values = line.split(',')
+        # Create a UDP socket
+        udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
-        # Check if there are two values
-        if len(values) == 2:
-            # Parse the values as floats
-            joystickX = float(values[0])
-            joystickY = float(values[1])
+        while ser is None:
+            print("Failed to connect. Retrying in 5 seconds...")
+            time.sleep(5)
+            ser = open_serial_connection()
 
-            # Encode joystick data
-            joystick_data = struct.pack('ff', joystickX, joystickY)
-            encoded_packet = bytes([PRA, PRB, 0x04, len(joystick_data)]) + joystick_data
+        try:
+            while True:
+                # Read data from the Arduino
+                line = ser.readline().decode('utf-8').strip()
 
-            # Calculate and set the checksum
-            checksum = sum(joystick_data) & 0xFF
-            encoded_packet += bytes([checksum])
+                # Split the line into two values based on the comma
+                values = line.split(',')
 
-            # Send the encoded packet over UDP
-            udp_socket.sendto(encoded_packet, (udp_target_ip, udp_target_port))
+                # Check if there are two values
+                if len(values) == 7:
+                    # Parse the values as floats
+                    joystickX = float(values[0])
+                    joystickY = float(values[1])
+                    joystickBtn = int(values[2])
+                    swUp = int(values[3])
+                    swDown = int(values[4])
+                    swLeft = int(values[5])
+                    swRight = int(values[6])
 
-            # Print the parsed values
-            print(f"Joystick X: {joystickX}, Joystick Y: {joystickY}")
+                    # Encode joystick data
+                    joystick_data = struct.pack('ffbbbbb', joystickX, joystickY, joystickBtn,  swUp, swDown, swLeft, swRight)
+                    encoded_packet = bytes([PRA, PRB, 99, len(joystick_data)]) + joystick_data
+                    # Calculate and set the checksum
+                    checksum = sum(joystick_data) & 0xFF
+                    encoded_packet += bytes([checksum])
 
-except KeyboardInterrupt:
-    # Handle Ctrl+C to gracefully exit the program
-    print("\nExiting program")
+                    # Send the encoded packet over UDP
+                    send_udp_packet(encoded_packet)
 
-finally:
-    # Close the serial connection and UDP socket when done
-    ser.close()
-    udp_socket.close()
+                    # Print the parsed values
+                    print(f"Joystick X: {joystickX}, Joystick Y: {joystickY}")
+
+        except KeyboardInterrupt:
+            # Handle Ctrl+C to gracefully exit the program
+            print("\nExiting program")
+
+        finally:
+            # Close the serial connection and UDP socket when done
+            if ser is not None:
+                ser.close()
+            udp_socket.close()
+
