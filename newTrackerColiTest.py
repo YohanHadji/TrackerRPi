@@ -337,9 +337,11 @@ def tracking_loop():
         # We want to create a fake point to track called "laserPointer"
         # This laserPointer point should move somewhere in the frame (0,0) is frame center randomely every 10sec
                     
+        # (-158 -168) and right up corner at (65 40)
+
         if (time.time()-startTime > 3):
-            laserPointer.x = np.random.randint(-img_width/4.0, img_width/4.0)
-            laserPointer.y = np.random.randint(-img_height/4.0, img_height/4.0)
+            laserPointer.x = np.random.randint(-158, 65)
+            laserPointer.y = np.random.randint(-168, 40)
             laserPointer.isVisible = True
             laserPointer.age = 0
             startTime = time.time()
