@@ -16,20 +16,15 @@ baud_rate = 9600
 usbSuccess = False
 
 def open_serial_connection():
-    global baud_rate, usbSuccess
-    while (not usbSuccess):
-        # Try connecting to either ttyACM0 or ttyACM1
-        for port_suffix in range(2):
-            serial_port = '/dev/tty.usbmodem14201'
-            print(f"Trying to connect to {serial_port}...")
-            try:
-                ser = serial.Serial(serial_port, baud_rate)
-                print(f"Connected to {serial_port}")
-                usbSuccess = True
-                return ser
-            except:
-                print(f"Failed to connect to {serial_port}")
-                continue
+    serial_port = '/dev/tty.usbmodem14201'
+    print(f"Trying to connect to {serial_port}...")
+    try:
+        ser = serial.Serial(serial_port, baud_rate)
+        print(f"Connected to {serial_port}")
+        return ser
+    except:
+        print(f"Failed to connect to {serial_port}")
+        pass
 
     # If no successful connection is established, return None
     return None
