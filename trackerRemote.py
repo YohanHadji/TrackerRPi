@@ -28,6 +28,7 @@ while (not successUsb):
     
         baud_rate = 9600  # Match this with your Arduino's baud rate
         ser = serial.Serial(serial_port, baud_rate)
+        print("USB succesfull")
         successUsb = True
     except:
         print("USB not connected, trying again")
