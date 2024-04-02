@@ -48,58 +48,58 @@ def send_udp_packet(packet):
                 time.sleep(5)
             else:
                 raise
-        # Set the baud rate based on your Arduino configuration
-            
-        # Try to open a serial connection
-        ser = open_serial_connection()
+# Set the baud rate based on your Arduino configuration
+    
+# Try to open a serial connection
+ser = open_serial_connection()
 
-        # Create a UDP socket
-        udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+# Create a UDP socket
+udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
-        while ser is None:
-            print("Failed to connect. Retrying in 5 seconds...")
-            time.sleep(5)
-            ser = open_serial_connection()
+while ser is None:
+    print("Failed to connect. Retrying in 5 seconds...")
+    time.sleep(5)
+    ser = open_serial_connection()
 
-        try:
-            while True:
-                # Read data from the Arduino
-                line = ser.readline().decode('utf-8').strip()
+try:
+    while True:
+        # Read data from the Arduino
+        line = ser.readline().decode('utf-8').strip()
 
-                # Split the line into two values based on the comma
-                values = line.split(',')
+        # Split the line into two values based on the comma
+        values = line.split(',')
 
-                # Check if there are two values
-                if len(values) == 7:
-                    # Parse the values as floats
-                    joystickX = float(values[0])
-                    joystickY = float(values[1])
-                    joystickBtn = int(values[2])
-                    swUp = int(values[3])
-                    swDown = int(values[4])
-                    swLeft = int(values[5])
-                    swRight = int(values[6])
+        # Check if there are two values
+        if len(values) == 7:
+            # Parse the values as floats
+            joystickX = float(values[0])
+            joystickY = float(values[1])
+            joystickBtn = int(values[2])
+            swUp = int(values[3])
+            swDown = int(values[4])
+            swLeft = int(values[5])
+            swRight = int(values[6])
 
-                    # Encode joystick data
-                    joystick_data = struct.pack('ffbbbbb', joystickX, joystickY, joystickBtn,  swUp, swDown, swLeft, swRight)
-                    encoded_packet = bytes([PRA, PRB, 99, len(joystick_data)]) + joystick_data
-                    # Calculate and set the checksum
-                    checksum = sum(joystick_data) & 0xFF
-                    encoded_packet += bytes([checksum])
+            # Encode joystick data
+            joystick_data = struct.pack('ffbbbbb', joystickX, joystickY, joystickBtn,  swUp, swDown, swLeft, swRight)
+            encoded_packet = bytes([PRA, PRB, 99, len(joystick_data)]) + joystick_data
+            # Calculate and set the checksum
+            checksum = sum(joystick_data) & 0xFF
+            encoded_packet += bytes([checksum])
 
-                    # Send the encoded packet over UDP
-                    send_udp_packet(encoded_packet)
+            # Send the encoded packet over UDP
+            send_udp_packet(encoded_packet)
 
-                    # Print the parsed values
-                    print(f"Joystick X: {joystickX}, Joystick Y: {joystickY}")
+            # Print the parsed values
+            print(f"Joystick X: {joystickX}, Joystick Y: {joystickY}")
 
-        except KeyboardInterrupt:
-            # Handle Ctrl+C to gracefully exit the program
-            print("\nExiting program")
+except KeyboardInterrupt:
+    # Handle Ctrl+C to gracefully exit the program
+    print("\nExiting program")
 
-        finally:
-            # Close the serial connection and UDP socket when done
-            if ser is not None:
-                ser.close()
-            udp_socket.close()
+finally:
+    # Close the serial connection and UDP socket when done
+    if ser is not None:
+        ser.close()
+    udp_socket.close()
 
