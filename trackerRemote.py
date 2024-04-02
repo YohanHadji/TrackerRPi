@@ -13,21 +13,20 @@ udp_target_ip_2 = '192.168.1.114'
 udp_target_port = 8888  # Replace with the desired UDP port
 
 baud_rate = 9600
-usbSuccess = False
 
 def open_serial_connection():
     # serial_port = '/dev/tty.usbmodem14201'
     print(f"Trying to connect to USB...")
-    try:
-        ser = serial.Serial('/dev/tty.usbmodem14201', 9600)
-        print(f"Connected to USB")
-        return ser
-    except:
-        print(f"Failed to connect to USB")
-        pass
+    # try:
+    ser = serial.Serial('/dev/tty.usbmodem14201', 9600)
+    print(f"Connected to USB")
+    return ser
+    # except:
+        # print(f"Failed to connect to USB")
+        # pass
 
     # If no successful connection is established, return None
-    return None
+    # return None
 
 def send_udp_packet(packet):
     global baud_rate
