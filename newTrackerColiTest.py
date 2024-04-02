@@ -219,7 +219,7 @@ def generate_frames():
         #        b'Content-Type: image/jpeg\r\n\r\n' + b_frame + b'\r\n')
 
 def tracking_loop():
-    global LightPointArray, all_light_points, input_values, resolution, picam2, xPos, yPos, img_width, img_height, startTime, firstTimeNoted, timeOffset, timeOffsetAverage, trackingEnabled, joystickX, joystickY, joystickBtn, swUp, swDown, swLeft, swRight
+    global LightPointArray, all_light_points, input_values, resolution, picam2, xPos, yPos, img_width, img_height, startTime, firstTimeNoted, timeOffset, timeOffsetAverage, trackingEnabled, joystickX, joystickY, joystickBtn, swUp, swDown, swLeft, swRight, laserPointer
 
     frame = None
 
