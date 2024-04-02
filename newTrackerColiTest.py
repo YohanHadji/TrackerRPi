@@ -327,8 +327,8 @@ def tracking_loop():
         # This laserPointer point should move somewhere in the frame (0,0) is frame center randomely every 10sec
                     
         if (time.time()-startTime > 3):
-            laserPointer.x = np.random.randint(-img_width/2.0, img_width/2.0)
-            laserPointer.y = np.random.randint(-img_height/2.0, img_height/2.0)
+            laserPointer.x = np.random.randint(-img_width/4.0, img_width/4.0)
+            laserPointer.y = np.random.randint(-img_height/4.0, img_height/4.0)
             laserPointer.isVisible = True
             laserPointer.age = 0
             startTime = time.time()
