@@ -46,7 +46,11 @@ def send_udp_packet(packet):
 # Set the baud rate based on your Arduino configuration
     
 # Try to open a serial connection
-ser = open_serial_connection()
+# ser = open_serial_connection()
+            
+print(f"Trying to connect to USB...")
+ser = serial.Serial('/dev/tty.usbmodem14201', 9600)
+print(f"Connected to USB")
 
 # Create a UDP socket
 udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
