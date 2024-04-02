@@ -16,14 +16,14 @@ baud_rate = 9600
 usbSuccess = False
 
 def open_serial_connection():
-    serial_port = '/dev/tty.usbmodem14201'
-    print(f"Trying to connect to {serial_port}...")
+    # serial_port = '/dev/tty.usbmodem14201'
+    print(f"Trying to connect to USB...")
     try:
-        ser = serial.Serial(serial_port, baud_rate)
-        print(f"Connected to {serial_port}")
+        ser = serial.Serial('/dev/tty.usbmodem14201', 9600)
+        print(f"Connected to USB")
         return ser
     except:
-        print(f"Failed to connect to {serial_port}")
+        print(f"Failed to connect to USB")
         pass
 
     # If no successful connection is established, return None
