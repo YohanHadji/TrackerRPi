@@ -174,7 +174,9 @@ def generate_frames():
             #     cv2.putText(b_frame, point.name, (point.x, point.y), cv2.FONT_HERSHEY_SIMPLEX, 1, 255, 2, cv2.LINE_AA)
 
             # Display the laserPointer point
-            cv2.circle(b_frame, (laserPointer.x+img_width/2.0, laserPointer.y+img_height/2.0), 5, 255, -1)
+            xCoord = int(laserPointer.x + img_width/2)
+            yCoord = int(laserPointer.y + img_height/2)
+            cv2.circle(b_frame, (xCoord, yCoord), 5, 255, -1)
 
             _, buffer = cv2.imencode('.jpg', b_frame,  [int(cv2.IMWRITE_JPEG_QUALITY), 100])
             b_frame = buffer.tobytes()
@@ -187,7 +189,9 @@ def generate_frames():
             #    cv2.putText(frame, point.name, (point.x, point.y), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2, cv2.LINE_AA)
 
             # Display the laserPointer point
-            cv2.circle(frame, (laserPointer.x+img_width/2.0, laserPointer.y+img_height/2.0), 5, (0, 0, 255), -1)
+            xCoord = int(laserPointer.x + img_width/2)
+            yCoord = int(laserPointer.y + img_height/2)
+            cv2.circle(frame, (xCoord, yCoord), 5, (0, 0, 255), -1)
 
             _, buffer = cv2.imencode('.jpg', frame,  [int(cv2.IMWRITE_JPEG_QUALITY), 100])
             b_frame = buffer.tobytes() 
