@@ -27,7 +27,7 @@ def open_serial_connection():
                 print(f"Connected to {serial_port}")
                 usbSuccess = True
                 return ser
-            except serial.SerialException:
+            except:
                 print(f"Failed to connect to {serial_port}")
                 continue
 
