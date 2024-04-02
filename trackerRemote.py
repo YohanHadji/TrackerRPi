@@ -20,7 +20,7 @@ def open_serial_connection():
     while (not usbSuccess):
         # Try connecting to either ttyACM0 or ttyACM1
         for port_suffix in range(2):
-            serial_port = f'/dev/ttyACM{port_suffix}'
+            serial_port = '/dev/tty.usbmodem14201'
             print(f"Trying to connect to {serial_port}...")
             try:
                 ser = serial.Serial(serial_port, baud_rate)
