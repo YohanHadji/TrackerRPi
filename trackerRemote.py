@@ -13,18 +13,23 @@ udp_target_ip_2 = '192.168.1.114'
 udp_target_port = 8888  # Replace with the desired UDP port
 
 baud_rate = 9600
+usbSuccess = False
 
 def open_serial_connection():
-    global baud_rate
-    # Try connecting to either ttyACM0 or ttyACM1
-    for port_suffix in range(2):
-        serial_port = f'/dev/ttyACM{port_suffix}'
-        try:
-            ser = serial.Serial(serial_port, baud_rate)
-            print(f"Connected to {serial_port}")
-            return ser
-        except serial.SerialException:
-            pass
+    global baud_rate, usbSuccess
+    while (not usbSuccess):
+        # Try connecting to either ttyACM0 or ttyACM1
+        for port_suffix in range(2):
+            serial_port = f'/dev/ttyACM{port_suffix}'
+            print(f"Trying to connect to {serial_port}...")
+            try:
+                ser = serial.Serial(serial_port, baud_rate)
+                print(f"Connected to {serial_port}")
+                usbSuccess = True
+                return ser
+            except serial.SerialException:
+                print(f"Failed to connect to {serial_port}")
+                continue
 
     # If no successful connection is established, return None
     return None
