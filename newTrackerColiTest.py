@@ -178,6 +178,12 @@ def generate_frames():
             yCoord = int(laserPointer.y + img_height/2)
             cv2.circle(b_frame, (xCoord, yCoord), 5, 255, -1)
 
+            # Draw a rectangle with left bottom corner at (-158 -168) and right up corner at (65 40) relative to center of the image
+            leftBottomCorner = (int(img_width/2-158), int(img_height/2-168))
+            rightUpCorner = (int(img_width/2+65), int(img_height/2+40))
+
+            cv2.rectangle(b_frame, leftBottomCorner, rightUpCorner, 255, 2)
+
             _, buffer = cv2.imencode('.jpg', b_frame,  [int(cv2.IMWRITE_JPEG_QUALITY), 100])
             b_frame = buffer.tobytes()
             yield (b'--frame\r\n'
@@ -192,6 +198,11 @@ def generate_frames():
             xCoord = int(laserPointer.x + img_width/2)
             yCoord = int(laserPointer.y + img_height/2)
             cv2.circle(frame, (xCoord, yCoord), 5, (0, 0, 255), -1)
+
+            leftBottomCorner = (int(img_width/2-158), int(img_height/2-168))
+            rightUpCorner = (int(img_width/2+65), int(img_height/2+40))
+
+            cv2.rectangle(b_frame, leftBottomCorner, rightUpCorner, 255, 2)
 
             _, buffer = cv2.imencode('.jpg', frame,  [int(cv2.IMWRITE_JPEG_QUALITY), 100])
             b_frame = buffer.tobytes() 
