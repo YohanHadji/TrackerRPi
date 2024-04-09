@@ -3,9 +3,11 @@ from capsule import *
 from display import *
 import socket
 import struct
+import serial
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 sockImage = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+ser = None
 
 TEENSY_IP = "192.168.1.100"
 TEENSY_PORT = 8888
@@ -37,6 +39,15 @@ trackerAzm = 0
 trackerElv = 0
 
 lastFrame = None
+
+def arduinoInit():
+    global ser
+    # Arduino connected on USB serial, use try, except to try to connect
+    try:
+        ser = serial.Serial('/dev/ttyACM0', 115200, timeout=1)
+    except:
+        print("Arduino not connected")
+
 
 # Variables to store slider and dropdown values
 cameraSetting = {
@@ -171,6 +182,26 @@ def sendTargetToTeensy(pointToSendIn):
     encoded_packet = bytearray(encoded_packet)
     # Send the encoded packet
     sock.sendto(encoded_packet, (TEENSY_IP, TEENSY_PORT))
+
+# Send target to arduino via USB serial
+def sendTargetToArduino(pointToSendIn):
+    global ser
+    # Send the target point to the arduino, the structure should be copied in a byte array then encoded then sent
+    packet_id = 0x01
+    # Pack the struct in a byte array
+
+    pointToSend = LightPoint(pointToSendIn.name, pointToSendIn.isVisible, pointToSendIn.x, pointToSendIn.y, pointToSendIn.age)
+
+    pointToSendName = str(pointToSend.name)
+    payload_data = struct.pack('4siiii', pointToSendName.encode('utf-8'), pointToSend.isVisible, pointToSend.x, pointToSend.y, pointToSend.age)
+    packet_length = len(payload_data)
+    encoded_packet = capsule_instance.encode(packet_id, payload_data, packet_length)
+
+    try:
+        # Send the encoded packet
+        ser.write(encoded_packet)
+    except Exception as e:
+        print(f"Error occurred while sending data: {e}")
 
 def sendLightPointListToRaspi(all_light_points, n):
     global sock

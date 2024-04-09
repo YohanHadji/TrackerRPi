@@ -46,7 +46,7 @@ def obtain_top_contours(b_frame, n=10):
         if M['m00'] != 0:
             cx, cy = int(M['m10'] / M['m00']), int(M['m01'] / M['m00'])
             contour_radius = cv2.minEnclosingCircle(blob)[1]
-            if contour_radius > 10:
+            if contour_radius > 3:
                 contour_brightness.append(((cx, cy), cv2.contourArea(blob)))
 
     # Sort contours based on brightness

@@ -13,6 +13,7 @@ app = Flask(__name__)
 
 #camInit(30)
 camInit(60)
+arduinoInit()
 
 img_width = 800
 img_height = 606
@@ -69,6 +70,7 @@ timeOffsetAverage = 0
 trackingEnabled = False
 
 def udp_listener():
+    global sock, ser
     UDP_IP = "0.0.0.0" 
     UDP_PORT = 8888
 
@@ -81,6 +83,7 @@ def udp_listener():
         # Decode the data with capsule
         for byte in data:
             capsule_instance.decode(byte)
+
 
 def sendSettingToTracker():
     global input_values, sock
@@ -292,13 +295,16 @@ def tracking_loop():
             # print(sensorTimeStamp, timeOffsetAverage)
             pointToSend.age = np.int32((((time.time()-startTime)*1e9)-(sensorTimeStamp+timeOffsetAverage))/1e6)
             # print(pointToSend.age)
-            oldX = pointToSend.x
-            pointToSend.x = -pointToSend.y
-            pointToSend.y = oldX
+            #oldX = pointToSend.x
+            #pointToSend.x = -pointToSend.y
+            #pointToSend.y = oldX
 
             print(pointToSend.name, pointToSend.x, pointToSend.y, pointToSend.age, pointToSend.isVisible)
 
-            sendTargetToTeensy(pointToSend)
+            pointToSend.y = -pointToSend.y
+
+            # sendTargetToTeensy(pointToSend)
+            sendTargetToArduino(pointToSend)
 
             printFps()
 
