@@ -12,7 +12,7 @@ import math
 app = Flask(__name__)
 
 #camInit(30)
-camInit(60)
+camInit(120)
 
 img_width = 800
 img_height = 606
@@ -22,7 +22,6 @@ img_height = 606
 
 xPos = 0
 yPos = 0
-
 
 joystickX   = 0
 joystickY   = 0
@@ -292,9 +291,9 @@ def tracking_loop():
             # print(sensorTimeStamp, timeOffsetAverage)
             pointToSend.age = np.int32((((time.time()-startTime)*1e9)-(sensorTimeStamp+timeOffsetAverage))/1e6)
             # print(pointToSend.age)
-            oldX = pointToSend.x
-            pointToSend.x = -pointToSend.y
-            pointToSend.y = oldX
+            # oldX = pointToSend.x
+            # pointToSend.x = pointToSend.x+15
+            # pointToSend.y = pointToSend.y-13
 
             print(pointToSend.name, pointToSend.x, pointToSend.y, pointToSend.age, pointToSend.isVisible)
 

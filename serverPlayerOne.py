@@ -90,14 +90,14 @@ def generate_frames():
         #     if (packetType == "pointList"):
         #         LightPointArray = returnLastPacketData(packetType)
 
-        gray_frame = frame #cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        gray_frame = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)
         _dummy, b_frame = cv2.threshold(gray_frame,np.int32(input_values["lightThreshold"]), 255, cv2.THRESH_BINARY)
                 
         printFps()
 
         # Encode the frame
         if (input_values["switchFrame"] == 0):
-            cv2.circle(b_frame, (652,488), input_values["lockRadius"], 255, 2)
+            cv2.circle(b_frame, (np.int16(1304/2),np.int16(976/2)), input_values["lockRadius"], 255, 2)
             for point in LightPointArray:
                 cv2.circle(b_frame, (point.x, point.y), 5, 255, -1)
                 cv2.putText(b_frame, point.name, (point.x, point.y), cv2.FONT_HERSHEY_SIMPLEX, 1, 255, 2, cv2.LINE_AA)
@@ -106,7 +106,7 @@ def generate_frames():
             yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + b_frame + b'\r\n')
         else:
-            cv2.circle(frame, (652,488), input_values["lockRadius"], (0, 0, 255), 2)
+            cv2.circle(frame, (np.int16(1304/2),np.int16(976/2)), input_values["lockRadius"], (0, 0, 255), 2)
             for point in LightPointArray:
                 cv2.circle(frame, (point.x, point.y), 5, (0, 0, 255), -1)
                 cv2.putText(frame, point.name, (point.x, point.y), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2, cv2.LINE_AA)

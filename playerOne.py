@@ -103,10 +103,10 @@ class POAConfigAttributes(ctypes.Structure):
         ('reserved', ctypes.c_char * 64)
     ]
 
-exposureSetting = 1000
-gainSetting = 75
-widthSetting = 652
-heightSetting = 488
+exposureSetting = 10000
+gainSetting = 450
+widthSetting = 1304
+heightSetting = 976
 
 def playerOneCamInit(): 
     global exposureSetting, gainSetting, widthSetting, heightSetting
@@ -193,49 +193,93 @@ def playerOneCamInit():
             libcamera.POAStopExposure(i)
 
         # Set bin, note: after setting bin, please get the image size and start position
-        error = libcamera.POASetImageBin(i, camera_properties.bins[1])  # set bin to 2, default bin is 1
+        error = libcamera.POASetImageBin(i, camera_properties.bins[0])  # set bin to 2, default bin is 1
 
         if error != POA_OK:
             print(f"Set bin failed, error code: {libcamera.POAGetErrorString(error)}")
 
-        # startX = ctypes.c_int(0)
-        # startY = ctypes.c_int(0)
-        # width = ctypes.c_int(0)
-        # height = ctypes.c_int(0)
+        startX = ctypes.c_int(0)
+        startY = ctypes.c_int(0)
+        width = ctypes.c_int(0)
+        height = ctypes.c_int(0)
 
-        # error = libcamera.POAGetImageStartPos(i, ctypes.byref(startX), ctypes.byref(startY))
-        # if error != POA_OK:
-        #     # if get image start position failed, set startX and startY to 0
-        #     startX.value = 0
-        #     startY.value = 0
-        #     print(f"Get Image Start Pos failed, error code: {libcamera.POAGetErrorString(error)}")
-        # else: 
-        #     print(f"Start X: {startX.value}, Start Y: {startY.value}")
+        error = libcamera.POAGetImageStartPos(i, ctypes.byref(startX), ctypes.byref(startY))
+        if error != POA_OK:
+            # if get image start position failed, set startX and startY to 0
+            startX.value = 0
+            startY.value = 0
+            print(f"Get Image Start Pos failed, error code: {libcamera.POAGetErrorString(error)}")
+        else: 
+            print(f"Start X: {startX.value}, Start Y: {startY.value}")
 
-        # error = libcamera.POAGetImageSize(i, ctypes.byref(width), ctypes.byref(height))
-        # if error != POA_OK:
-        #     # if get image size failed, set width and height to the maximum value under current bin
-        #     width.value = camera_properties.contents.maxWidth // camera_properties.contents.bins[1]  # Maximum width under current bin
-        #     height.value = camera_properties.contents.maxHeight // camera_properties.contents.bins[1]  # Maximum height under current bin
-        #     print(f"Get Image Size failed, error code: {libcamera.POAGetErrorString(error)}")
-        # else:
-        #     print(f"Width: {width.value}, Height: {height.value}")
+        error = libcamera.POAGetImageSize(i, ctypes.byref(width), ctypes.byref(height))
+        if error != POA_OK:
+            # if get image size failed, set width and height to the maximum value under current bin
+            width.value = camera_properties.contents.maxWidth // camera_properties.contents.bins[1]  # Maximum width under current bin
+            height.value = camera_properties.contents.maxHeight // camera_properties.contents.bins[1]  # Maximum height under current bin
+            print(f"Get Image Size failed, error code: {libcamera.POAGetErrorString(error)}")
+        else:
+            print(f"Width: {width.value}, Height: {height.value}")
 
         # Set image format, if exposing, please stop exposure first
-        error = libcamera.POASetImageFormat(i, POA_MONO8)  # default image format is POA_RAW8
+        error = libcamera.POASetImageFormat(i, POA_RAW16)  # default image format is POA_RAW8
         if error != POA_OK:
             print(f"Set image format failed, error code: {libcamera.POAGetErrorString(error)}")
         else: 
             print("Set image format successfully.")
 
+        error = libcamera.POASetImageSize(i, ctypes.c_int(widthSetting), ctypes.c_int(heightSetting))  # default image format is POA_RAW8
+        if error != POA_OK:
+            print(f"Set image format failed, error code: {libcamera.POAGetErrorString(error)}")
+        else: 
+            print("Set image size successfully.")
+
+        width = ctypes.c_int(0)
+        height = ctypes.c_int(0)
+
+        camera_properties = POACameraProperties()
+        ret = libcamera.POAGetCameraProperties(i, ctypes.byref(camera_properties))
+        if ret != POA_OK:
+            print(f"Error: Failed to get properties of camera {i}. Error code: {ret}")
+            # Close the camera if retrieving properties fails
+            libcamera.POACloseCamera(i)
+            continue
+        else: 
+            print(f"Camera {i} got properties.")
+
+        error = libcamera.POAGetImageSize(i, ctypes.byref(width), ctypes.byref(height))
+        if error != POA_OK:
+            # if get image size failed, set width and height to the maximum value under current bin
+            width.value = camera_properties.contents.maxWidth // camera_properties.contents.bins[0]  # Maximum width under current bin
+            height.value = camera_properties.contents.maxHeight // camera_properties.contents.bins[0]  # Maximum height under current bin
+            print(f"Get Image Size failed, error code: {libcamera.POAGetErrorString(error)}")
+        else:
+            print(f"Width: {width.value}, Height: {height.value}")
+
         # Set exposure
         exposure_us = ctypes.c_int(exposureSetting)  # 100ms
-        error = libcamera.POASetConfig(i, POA_EXPOSURE, exposure_us, POA_FALSE)
+        error = libcamera.POASetConfig(i, POA_EXPOSURE, exposureSetting, POA_FALSE)
 
         if error != POA_OK:
             print(f"Set exposure failed, error code: {libcamera.POAGetErrorString(error)}")
         else:
             print("Set exposure successfully.")
+
+        # auto_max_exposure_us = ctypes.c_int(100000)  # 100ms
+        # error = libcamera.POASetConfig(i, POA_AUTOEXPO_MAX_EXPOSURE, auto_max_exposure_us, POA_FALSE)
+
+        # if error != POA_OK:
+        #     print(f"Set exposure failed, error code: {libcamera.POAGetErrorString(error)}")
+        # else:
+        #     print("Set exposure successfully.")
+
+        # auto_max_gain = ctypes.c_int(780)  # 100ms
+        # error = libcamera.POASetConfig(i, POA_AUTOEXPO_MAX_GAIN, auto_max_gain, POA_FALSE)
+
+        # if error != POA_OK:
+        #     print(f"Set exposure failed, error code: {libcamera.POAGetErrorString(error)}")
+        # else:
+        #     print("Set exposure successfully.")
 
         # Set gain
         gain = ctypes.c_int(gainSetting)  # 100
@@ -283,10 +327,11 @@ def setPlayerOneCameraSettings(gainIn, exposureTimeIn):
         else:
             print("start exposure successfully.")
 
+
 def getPlayerOneFrame(): 
     global exposureSetting, gainSetting, widthSetting, heightSetting
     # start exposure
-    buffer_size = widthSetting * heightSetting * 2  # raw16
+    buffer_size = widthSetting * heightSetting * 2 # raw16
     data_buffer = (ctypes.c_uint8 * buffer_size)()
 
     pIsReady = ctypes.c_int(POA_FALSE)
@@ -299,10 +344,17 @@ def getPlayerOneFrame():
         print(f"Get image data failed, error code: {error}")
 
     # Convert binary image to jpg using OpenCV with only the first half of the buffer
-    data_buffer_half = bytes(data_buffer[:buffer_size // 2])
-    img = np.frombuffer(data_buffer_half, dtype=np.uint8).reshape((heightSetting, widthSetting))
+    # data_buffer_half = bytes(data_buffer[:buffer_size // 2])
+    # img = np.frombuffer(data_buffer, dtype=np.uint16).reshape((heightSetting, widthSetting))
+    # img = cv2.normalize(img, None, 0, 255, cv2.NORM_MINMAX)
+    # img = img.astype(np.uint8)
+
+    # Convert RAW16 image contained in the buffer into a frame that openCv can use
+    img = np.frombuffer(data_buffer, dtype=np.uint16).reshape((heightSetting, widthSetting))
     img = cv2.normalize(img, None, 0, 255, cv2.NORM_MINMAX)
     img = img.astype(np.uint8)
+    img = cv2.cvtColor(img, cv2.COLOR_BayerBG2BGR)
+
     return img
 
 if __name__ == "__main__":
