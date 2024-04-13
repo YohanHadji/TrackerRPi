@@ -256,6 +256,8 @@ def tracking_loop():
             # oldX = pointToSend.x
             # pointToSend.x = pointToSend.x+15
             # pointToSend.y = pointToSend.y-13
+            pointToSend.x = pointToSend.x*0.71
+            pointToSend.y = pointToSend.y*0.71
 
             # print(pointToSend.name, pointToSend.x, pointToSend.y, pointToSend.age, pointToSend.isVisible)
 
