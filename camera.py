@@ -103,10 +103,10 @@ fpsAverage = 0
 fpsDeviation = 0
 prev_time_sec = 0
 
-def camInit(framerate):
+def camInit(framerate, vFlipSet, hFlipSet):
     global picam2
     # Camera Init
-    camera_config = picam2.create_video_configuration(main={"format": "BGR888", "size": (800, 606)}, raw={"format": "SRGGB10", "size": (800, 606)}, transform=Transform(hflip=False, vflip=False))
+    camera_config = picam2.create_video_configuration(main={"format": "BGR888", "size": (800, 606)}, raw={"format": "SRGGB10", "size": (800, 606)}, transform=Transform(hflip=hFlipSet, vflip=vFlipSet))
     picam2.configure(camera_config)
     picam2.set_controls({"FrameRate": framerate})
     picam2.set_controls({"AwbEnable": True})
