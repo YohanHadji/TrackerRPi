@@ -259,7 +259,7 @@ def tracking_loop():
             pointToSend.x = pointToSend.x*0.71
             pointToSend.y = pointToSend.y*0.71
 
-            # print(pointToSend.name, pointToSend.x, pointToSend.y, pointToSend.age, pointToSend.isVisible)
+            print(pointToSend.name, pointToSend.x, pointToSend.y, pointToSend.age, pointToSend.isVisible)
 
             sendTargetToTeensy(pointToSend, 99)
 
@@ -283,10 +283,10 @@ def tracking_loop():
                         trackingEnabled = False
                     else:
                         trackingEnabled = True
-                elif (packetType == "dataFromTracker"):
-                    # Print the position of tracker and pointToSendX, pointToSendY
-                    trackerAzm, trackerElv = returnLastPacketData(packetType)
-                    print(trackerAzm, trackerElv, pointToSend.x, pointToSend.y)
+                # elif (packetType == "dataFromTracker"):
+                #     # Print the position of tracker and pointToSendX, pointToSendY
+                #     trackerAzm, trackerElv = returnLastPacketData(packetType)
+                #     # print(trackerAzm, trackerElv, pointToSend.x, pointToSend.y)
 
 
 @app.route('/video_feed')
