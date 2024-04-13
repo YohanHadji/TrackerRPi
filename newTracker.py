@@ -259,6 +259,29 @@ def tracking_loop():
 
             # parseIncomingDataFromUDP()
 
+            pointToSend = getLockedPoint(all_light_points, joystickBtn, swUp, swDown, swLeft, swRight)
+            # print(pointToSend.name, pointToSend.x, pointToSend.y)
+
+            if (not trackingEnabled):
+                # print("Tracking disabled")
+                pointToSend.isVisible = False
+            #else:
+                # print("Tracking enabled")
+            
+            # pointToSend.age = np.int32((np.int64((time.time()-startTime)*1e9)-timeOffsetAverage)-sensorTimeStamp)
+            # print(sensorTimeStamp, timeOffsetAverage)
+            pointToSend.age = np.int32((((time.time()-startTime)*1e9)-(sensorTimeStamp+timeOffsetAverage))/1e6)
+            # print(pointToSend.age)
+            # oldX = pointToSend.x
+            # pointToSend.x = pointToSend.x+15
+            # pointToSend.y = pointToSend.y-13
+
+            # print(pointToSend.name, pointToSend.x, pointToSend.y, pointToSend.age, pointToSend.isVisible)
+
+            sendTargetToTeensy(pointToSend, 33)
+
+            # printFps()
+
             if (newPacketReceived()):
                 packetType = newPacketReceivedType()
                 if (packetType == "controller"):
@@ -277,29 +300,10 @@ def tracking_loop():
                         trackingEnabled = False
                     else:
                         trackingEnabled = True
-
-            pointToSend = getLockedPoint(all_light_points, joystickBtn, swUp, swDown, swLeft, swRight)
-            # print(pointToSend.name, pointToSend.x, pointToSend.y)
-
-            if (not trackingEnabled):
-                # print("Tracking disabled")
-                pointToSend.isVisible = False
-            #else:
-                # print("Tracking enabled")
-            
-            # pointToSend.age = np.int32((np.int64((time.time()-startTime)*1e9)-timeOffsetAverage)-sensorTimeStamp)
-            # print(sensorTimeStamp, timeOffsetAverage)
-            pointToSend.age = np.int32((((time.time()-startTime)*1e9)-(sensorTimeStamp+timeOffsetAverage))/1e6)
-            # print(pointToSend.age)
-            # oldX = pointToSend.x
-            # pointToSend.x = pointToSend.x+15
-            # pointToSend.y = pointToSend.y-13
-
-            print(pointToSend.name, pointToSend.x, pointToSend.y, pointToSend.age, pointToSend.isVisible)
-
-            sendTargetToTeensy(pointToSend)
-
-            printFps()
+                elif (packetType == "dataFromTracker"):
+                    # Print the position of tracker and pointToSendX, pointToSendY
+                    trackerAzm, trackerElv = returnLastPacketData(packetType)
+                    print(trackerAzm, trackerElv, pointToSend.x, pointToSend.y)
 
 
 @app.route('/video_feed')

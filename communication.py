@@ -164,7 +164,7 @@ def sendFrameToSelf(frame):
     print("Sent frame to self")
     sockImage.sendall(frame.tobytes())
 
-def sendTargetToTeensy(pointToSendIn):
+def sendTargetToTeensy(pointToSendIn, cameraID):
     global sock
     # Send the target point to the teensy, the structure should be copied in a byte array then encoded then sent
     packet_id = 0x01
@@ -173,7 +173,7 @@ def sendTargetToTeensy(pointToSendIn):
     pointToSend = LightPoint(pointToSendIn.name, pointToSendIn.isVisible, pointToSendIn.x, pointToSendIn.y, pointToSendIn.age)
 
     pointToSendName = str(pointToSend.name)
-    payload_data = struct.pack('4siiii', pointToSendName.encode('utf-8'), pointToSend.isVisible, pointToSend.x, pointToSend.y, pointToSend.age)
+    payload_data = struct.pack('4siiiii', pointToSendName.encode('utf-8'), pointToSend.isVisible, pointToSend.x, pointToSend.y, pointToSend.age, cameraID)
     packet_length = len(payload_data)
     encoded_packet = capsule_instance.encode(packet_id, payload_data, packet_length)
     # Print the encoded packet

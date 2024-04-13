@@ -239,44 +239,6 @@ def tracking_loop():
             # Rotate frame by 90° to the left
 
             all_light_points = detect(frame, sensorTimeStamp)
-            
-            
-            # Print in line the first 3 points in all light points
-            # for i, (existing_name, existing_firstSeen, existing_x, existing_y, age, existing_timestamp, existing_speed_x, existing_speed_y, existing_acceleration_x, existing_acceleration_Y)in enumerate(all_light_points):
-            #     print(existing_name, existing_x, existing_y)
-            
-            # print(" --- ")
-
-            # if (newPacketReceived()):
-            #     packetType = newPacketReceivedType()
-            #     if (packetType == "pointList"):
-            #         LightPointArray = returnLastPacketData(packetType)
-            #     if (packetType == "dataFromTracker"):
-            #         trackerAzm, trackerElv = returnLastPacketData(packetType)
-            #         # print(trackerAzm)
-            #         # print(trackerElv)
-            #         # Draw a white point on the frame at coordinate x and y (in pixels)
-
-            # parseIncomingDataFromUDP()
-
-            if (newPacketReceived()):
-                packetType = newPacketReceivedType()
-                if (packetType == "controller"):
-                    joystickX, joystickY, joystickBtn, swUp, swDown, swLeft, swRight = returnLastPacketData(packetType)
-                    # print(joystickX, joystickY, joystickBtn, swUp, swDown, swLeft, swRight)
-                    getLockedPoint(all_light_points, joystickBtn, swUp, swDown, swLeft, swRight)
-                elif (packetType == "pointList"):
-                    LightPointArray = returnLastPacketData(packetType)
-                elif (packetType == "cameraSettings"):
-                    cameraSetting = returnLastPacketData(packetType)
-                    setCameraSettings(cameraSetting["gain"], cameraSetting["exposureTime"])
-                    print("Applied camera settings")
-                    setDetectionSettings(cameraSetting["idRadius"], cameraSetting["lockRadius"], cameraSetting["lightLifetime"], cameraSetting["lightThreshold"])
-                    print(cameraSetting["trackingEnabled"])
-                    if (not cameraSetting["trackingEnabled"]):
-                        trackingEnabled = False
-                    else:
-                        trackingEnabled = True
 
             pointToSend = getLockedPoint(all_light_points, joystickBtn, swUp, swDown, swLeft, swRight)
             # print(pointToSend.name, pointToSend.x, pointToSend.y)
@@ -297,9 +259,32 @@ def tracking_loop():
 
             print(pointToSend.name, pointToSend.x, pointToSend.y, pointToSend.age, pointToSend.isVisible)
 
-            sendTargetToTeensy(pointToSend)
+            sendTargetToTeensy(pointToSend, 99)
 
-            printFps()
+            # printFps()
+
+            if (newPacketReceived()):
+                packetType = newPacketReceivedType()
+                if (packetType == "controller"):
+                    joystickX, joystickY, joystickBtn, swUp, swDown, swLeft, swRight = returnLastPacketData(packetType)
+                    # print(joystickX, joystickY, joystickBtn, swUp, swDown, swLeft, swRight)
+                    getLockedPoint(all_light_points, joystickBtn, swUp, swDown, swLeft, swRight)
+                elif (packetType == "pointList"):
+                    LightPointArray = returnLastPacketData(packetType)
+                elif (packetType == "cameraSettings"):
+                    cameraSetting = returnLastPacketData(packetType)
+                    setCameraSettings(cameraSetting["gain"], cameraSetting["exposureTime"])
+                    print("Applied camera settings")
+                    setDetectionSettings(cameraSetting["idRadius"], cameraSetting["lockRadius"], cameraSetting["lightLifetime"], cameraSetting["lightThreshold"])
+                    print(cameraSetting["trackingEnabled"])
+                    if (not cameraSetting["trackingEnabled"]):
+                        trackingEnabled = False
+                    else:
+                        trackingEnabled = True
+                elif (packetType == "dataFromTracker"):
+                    # Print the position of tracker and pointToSendX, pointToSendY
+                    trackerAzm, trackerElv = returnLastPacketData(packetType)
+                    print(trackerAzm, trackerElv, pointToSend.x, pointToSend.y)
 
 
 @app.route('/video_feed')
