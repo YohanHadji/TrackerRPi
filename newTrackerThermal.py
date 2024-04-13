@@ -262,6 +262,7 @@ def tracking_loop():
             print(pointToSend.name, pointToSend.x, pointToSend.y, pointToSend.age, pointToSend.isVisible)
 
             sendTargetToTeensy(pointToSend, 99)
+            
 
             # printFps()
 
