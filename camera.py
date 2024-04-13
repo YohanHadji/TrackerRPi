@@ -109,7 +109,7 @@ def camInit(framerate):
     camera_config = picam2.create_video_configuration(main={"format": "BGR888", "size": (800, 606)}, raw={"format": "SRGGB10", "size": (800, 606)}, transform=Transform(hflip=False, vflip=False))
     picam2.configure(camera_config)
     picam2.set_controls({"FrameRate": framerate})
-    picam2.set_controls({"AwbEnable": False})
+    picam2.set_controls({"AwbEnable": True})
     picam2.start()
 
 def camInit180(framerate):
@@ -159,7 +159,7 @@ def printFps():
 
 def setCameraSettings(gain, exposureTime):
     global picam2
-    awbAuto = False
+    awbAuto = True
     # print("Setting camera settings")
     # print(gain, exposureTime)
     picam2.set_controls({"AnalogueGain": gain, "ExposureTime": exposureTime, "AwbEnable": awbAuto})
