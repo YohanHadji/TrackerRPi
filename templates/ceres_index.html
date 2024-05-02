@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Control Panel</title>
+    <title>Control Camera Ceres </title>
     <style>
         body {
             display: flex;
@@ -48,7 +48,38 @@
     </style>
 </head>
 <body>
-    <h1>Control Panel</h1>
+    <h1>Control Panel Ceres</h1>
+    <!-- Botones para control de Arduino -->
+    <div>
+        <button onclick="sendCommand('HOME')">Homing</button>
+        <button onclick="sendCommand('GOTO 0')">Ir a 0</button>
+        <button onclick="sendCommand('MOVE +')">Mover +</button>
+        <button onclick="sendCommand('MOVE -')">Mover -</button>
+        <button onclick="sendCommand('GOTO 1000')">Ir a 1000</button>
+        <!-- Campo para ingresar valor manualmente -->
+        <input type="number" id="manualPosition" placeholder="Ingrese posición">
+        <button onclick="sendManualCommand()">Ir a posición</button>
+    </div>
+
+    <script>
+    function sendCommand(command) {
+        fetch("/send_command", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ command: command }),
+        }).then(response => response.json())
+          .then(data => console.log(data))
+          .catch(error => console.error('Error:', error));
+    }
+
+    function sendManualCommand() {
+        var position = document.getElementById('manualPosition').value;
+        sendCommand('GOTO ' + position);
+    }
+    </script>
+
 
     <!-- Video Feed and Sliders Container -->
     <div class="container">
