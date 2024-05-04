@@ -11,8 +11,8 @@ import math
 
 app = Flask(__name__)
 
-#camInit(30)
-camInit(120, False, False)
+#camInit(30) False O True para invertir la imagen 
+camInit(120, True, True)
 
 img_width = 800
 img_height = 606
@@ -231,10 +231,10 @@ def tracking_loop():
             frame,sensorTimeStamp = server.wait_for_frame(frame)
             # frame = cv2.rotate(frame, cv2.ROTATE_90_COUNTERCLOCKWISE)
             # frame = cv2.rotate(frame, cv2.ROTATE_90_COUNTERCLOCKWISE)
-            # Vertical flip 
-            # frame = cv2.flip(frame, 0)
-            # Horizontal flip
-            # frame = cv2.flip(frame, 1)
+            #Vertical flip 
+            #frame = cv2.flip(frame, -1)
+            #Horizontal flip
+            #frame = cv2.flip(frame, -1)
 
             # Rotate frame by 90° to the left
 
