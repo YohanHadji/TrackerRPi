@@ -3,6 +3,7 @@ import serial
 import struct
 import socket
 import time
+import glob
 
 # Constants for the packet header
 PRA = 0xFF
@@ -19,7 +20,7 @@ def open_serial_connection():
     # serial_port = '/dev/tty.usbmodem14201'
     print(f"Trying to connect to USB...")
     # try:
-    ser = serial.Serial('/dev/tty.usbmodem14201', 9600)
+    ser = serial.Serial('/dev/tty.usbmodem14101', 9600)
     print(f"Connected to USB")
     return ser
     # except:
@@ -34,23 +35,24 @@ def send_udp_packet(packet):
     while True:
         try:
             udp_socket.sendto(packet, (udp_target_ip, udp_target_port))
-            udp_socket.sendto(packet, (udp_target_ip_2,udp_target_port))
+            # udp_socket.sendto(packet, (udp_target_ip_2,udp_target_port))
             print("Packet sent successfully")
             break
-        except OSError as e:
-            if e.errno == 101:  # Network is unreachable
-                print("Network is unreachable. Retrying in 5 seconds...")
-                time.sleep(5)
-            else:
-                raise
+        except:
+            print("Network is unreachable. Retrying in 5 seconds...")
+            time.sleep(5)
 # Set the baud rate based on your Arduino configuration
     
 # Try to open a serial connection
 # ser = open_serial_connection()
             
 print(f"Trying to connect to USB...")
-ser = serial.Serial('/dev/tty.usbmodem14201', 9600)
-print(f"Connected to USB")
+usb_ports = glob.glob('/dev/tty.usbmodem*')
+if len(usb_ports) > 0:
+    ser = serial.Serial(usb_ports[0], 9600)
+    print(f"Connected to USB: {usb_ports[0]}")
+else:
+    print("No USB port found")
 
 # Create a UDP socket
 udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -71,8 +73,8 @@ try:
         # Check if there are two values
         if len(values) == 7:
             # Parse the values as floats
-            joystickX = float(values[0])
-            joystickY = float(values[1])
+            joystickX = float(values[0])/10.0
+            joystickY = float(values[1])/10.0
             joystickBtn = int(values[2])
             swUp = int(values[3])
             swDown = int(values[4])
