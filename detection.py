@@ -4,7 +4,7 @@ import random
 import string
 
 all_light_points = []
-resolution = (800, 606)
+resolution = (1304, 976)
 #resolution = (1332, 990)
 #resolution = (1304, 976)
 currentlyLocked = False
@@ -47,7 +47,7 @@ def obtain_top_contours(b_frame, n=10):
         if M['m00'] != 0:
             cx, cy = int(M['m10'] / M['m00']), int(M['m01'] / M['m00'])
             contour_radius = cv2.minEnclosingCircle(blob)[1]
-            if contour_radius > 1:
+            if contour_radius > 5:
                 contour_brightness.append(((cx, cy), cv2.contourArea(blob)))
 
     # Sort contours based on brightness
