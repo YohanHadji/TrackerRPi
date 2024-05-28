@@ -11,6 +11,7 @@ from detection import *
 import serial.tools.list_ports
 import logging
 
+camRes = (1304, 976)
 
 joystickX   = 0
 joystickY   = 0
@@ -227,7 +228,7 @@ def tracking_loop():
         else:
             frame,sensorTimeStamp = serverPlayerOne.wait_for_frame(frame)
             all_light_points = detect(frame, sensorTimeStamp)
-            pointToSend = getLockedPoint(all_light_points, joystickBtn, swUp, swDown, swLeft, swRight)
+            pointToSend = getLockedPoint(all_light_points, camRes, joystickBtn, swUp, swDown, swLeft, swRight)
             print(pointToSend.name, pointToSend.x, pointToSend.y)
 
             if (not trackingEnabled):
@@ -235,12 +236,14 @@ def tracking_loop():
                 pointToSend.isVisible = False
             #else:
                 # print("Tracking enabled")
+                
+            pointToSend.x = -pointToSend.x
 
             pointToSend.age = np.int32((((time.time()-startTime)*1e9)-(sensorTimeStamp+timeOffsetAverage))/1e6)
 
             # print(pointToSend.name, pointToSend.x, pointToSend.y, pointToSend.age, pointToSend.isVisible)
 
-            sendTargetToTeensy(pointToSend, 33)
+            sendTargetToTeensy(pointToSend, 44)
 
             # printFps()
 
@@ -249,7 +252,7 @@ def tracking_loop():
                 if (packetType == "controller"):
                     joystickX, joystickY, joystickBtn, swUp, swDown, swLeft, swRight = returnLastPacketData(packetType)
                     # print(joystickX, joystickY, joystickBtn, swUp, swDown, swLeft, swRight)
-                    getLockedPoint(all_light_points, joystickBtn, swUp, swDown, swLeft, swRight)
+                    getLockedPoint(all_light_points, camRes, joystickBtn, swUp, swDown, swLeft, swRight)
                 elif (packetType == "pointList"):
                     LightPointArray = returnLastPacketData(packetType)
                 elif (packetType == "cameraSettings"):
@@ -267,6 +270,12 @@ def tracking_loop():
                 #     trackerAzm, trackerElv = returnLastPacketData(packetType)
                 #     print(trackerAzm, trackerElv, pointToSend.x, pointToSend.y)
 
+@app.route('/send_udp', methods=['POST'])
+def send_udp():
+    data = request.get_json()
+    azm = data.get('azm')
+    elv = data.get('elv')
+    sendAbsPosToTeensy(azm, elv)
 
 @app.route('/video_feed')
 def video_feed():
@@ -275,7 +284,7 @@ def video_feed():
 
 @app.route('/')
 def index():
-    return render_template('ceres_index.html')
+    return render_template('ceres_index_control.html')
 
 @app.route('/update_variable', methods=['POST'])
 def update_variable():

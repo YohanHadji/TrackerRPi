@@ -17,6 +17,8 @@ camInit(120, True, True)
 img_width = 800
 img_height = 606
 
+camRes = (img_width, img_height)
+
 # azimuth = 270
 # elevation = 90
 
@@ -238,7 +240,7 @@ def tracking_loop():
 
             # Rotate frame by 90° to the left
 
-            all_light_points = detect(frame, sensorTimeStamp)
+            all_light_points = detect(frame, sensorTimeStamp, camRes)
             
             
             # Print in line the first 3 points in all light points
@@ -259,7 +261,7 @@ def tracking_loop():
 
             # parseIncomingDataFromUDP()
 
-            pointToSend = getLockedPoint(all_light_points, joystickBtn, swUp, swDown, swLeft, swRight)
+            pointToSend = getLockedPoint(all_light_points, camRes, joystickBtn, swUp, swDown, swLeft, swRight)
             # print(pointToSend.name, pointToSend.x, pointToSend.y)
 
             if (not trackingEnabled):
@@ -278,16 +280,16 @@ def tracking_loop():
 
             print(pointToSend.name, pointToSend.x, pointToSend.y, pointToSend.age, pointToSend.isVisible)
 
-            sendTargetToTeensy(pointToSend, 33)
+            sendTargetToTeensy(pointToSend, 33, 7, 100)
 
-            # printFps()
+            printFps()
 
             if (newPacketReceived()):
                 packetType = newPacketReceivedType()
                 if (packetType == "controller"):
                     joystickX, joystickY, joystickBtn, swUp, swDown, swLeft, swRight = returnLastPacketData(packetType)
                     # print(joystickX, joystickY, joystickBtn, swUp, swDown, swLeft, swRight)
-                    getLockedPoint(all_light_points, joystickBtn, swUp, swDown, swLeft, swRight)
+                    getLockedPoint(all_light_points, camRes, joystickBtn, swUp, swDown, swLeft, swRight)
                 elif (packetType == "pointList"):
                     LightPointArray = returnLastPacketData(packetType)
                 elif (packetType == "cameraSettings"):
@@ -336,7 +338,7 @@ def update_variable():
     else:
         print(f"Unknown control ID: {control_id}")
     
-    # picam2.set_controls({"AnalogueGain": np.int32(input_values["gain"]), "ExposureTime": np.int32(input_values["exposureTime"])})
+    picam2.set_controls({"AnalogueGain": np.int32(input_values["gain"]), "ExposureTime": np.int32(input_values["exposureTime"])})
 
     return "Variable updated successfully!"
 

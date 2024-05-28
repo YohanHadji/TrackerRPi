@@ -164,7 +164,24 @@ def sendFrameToSelf(frame):
     print("Sent frame to self")
     sockImage.sendall(frame.tobytes())
 
-def sendTargetToTeensy(pointToSendIn, cameraID):
+def sendAbsPosToTeensy(azm, elv):
+    global sock
+    # Send the target point to the teensy, the structure should be copied in a byte array then encoded then sent
+    packet_id = 0x03
+    # Pack the struct in a byte array
+    print(f"Sending azm: {azm}, elv: {elv}")
+
+    payload_data = struct.pack('ff', float(azm), float(elv))
+    packet_length = len(payload_data)
+    encoded_packet = capsule_instance.encode(packet_id, payload_data, packet_length)
+    # Print the encoded packet
+    #print(f"Encoded Packet: {encoded_packet}")
+    # Convert encoded_packet to a bytearray
+    encoded_packet = bytearray(encoded_packet)
+    # Send the encoded packet
+    sock.sendto(encoded_packet, (TEENSY_IP, TEENSY_PORT))
+    
+def sendTargetToTeensy(pointToSendIn, cameraID, Kp, maxSpeed):
     global sock
     # Send the target point to the teensy, the structure should be copied in a byte array then encoded then sent
     packet_id = 0x01
@@ -173,7 +190,7 @@ def sendTargetToTeensy(pointToSendIn, cameraID):
     pointToSend = LightPoint(pointToSendIn.name, pointToSendIn.isVisible, pointToSendIn.x, pointToSendIn.y, pointToSendIn.age)
 
     pointToSendName = str(pointToSend.name)
-    payload_data = struct.pack('4siiiii', pointToSendName.encode('utf-8'), pointToSend.isVisible, pointToSend.x, pointToSend.y, pointToSend.age, cameraID)
+    payload_data = struct.pack('4siiiiiff', pointToSendName.encode('utf-8'), pointToSend.isVisible, pointToSend.x, pointToSend.y, pointToSend.age, cameraID, Kp, maxSpeed)
     packet_length = len(payload_data)
     encoded_packet = capsule_instance.encode(packet_id, payload_data, packet_length)
     # Print the encoded packet

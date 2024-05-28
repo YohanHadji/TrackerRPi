@@ -4,8 +4,8 @@ import random
 import string
 
 all_light_points = []
-resolution = (1304, 976)
-#resolution = (1332, 990)
+# resolution = (1304, 976)
+# resolution = (800, 606)
 #resolution = (1304, 976)
 currentlyLocked = False
 lockedName = "ABCD"
@@ -186,8 +186,8 @@ def detect(frame, sensorTimeStamp):
     all_light_points = process_and_store_light_points(result, sensorTimeStamp)
     return all_light_points
 
-def getLockedPoint(all_light_points, isButtonPressed=False,swLeft=False,swRight=False,swUp=False,swDown=False):
-    global resolution, currentlyLocked, lockedName, lockRadius
+def getLockedPoint(all_light_points, resolution, isButtonPressed=False,swLeft=False,swRight=False,swUp=False,swDown=False):
+    global currentlyLocked, lockedName, lockRadius
 
     if (not currentlyLocked):
         for i, (name, firstSeen, x, y, _, _, _, _, _, _) in enumerate(all_light_points):
