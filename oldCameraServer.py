@@ -11,7 +11,7 @@ def function2():
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('oldIndex.html')
 
 @app.route('/button1', methods=['POST'])
 def button1():
