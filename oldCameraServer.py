@@ -1,4 +1,4 @@
-from flask import Flask, render_template, Response, request, redirect, url_for
+from flask import Flask, render_template, Response, request
 from picamera import PiCamera
 from picamera.array import PiRGBArray
 import cv2
@@ -14,11 +14,8 @@ camera.resolution = (640, 480)
 camera.framerate = 24
 rawCapture = PiRGBArray(camera, size=(640, 480))
 
-
 # Allow the camera to warm up
 time.sleep(0.1)
-
-# Fake comment
 
 # Initialize serial communication with Arduino
 ser = serial.Serial('/dev/ttyACM0', 115200, timeout=1)
@@ -44,25 +41,18 @@ def video_feed():
 def index():
     return render_template('oldIndex.html')
 
-@app.route('/zoom_in')
-def zoom_in():
-    ser.write(b'zoom_in\n')
-    return redirect(url_for('oldIndex'))
-
-@app.route('/zoom_out')
-def zoom_out():
-    ser.write(b'zoom_out\n')
-    return redirect(url_for('oldIndex'))
-
-@app.route('/record_on')
-def record_on():
-    ser.write(b'record_on\n')
-    return redirect(url_for('oldIndex'))
-
-@app.route('/record_off')
-def record_off():
-    ser.write(b'record_off\n')
-    return redirect(url_for('oldIndex'))
+@app.route('/control', methods=['POST'])
+def control():
+    action = request.form.get('action')
+    if action == 'zoom_in':
+        ser.write(b'zoom_in\n')
+    elif action == 'zoom_out':
+        ser.write(b'zoom_out\n')
+    elif action == 'record_on':
+        ser.write(b'record_on\n')
+    elif action == 'record_off':
+        ser.write(b'record_off\n')
+    return '', 204
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
