@@ -56,6 +56,7 @@ def control():
     elif action == 'record_off':
         print('record_off')
         # ser.write(b'record_off\n')
+    return "Variable updated successfully!"
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
