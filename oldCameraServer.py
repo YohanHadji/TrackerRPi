@@ -5,7 +5,14 @@ import cv2
 import io
 import time
 import serial
+from capsule import *
+import struct
 
+capsule_instance = Capsule(lambda packetId, dataIn, len: handle_packet(packetId, dataIn[:len], len))
+
+def handle_packet(packetId, dataIn, lenIn):
+    print("Packet ID: " + str(packetId))
+    
 app = Flask(__name__)
 
 # Initialize the camera
@@ -37,11 +44,18 @@ def gen_frames():
 def video_feed():
     return Response(gen_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
-def zoom_in():
-    print("Zoom + called")
+def sendZoom(zoomDir):
+    packet_id = 0x03
+    # Pack the struct in a byte array
 
-def zoom_out():
-    print("Zoom - called")
+    payload_data = struct.pack('i', zoomDir)
+    packet_length = len(payload_data)
+    encoded_packet = capsule_instance.encode(packet_id, payload_data, packet_length)
+    # Print the encoded packet
+    #print(f"Encoded Packet: {encoded_packet}")
+    # Convert encoded_packet to a bytearray
+    encoded_packet = bytearray(encoded_packet)
+    ser.write(encoded_packet)
 
 def record_on():
     print("Record On called")
@@ -57,12 +71,12 @@ def index():
 
 @app.route('/zoom_in', methods=['POST'])
 def button1():
-    zoom_in()
+    sendZoom(1)
     return '', 204
 
 @app.route('/zoom_out', methods=['POST'])
 def button2():
-    zoom_out()
+    sendZoom(-1)
     return '', 204
 
 @app.route('/record_on', methods=['POST'])
