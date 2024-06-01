@@ -1,14 +1,41 @@
-from flask import Flask, render_template, request, Response
+from flask import Flask, render_template, Response, request
 from picamera import PiCamera
 from picamera.array import PiRGBArray
-import time
+import cv2
 import io
-from PIL import Image
+import time
+import serial
 
 app = Flask(__name__)
 
+# Initialize the camera
 camera = PiCamera()
 camera.resolution = (640, 480)
+camera.framerate = 24
+rawCapture = PiRGBArray(camera, size=(640, 480))
+
+# Allow the camera to warm up
+time.sleep(0.1)
+
+# Initialize serial communication with Arduino
+ser = serial.Serial('/dev/ttyACM0', 115200, timeout=1)
+
+def gen_frames():
+    for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
+        image = frame.array
+        ret, buffer = cv2.imencode('.jpg', image)
+        frame = buffer.tobytes()
+        
+        # Clear the stream for the next frame
+        rawCapture.truncate(0)
+
+        # Yield frame to Flask response
+        yield (b'--frame\r\n'
+               b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
+
+@app.route('/video_feed')
+def video_feed():
+    return Response(gen_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 def zoom_in():
     print("Zoom + called")
@@ -18,11 +45,11 @@ def zoom_out():
 
 def record_on():
     print("Record On called")
-    camera.start_recording('video.h264')
+    # camera.start_recording('video.h264')
 
 def record_off():
     print("Record Off called")
-    camera.stop_recording()
+    # camera.stop_recording()
 
 @app.route('/')
 def index():
@@ -48,23 +75,5 @@ def button4():
     record_off()
     return '', 204
 
-@app.route('/video_feed')
-def video_feed():
-    return Response(gen(camera), mimetype='multipart/x-mixed-replace; boundary=frame')
-
-def gen(camera):
-    while True:
-        frame = capture_frame(camera)
-        yield (b'--frame\r\n'
-               b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
-
-def capture_frame(camera):
-    raw_capture = PiRGBArray(camera)
-    camera.capture(raw_capture, format='rgb', use_video_port=True)
-    frame = raw_capture.array
-    with io.BytesIO() as output:
-        Image.fromarray(frame).save(output, format="JPEG")
-        return output.getvalue()
-
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8080, debug=True)
+    app.run(host='0.0.0.0', port=5000)
