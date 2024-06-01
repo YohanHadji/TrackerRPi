@@ -8,11 +8,20 @@
 <body>
     <h1>Welcome to Simple Web Server</h1>
     <p>Click the buttons to trigger functions:</p>
-    <form action="/button1" method="post">
-        <button type="submit">Function 1</button>
+    <form action="/zoom_in" method="post">
+        <button type="submit">Zoom +</button>
     </form>
-    <form action="/button2" method="post">
-        <button type="submit">Function 2</button>
+    <form action="/zoom_out" method="post">
+        <button type="submit">Zoom -</button>
     </form>
+    <form action="/record_on" method="post">
+        <button type="submit">Record On</button>
+    </form>
+    <form action="/record_off" method="post">
+        <button type="submit">Record Off</button>
+    </form>
+
+    <h2>Camera Live Feed</h2>
+    <img id="live-feed" src="/video_feed" width="640" height="480">
 </body>
 </html>
