@@ -25,7 +25,11 @@ rawCapture = PiRGBArray(camera, size=(640, 480))
 time.sleep(0.1)
 
 # Initialize serial communication with Arduino
-ser = serial.Serial('/dev/ttyACM0', 115200, timeout=1)
+try: 
+    ser = serial.Serial('/dev/ttyACM0', 115200, timeout=1)
+except:
+    ser = serial.Serial('/dev/ttyACM1', 115200, timeout=1)
+    
 
 def gen_frames():
     for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
