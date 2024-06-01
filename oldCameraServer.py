@@ -1,4 +1,4 @@
-from flask import Flask, Response
+from flask import Flask, Response, render_template
 from picamera import PiCamera
 from picamera.array import PiRGBArray
 import cv2
@@ -13,7 +13,7 @@ camera.resolution = (640, 480)
 camera.framerate = 24
 rawCapture = PiRGBArray(camera, size=(640, 480))
 
-# Allow the camera to warmup
+# Allow the camera to warm up
 time.sleep(0.1)
 
 def gen_frames():
@@ -35,7 +35,7 @@ def video_feed():
 
 @app.route('/')
 def index():
-    return app.send_static_file('/templates/oldIndex.html')
+    return render_template('oldIndex.html')
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
