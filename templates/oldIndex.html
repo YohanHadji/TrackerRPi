@@ -7,10 +7,12 @@
     <h1>Raspberry Pi Camera Live Stream</h1>
     <img src="/video_feed">
     <div>
-        <a href="/zoom_in"><button>Zoom +</button></a>
-        <a href="/zoom_out"><button>Zoom -</button></a>
-        <a href="/record_on"><button>Record On</button></a>
-        <a href="/record_off"><button>Record Off</button></a>
+        <form action="/control" method="post">
+            <button type="submit" name="action" value="zoom_in">Zoom +</button>
+            <button type="submit" name="action" value="zoom_out">Zoom -</button>
+            <button type="submit" name="action" value="record_on">Record On</button>
+            <button type="submit" name="action" value="record_off">Record Off</button>
+        </form>
     </div>
 </body>
 </html>
