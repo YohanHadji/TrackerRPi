@@ -1,18 +1,18 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Live Video Feed</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Web Server</title>
 </head>
 <body>
-    <h1>Raspberry Pi Camera Live Stream</h1>
-    <img src="/video_feed">
-    <div>
-        <form action="/control" method="post">
-            <button type="submit" name="action" value="zoom_in">Zoom +</button>
-            <button type="submit" name="action" value="zoom_out">Zoom -</button>
-            <button type="submit" name="action" value="record_on">Record On</button>
-            <button type="submit" name="action" value="record_off">Record Off</button>
-        </form>
-    </div>
+    <h1>Welcome to Simple Web Server</h1>
+    <p>Click the buttons to trigger functions:</p>
+    <form action="/button1" method="post">
+        <button type="submit">Function 1</button>
+    </form>
+    <form action="/button2" method="post">
+        <button type="submit">Function 2</button>
+    </form>
 </body>
 </html>
