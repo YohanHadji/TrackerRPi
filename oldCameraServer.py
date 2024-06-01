@@ -17,9 +17,9 @@ app = Flask(__name__)
 
 # Initialize the camera
 camera = PiCamera()
-camera.resolution = (640, 480)
+camera.resolution = (1280, 720)
 camera.framerate = 24
-rawCapture = PiRGBArray(camera, size=(640, 480))
+rawCapture = PiRGBArray(camera, size=(1280, 720))
 
 # Allow the camera to warm up
 time.sleep(0.1)
