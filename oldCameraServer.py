@@ -35,7 +35,7 @@ def video_feed():
 
 @app.route('/')
 def index():
-    return app.send_static_file('oldIndex.html')
+    return app.send_static_file('/templates/oldIndex.html')
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
