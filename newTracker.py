@@ -240,7 +240,7 @@ def tracking_loop():
 
             # Rotate frame by 90° to the left
 
-            all_light_points = detect(frame, sensorTimeStamp, camRes)
+            all_light_points = detect(frame, sensorTimeStamp)
             
             
             # Print in line the first 3 points in all light points
@@ -277,6 +277,10 @@ def tracking_loop():
             # oldX = pointToSend.x
             # pointToSend.x = pointToSend.x+15
             # pointToSend.y = pointToSend.y-13
+            
+                        
+            pointToSend.x = pointToSend.x + 35
+            pointToSend.y = pointToSend.y + 33
 
             print(pointToSend.name, pointToSend.x, pointToSend.y, pointToSend.age, pointToSend.isVisible)
 

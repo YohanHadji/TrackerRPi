@@ -3,7 +3,7 @@ import serial
 import numpy as np
 from communication import *
 from playerOne import *
-from camera import *
+# from camera import *
 import threading 
 import cv2
 import time
@@ -118,7 +118,7 @@ input_values = {
     "trackingEnabled": 0
 }
 
-picam2.set_controls({"AnalogueGain": np.int32(input_values["gain"]), "ExposureTime": np.int32(input_values["exposureTime"])})
+# picam2.set_controls({"AnalogueGain": np.int32(input_values["gain"]), "ExposureTime": np.int32(input_values["exposureTime"])})
 
 # input_values = {}  # Assuming you have a global dictionary to store input values
 
@@ -162,7 +162,7 @@ def sendSettingToTracker():
     print("Sent settings to tracker")
 
 def generate_frames():
-    global LightPointArray, input_values, resolution, picam2
+    global LightPointArray, input_values
 
     while True:
         # Get a frame with metadata
@@ -201,7 +201,7 @@ def generate_frames():
 
 
 def tracking_loop():
-    global LightPointArray, all_light_points, input_values, resolution, picam2, xPos, yPos, img_width, img_height, startTime, firstTimeNoted, timeOffset, timeOffsetAverage, trackingEnabled, joystickX, joystickY, joystickBtn, swUp, swDown, swLeft, swRight
+    global LightPointArray, all_light_points, input_value, xPos, yPos, img_width, img_height, startTime, firstTimeNoted, timeOffset, timeOffsetAverage, trackingEnabled, joystickX, joystickY, joystickBtn, swUp, swDown, swLeft, swRight
 
     frame = None
     
@@ -243,9 +243,7 @@ def tracking_loop():
 
             # print(pointToSend.name, pointToSend.x, pointToSend.y, pointToSend.age, pointToSend.isVisible)
 
-            sendTargetToTeensy(pointToSend, 44)
-
-            # printFps()
+            sendTargetToTeensy(pointToSend, 44, 0.2, 5.0)
 
             if (newPacketReceived()):
                 packetType = newPacketReceivedType()
@@ -257,7 +255,7 @@ def tracking_loop():
                     LightPointArray = returnLastPacketData(packetType)
                 elif (packetType == "cameraSettings"):
                     cameraSetting = returnLastPacketData(packetType)
-                    setCameraSettings(cameraSetting["gain"], cameraSetting["exposureTime"])
+                    # setCameraSettings(cameraSetting["gain"], cameraSetting["exposureTime"])
                     print("Applied camera settings")
                     setDetectionSettings(cameraSetting["idRadius"], cameraSetting["lockRadius"], cameraSetting["lightLifetime"], cameraSetting["lightThreshold"])
                     print(cameraSetting["trackingEnabled"])
@@ -298,13 +296,11 @@ def update_variable():
         input_values[control_id] = int(value)
         print(f"Slider {control_id} updated to {value}")
         sendSettingToTracker()
-        setCameraSettings(input_values["gain"], input_values["exposureTime"])
+        # setCameraSettings(input_values["gain"], input_values["exposureTime"])
         setPlayerOneCameraSettings(input_values["gain"], input_values["exposureTime"])
     else:
         print(f"Unknown control ID: {control_id}")
     
-    #picam2.set_controls({"AnalogueGain": np.int32(input_values["gain"]), "ExposureTime": np.int32(input_values["exposureTime"])})
-
     return "Variable updated successfully!"
 
 if __name__ == '__main__':
@@ -322,6 +318,6 @@ if __name__ == '__main__':
         udp_thread = threading.Thread(target=udp_listener)
         udp_thread.start()
         
-        app.run(host='0.0.0.0', port=5000, threaded=True)
+        app.run(host='0.0.0.0', port=5001, threaded=True)
     finally:
         print("Closing the application")
