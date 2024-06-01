@@ -52,6 +52,7 @@ def control():
         ser.write(b'record_on\n')
     elif action == 'record_off':
         ser.write(b'record_off\n')
+    return render_template('oldIndex.html')
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
