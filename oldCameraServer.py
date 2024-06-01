@@ -45,7 +45,7 @@ def video_feed():
     return Response(gen_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 def sendZoom(zoomDir):
-    packet_id = 0x03
+    packet_id = 0x13
     # Pack the struct in a byte array
 
     payload_data = struct.pack('i', zoomDir)
