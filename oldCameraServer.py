@@ -45,14 +45,17 @@ def index():
 def control():
     action = request.form.get('action')
     if action == 'zoom_in':
-        ser.write(b'zoom_in\n')
+        print('zoom_in')
+        # ser.write(b'zoom_in\n')
     elif action == 'zoom_out':
-        ser.write(b'zoom_out\n')
+        print('zoom_out')
+        # ser.write(b'zoom_out\n')
     elif action == 'record_on':
-        ser.write(b'record_on\n')
+        print('record_on')
+        # ser.write(b'record_on\n')
     elif action == 'record_off':
-        ser.write(b'record_off\n')
-    return render_template('oldIndex.html')
+        print('record_off')
+        # ser.write(b'record_off\n')
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
