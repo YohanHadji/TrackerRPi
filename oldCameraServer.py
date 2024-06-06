@@ -75,12 +75,12 @@ def index():
 
 @app.route('/zoom_in', methods=['POST'])
 def button1():
-    sendZoom(25)
+    sendZoom(100)
     return '', 204
 
 @app.route('/zoom_out', methods=['POST'])
 def button2():
-    sendZoom(-25)
+    sendZoom(-100)
     return '', 204
 
 @app.route('/record_on', methods=['POST'])
