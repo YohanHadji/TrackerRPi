@@ -6,9 +6,13 @@ import io
 import time
 import serial
 from capsule import *
+from communication import *
 import struct
 
 capsule_instance = Capsule(lambda packetId, dataIn, len: handle_packet(packetId, dataIn[:len], len))
+
+azmFromSlider = 0
+elvFromSlider = 0
 
 def handle_packet(packetId, dataIn, lenIn):
     print("Packet ID: " + str(packetId))
@@ -48,6 +52,23 @@ def gen_frames():
 def video_feed():
     return Response(gen_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
+
+@app.route('/update_variable', methods=['POST'])
+def update_variable():
+    global azmFromSlider, elvFromSlider
+
+    data = request.get_json()
+    control_id = data.get("id")
+    value = data.get("value")
+    
+    if (control_id == "azmValue"):
+        azmFromSlider = value
+    elif (control_id == "elvValue"):
+        elvFromSlider = value
+        
+    sendAbsPosToTeensy(azmFromSlider, elvFromSlider)
+
+    
 def sendZoom(zoomDir):
     packet_id = 0x13
     # Pack the struct in a byte array
