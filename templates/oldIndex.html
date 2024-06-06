@@ -4,6 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Simple Web Server</title>
+    <style>
+        .sliders div {
+            margin-bottom: 20px;
+        }
+
+        .sliders label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .sliders input[type="range"] {
+            width: 100%;
+        }
+
+        .sliders p {
+            text-align: center;
+            margin-top: 5px;
+        }
+    </style>
 </head>
 <body>
     <h1>Welcome to Simple Web Server</h1>
@@ -21,7 +40,51 @@
         <button type="submit">Record Off</button>
     </form>
 
+     <!-- Sliders Container -->
+     <div class="sliders">
+        <!-- Radius Slider -->
+        <div>
+            <label for="Azimuth">Azimuth (°):</label>
+            <input type="range" id="azm" min="-360" max="360" value="0" step="0.01">
+            <p id="azmValue">0</p>
+        </div>
+
+        <!-- Lock Radius Slider -->
+        <div>
+            <label for="Elevation">Elevation (°):</label>
+            <input type="range" id="elv" min="-30" max="60" value="0" step="0.01">
+            <p id="elvValue">0</p>
+        </div>
+    </div>
+
     <h2>Camera Live Feed</h2>
     <img id="live-feed" src="/video_feed" width="640" height="480">
+
+    <script>
+        // Function to update the Python variable whenever a slider or dropdown value changes
+        function updateControlValue(controlId, displayId) {
+            var control = document.getElementById(controlId);
+            var controlValueDisplay = document.getElementById(displayId);
+
+            control.addEventListener("input", function() {
+                var controlValue = control.value || control.options[control.selectedIndex].value;
+                controlValueDisplay.textContent = controlValue;
+
+                // Use JavaScript to send the control value and control ID to the server
+                fetch("/update_variable", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ id: controlId, value: controlValue }),
+                });
+            });
+        }
+
+        // Update the radius sliders
+        updateControlValue("azm", "azmValue");
+        updateControlValue("elv", "elvValue");
+    </script>
+
 </body>
 </html>
