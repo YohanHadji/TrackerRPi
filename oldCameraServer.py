@@ -63,10 +63,10 @@ def update_variable():
     
     print("Control ID: " + control_id)
     
-    if (control_id == "azmValue"):
+    if (control_id == "azm"):
         azmFromSlider = value
         print("Azimuth: " + str(azmFromSlider))
-    elif (control_id == "elvValue"):
+    elif (control_id == "elv"):
         elvFromSlider = value
         print("Elevation: " + str(elvFromSlider))
         
