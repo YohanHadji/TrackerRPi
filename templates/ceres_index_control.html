@@ -143,6 +143,15 @@
         <button onclick="sendUDP()">Send</button>
     </div>
 
+    <!-- Azimuth and Elevation Controls -->
+    <div class="container">
+        <div>
+            <label for="focus">Focus:</label>
+            <input type="text" id="foc" placeholder="Enter Focus">
+        </div>
+        <button onclick="sendFocus()">Send</button>
+    </div>
+
     <script>
     function sendUDP() {
         var azm = document.getElementById('azm').value;
@@ -150,6 +159,21 @@
         var data = { azm: azm, elv: elv };
 
         fetch("/send_udp", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data),
+        }).then(response => response.json())
+          .then(data => console.log(data))
+          .catch(error => console.error('Error:', error));
+    }
+
+    function sendFocus() {
+        var foc = document.getElementById('foc').value;
+        var data = { foc: foc };
+
+        fetch("/send_focus", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",

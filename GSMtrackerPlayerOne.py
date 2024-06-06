@@ -30,6 +30,11 @@ class LightPoint:
         self.y = int(y)  # Ensure integer type
         self.age = int(age)
 
+def handle_packet_arduino(packetId, dataIn, lenIn):
+    print("Packet ID: " + str(packetId))
+
+capsule_instance_arduino = Capsule(lambda packetId, dataIn, len: handle_packet_arduino(packetId, dataIn[:len], len))
+
 # Create an array of structures without specifying values
 LightPointArray = [LightPoint(name="ABCD", isVisible=False, x=0, y=0, age = 0) for _ in range(10)]
 all_light_points = []
@@ -58,9 +63,9 @@ def create_serial_connection():
     arduino_port = find_arduino()
     if arduino_port:
         try:
-            return serial.Serial(arduino_port, 9600, timeout=1)
+            return serial.Serial(arduino_port, 115200, timeout=1)
         except serial.SerialException as e:
-            print(f"Error al abrir el puerto serial: {e}")
+            print(f"Error opening the port: {e}")
     else:
         print("Arduino no encontrado.")
     return None
@@ -71,38 +76,53 @@ arduino = create_serial_connection()
 @app.route('/send_command', methods=['POST'])
 def send_command():
     global arduino
-    if not arduino:
-        print("Reintentando conexión con Arduino...")
-        arduino = create_serial_connection()  # Reintentar establecer conexión si no existe.
-        if not arduino:
-            print("Fallo al reconectar con Arduino.")
-            return jsonify({"error": "Arduino no está conectado"}), 500
+    return "", 200
+    # if not arduino:
+    #     print("Reintentando conexión con Arduino...")
+    #     arduino = create_serial_connection()  # Reintentar establecer conexión si no existe.
+    #     if not arduino:
+    #         print("Fallo al reconectar con Arduino.")
+    #         return jsonify({"error": "Arduino no está conectado"}), 500
 
-    data = request.get_json()
-    command = data.get('command', '')
-    print(f"Datos recibidos: {data}")  # Imprimir los datos recibidos
-    print(f"Comando recibido: {command}")  # Imprimir el comando específico
+    # data = request.get_json()
+    # command = data.get('command', '')
+    # print(f"Datos recibidos: {data}")  # Imprimir los datos recibidos
+    # print(f"Comando recibido: {command}")  # Imprimir el comando específico
 
-    try:
-        response = send_command_to_arduino(command)
-        return jsonify({"message": "Comando enviado al Arduino", "response": response}), 200
-    except Exception as e:
-        print(f"Error al enviar comando: {e}")
-        return jsonify({"error": str(e)}), 500
+    # try:
+    #     response = send_command_to_arduino(command)
+    #     return jsonify({"message": "Comando enviado al Arduino", "response": response}), 200
+    # except Exception as e:
+    #     print(f"Error al enviar comando: {e}")
+    #     return jsonify({"error": str(e)}), 500
 
 def send_command_to_arduino(command):
-    """Envía un comando al Arduino y espera una respuesta."""
-    try:
-        arduino.write((command + '\n').encode())
-        response = arduino.readline().decode().strip()  # Espera una respuesta del Arduino
-        print("Respuesta de Arduino:", response)
-        return response
-    except serial.SerialException as e:
-        raise Exception(f"Error de comunicación serial: {e}")
-    except Exception as e:
-        raise Exception(f"Error general en la comunicación: {e}")
+    global arduino
+    # """Envía un comando al Arduino y espera una respuesta."""
+    # try:
+    #     arduino.write((command + '\n').encode())
+    #     response = arduino.readline().decode().strip()  # Espera una respuesta del Arduino
+    #     print("Respuesta de Arduino:", response)
+    #     return response
+    # except serial.SerialException as e:
+    #     raise Exception(f"Error de comunicación serial: {e}")
+    # except Exception as e:
+    #     raise Exception(f"Error general en la comunicación: {e}")
 
+def sendAbsFocToArduino(focus):
+    global arduino
+    
+    packet_id = 0x15
+    print(f"Focus: {focus}")
 
+    payload_data = struct.pack('i', focus)
+    packet_length = len(payload_data)
+    encoded_packet = capsule_instance_arduino.encode(packet_id, payload_data, packet_length)
+    # Print the encoded packet
+    #print(f"Encoded Packet: {encoded_packet}")
+    # Convert encoded_packet to a bytearray
+    encoded_packet = bytearray(encoded_packet)
+    
 # camInit(30)
 playerOneCamInit()
 
@@ -274,6 +294,12 @@ def send_udp():
     azm = data.get('azm')
     elv = data.get('elv')
     sendAbsPosToTeensy(azm, elv)
+    
+@app.route('/send_focus', methods=['POST'])
+def send_focus():
+    data = request.get_json()
+    foc = data.get('foc')
+    sendAbsFocToArduino(foc)
 
 @app.route('/video_feed')
 def video_feed():

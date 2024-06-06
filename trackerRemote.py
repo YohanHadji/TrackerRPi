@@ -34,7 +34,7 @@ def send_udp_packet(packet):
     while True:
         try:
             udp_socket.sendto(packet, (udp_target_ip, udp_target_port))
-            udp_socket.sendto(packet, (udp_target_ip_2,udp_target_port))
+            # udp_socket.sendto(packet, (udp_target_ip_2,udp_target_port))
             print("Packet sent successfully")
             break
         except OSError as e:
