@@ -61,13 +61,21 @@ def sendZoom(zoomDir):
     encoded_packet = bytearray(encoded_packet)
     ser.write(encoded_packet)
 
-def record_on():
+def record_toggle():
     print("Record On called")
+    packet_id = 0x14
+    
+    # Pack the struct in a byte array
+    
+    payload_data = struct.pack('i', 1)
+    packet_length = len(payload_data)
+    encoded_packet = capsule_instance.encode(packet_id, payload_data, packet_length)
+    # Print the encoded packet
+    #print(f"Encoded Packet: {encoded_packet}")
+    # Convert encoded_packet to a bytearray
+    encoded_packet = bytearray(encoded_packet)
+    ser.write(encoded_packet)
     # camera.start_recording('video.h264')
-
-def record_off():
-    print("Record Off called")
-    # camera.stop_recording()
 
 @app.route('/')
 def index():
@@ -85,12 +93,12 @@ def button2():
 
 @app.route('/record_on', methods=['POST'])
 def button3():
-    record_on()
+    record_toggle()
     return '', 204
 
 @app.route('/record_off', methods=['POST'])
 def button4():
-    record_off()
+    record_toggle()
     return '', 204
 
 if __name__ == '__main__':
