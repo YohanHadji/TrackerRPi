@@ -63,8 +63,10 @@ def update_variable():
     
     if (control_id == "azmValue"):
         azmFromSlider = value
+        print("Azimuth: " + str(azmFromSlider))
     elif (control_id == "elvValue"):
         elvFromSlider = value
+        print("Elevation: " + str(elvFromSlider))
         
     sendAbsPosToTeensy(azmFromSlider, elvFromSlider)
     
