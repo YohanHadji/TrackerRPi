@@ -67,6 +67,8 @@ def update_variable():
         elvFromSlider = value
         
     sendAbsPosToTeensy(azmFromSlider, elvFromSlider)
+    
+    return "Variable updated successfully!"
 
     
 def sendZoom(zoomDir):
