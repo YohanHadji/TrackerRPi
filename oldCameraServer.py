@@ -61,6 +61,8 @@ def update_variable():
     control_id = data.get("id")
     value = data.get("value")
     
+    print("Control ID: " + control_id)
+    
     if (control_id == "azmValue"):
         azmFromSlider = value
         print("Azimuth: " + str(azmFromSlider))
