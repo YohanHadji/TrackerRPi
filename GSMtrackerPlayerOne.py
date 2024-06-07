@@ -115,13 +115,19 @@ def sendAbsFocToArduino(focus):
     packet_id = 0x15
     print(f"Focus: {focus}")
 
-    payload_data = struct.pack('i', focus)
+    payload_data = struct.pack('i', int(focus))
     packet_length = len(payload_data)
     encoded_packet = capsule_instance_arduino.encode(packet_id, payload_data, packet_length)
     # Print the encoded packet
     #print(f"Encoded Packet: {encoded_packet}")
     # Convert encoded_packet to a bytearray
     encoded_packet = bytearray(encoded_packet)
+    
+    try:
+        arduino.write(encoded_packet)
+        print("Write success")
+    except: 
+        print("Write Failed")
     
 # camInit(30)
 playerOneCamInit()
@@ -249,7 +255,7 @@ def tracking_loop():
             frame,sensorTimeStamp = serverPlayerOne.wait_for_frame(frame)
             all_light_points = detect(frame, sensorTimeStamp)
             pointToSend = getLockedPoint(all_light_points, camRes, joystickBtn, swUp, swDown, swLeft, swRight)
-            print(pointToSend.name, pointToSend.x, pointToSend.y)
+            # print(pointToSend.name, pointToSend.x, pointToSend.y)
 
             if (not trackingEnabled):
                 # print("Tracking disabled")
