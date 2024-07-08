@@ -115,20 +115,25 @@ def sendAbsFocToArduino(focus):
     packet_id = 0x15
     print(f"Focus: {focus}")
 
-    payload_data = struct.pack('i', int(focus))
-    packet_length = len(payload_data)
-    encoded_packet = capsule_instance_arduino.encode(packet_id, payload_data, packet_length)
-    # Print the encoded packet
-    #print(f"Encoded Packet: {encoded_packet}")
-    # Convert encoded_packet to a bytearray
-    encoded_packet = bytearray(encoded_packet)
-    
     try:
+        payload_data = struct.pack('L', int(focus))
+        packet_length = len(payload_data)
+        encoded_packet = capsule_instance_arduino.encode(packet_id, payload_data, packet_length)
+        
+        encoded_packet = bytearray(encoded_packet)
+        
         arduino.write(encoded_packet)
         print("Write success")
-    except: 
-        print("Write Failed")
-    
+    except struct.error as e:
+        print(f"Struct error: {e}")
+        raise
+    except serial.SerialException as e:
+        print(f"Serial error: {e}")
+        raise
+    except Exception as e:
+        print(f"General error: {e}")
+        raise
+
 # camInit(30)
 playerOneCamInit()
 
@@ -305,7 +310,19 @@ def send_udp():
 def send_focus():
     data = request.get_json()
     foc = data.get('foc')
-    sendAbsFocToArduino(foc)
+
+    if foc is None:
+        return jsonify({"error": "No focus value provided"}), 400
+
+    try:
+        foc = int(foc)
+        sendAbsFocToArduino(foc)
+        return jsonify({"message": "Focus command sent successfully"}), 200
+    except ValueError:
+        return jsonify({"error": "Invalid focus value"}), 400
+    except Exception as e:
+        app.logger.error(f"Error in send_focus: {e}")
+        return jsonify({"error": str(e)}), 500
 
 @app.route('/video_feed')
 def video_feed():
