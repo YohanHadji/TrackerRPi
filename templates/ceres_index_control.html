@@ -143,6 +143,15 @@
         <button onclick="sendUDP()">Send</button>
     </div>
 
+    <!-- Focus Controls -->
+    <div class="container">
+        <div>
+            <label for="focus">Focus:</label>
+            <input type="text" id="foc" placeholder="Enter Focus">
+        </div>
+        <button onclick="sendFocus()">Send</button>
+    </div>
+
     <script>
     function sendUDP() {
         var azm = document.getElementById('azm').value;
@@ -158,6 +167,26 @@
         }).then(response => response.json())
           .then(data => console.log(data))
           .catch(error => console.error('Error:', error));
+    }
+
+    function sendFocus() {
+        var foc = document.getElementById('foc').value;
+        var data = { foc: foc };
+
+        fetch("/send_focus", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data),
+        }).then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok ' + response.statusText);
+            }
+            return response.json();
+        })
+        .then(data => console.log(data))
+        .catch(error => console.error('Error:', error));
     }
 
     function updateControlValue(controlId, displayId) {
@@ -186,6 +215,34 @@
     updateControlValue("exposureTime", "exposureTimeValue");
     updateControlValue("gain", "gainValue");
     updateControlValue("trackingEnabled", "trackingEnabledValue");
+
+    let lastFocusValue = document.getElementById('foc').value;
+
+    document.getElementById('foc').addEventListener('wheel', function(event) {
+        event.preventDefault();
+        let currentValue = parseFloat(this.value) || 0;
+        let step = event.deltaY < 0 ? 100 : -100;
+        currentValue += step;
+        this.value = currentValue;
+        sendDynamicFocus(currentValue);
+    });
+
+    function sendDynamicFocus(value) {
+        fetch("/send_focus", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ foc: value }),
+        }).then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok ' + response.statusText);
+            }
+            return response.json();
+        })
+        .then(data => console.log(data))
+        .catch(error => console.error('Error:', error));
+    }
     </script>
 </body>
 </html>
