@@ -13,6 +13,10 @@ capsule_instance = Capsule(lambda packetId, dataIn, len: handle_packet(packetId,
 
 azmFromSlider = 0
 elvFromSlider = 0
+circle1_x = 300  # Position X for circle 1
+circle1_y = 300  # Position Y for circle 1
+circle2_x = 500  # Position X for circle 2
+circle2_y = 500  # Position Y for circle 2
 
 def handle_packet(packetId, dataIn, lenIn):
     print("Packet ID: " + str(packetId))
@@ -33,11 +37,21 @@ try:
     ser = serial.Serial('/dev/ttyACM0', 115200, timeout=1)
 except:
     ser = serial.Serial('/dev/ttyACM1', 115200, timeout=1)
-    
 
 def gen_frames():
+    global circle1_x, circle1_y, circle2_x, circle2_y
     for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
         image = frame.array
+
+        # Draw the central circle
+        center_x = image.shape[1] // 2
+        center_y = image.shape[0] // 2
+        cv2.circle(image, (center_x, center_y), 50, (0, 255, 0), 2)
+
+        # Draw the additional circles
+        cv2.circle(image, (circle1_x, circle1_y), 50, (255, 0, 0), 2)
+        cv2.circle(image, (circle2_x, circle2_y), 50, (0, 0, 255), 2)
+
         ret, buffer = cv2.imencode('.jpg', image)
         frame = buffer.tobytes()
         
@@ -59,14 +73,14 @@ def update_variable():
 
     data = request.get_json()
     control_id = data.get("id")
-    value = data.get("value")
+    value = float(data.get("value"))
     
     print("Control ID: " + control_id)
     
-    if (control_id == "azm"):
+    if control_id == "azm":
         azmFromSlider = value
         print("Azimuth: " + str(azmFromSlider))
-    elif (control_id == "elv"):
+    elif control_id == "elv":
         elvFromSlider = value
         print("Elevation: " + str(elvFromSlider))
         
@@ -74,7 +88,6 @@ def update_variable():
     
     return "Variable updated successfully!"
 
-    
 def sendZoom(zoomDir):
     packet_id = 0x13
     # Pack the struct in a byte array
