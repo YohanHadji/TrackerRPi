@@ -38,6 +38,9 @@ swRight = False
 trackerAzm = 0
 trackerElv = 0
 
+colimator1 = 1500
+colimator2 = 1500
+
 lastFrame = None
 
 def arduinoInit():
@@ -200,8 +203,19 @@ def sendTargetToTeensy(pointToSendIn, cameraID, Kp, maxSpeed):
     # Send the encoded packet
     sock.sendto(encoded_packet, (TEENSY_IP, TEENSY_PORT))
 
+def getPositionFromColimator():
+    global ser, colimator1, colimator2
+    
+    while ser.in_waiting > 0:
+        line = ser.readline().decode('utf-8').rstrip()
+        # print(line)
+        colimator1, colimator2 = line.split(',')
+        # print("Servo 1: " + servo1Position + " Servo 2: " + servo2Position)
+        
+    return colimator1, colimator2
+        
 # Send target to arduino via USB serial
-def sendTargetToArduino(pointToSendIn):
+def sendTargetToColimator(pointToSendIn):
     global ser
     # Send the target point to the arduino, the structure should be copied in a byte array then encoded then sent
     packet_id = 0x01
