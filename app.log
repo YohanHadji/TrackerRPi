@@ -6870,3 +6870,38 @@ Traceback (most recent call last):
 TypeError: The view function for 'send_focus' did not return a valid response. The function either returned None or ended without a return statement.
 Error in send_focus: argument out of range
 Error in send_focus: argument out of range
+Exception on /send_udp [POST]
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/flask/app.py", line 2525, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/flask/app.py", line 1823, in full_dispatch_request
+    return self.finalize_request(rv)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/flask/app.py", line 1842, in finalize_request
+    response = self.make_response(rv)
+               ^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/flask/app.py", line 2134, in make_response
+    raise TypeError(
+TypeError: The view function for 'send_udp' did not return a valid response. The function either returned None or ended without a return statement.
+Exception on /send_udp [POST]
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/flask/app.py", line 2525, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/flask/app.py", line 1823, in full_dispatch_request
+    return self.finalize_request(rv)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/flask/app.py", line 1842, in finalize_request
+    response = self.make_response(rv)
+               ^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/flask/app.py", line 2134, in make_response
+    raise TypeError(
+TypeError: The view function for 'send_udp' did not return a valid response. The function either returned None or ended without a return statement.
+Error in send_focus: 'NoneType' object has no attribute 'write'
+Error in send_focus: 'NoneType' object has no attribute 'write'
+Error in send_focus: 'NoneType' object has no attribute 'write'
+Error in send_focus: 'NoneType' object has no attribute 'write'
+Error in send_focus: 'NoneType' object has no attribute 'write'
+Error in send_focus: 'NoneType' object has no attribute 'write'
+Error in send_focus: 'NoneType' object has no attribute 'write'
