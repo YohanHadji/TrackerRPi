@@ -41,6 +41,9 @@ trackerElv = 0
 colimator1 = 1500
 colimator2 = 1500
 
+colimator1 = 1500
+colimator2 = 1500
+
 lastFrame = None
 
 def arduinoInit():
@@ -239,8 +242,13 @@ def sendTargetToColimator(pointToSendIn):
 
     pointToSendName = str(pointToSend.name)
     payload_data = struct.pack('4siiiiiff', pointToSendName.encode('utf-8'), pointToSend.isVisible, pointToSend.x, pointToSend.y, pointToSend.age, 0,0,0)
+    payload_data = struct.pack('4siiiiiff', pointToSendName.encode('utf-8'), pointToSend.isVisible, pointToSend.x, pointToSend.y, pointToSend.age, 0,0,0)
     packet_length = len(payload_data)
     encoded_packet = capsule_instance.encode(packet_id, payload_data, packet_length)
+    # Print the encoded packet
+    #print(f"Encoded Packet: {encoded_packet}")
+    # Convert encoded_packet to a bytearray
+    encoded_packet = bytearray(encoded_packet)
     # Print the encoded packet
     #print(f"Encoded Packet: {encoded_packet}")
     # Convert encoded_packet to a bytearray

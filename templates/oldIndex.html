@@ -3,8 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simple Web Server</title>
+    <title>Buscador - Tracker</title>
     <style>
+        .buttons {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+        }
+
+        .buttons form {
+            margin: 0;
+        }
+
+        .buttons button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .buttons button:hover {
+            background-color: #45a049;
+        }
+
+        .sliders {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
         .sliders div {
             margin-bottom: 20px;
         }
@@ -15,50 +45,75 @@
         }
 
         .sliders input[type="range"] {
-            width: 100%;
+            width: 1280px; /* Same width as the image */
         }
 
-        .sliders p {
-            text-align: center;
-            margin-top: 5px;
+        .vertical-slider-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 720px; /* Same height as the image */
+        }
+
+        .vertical-slider-container label {
+            writing-mode: vertical-rl;
+            transform: rotate(180deg);
+            margin-bottom: 10px;
+        }
+
+        .vertical-slider {
+            writing-mode: bt-lr; /* IE */
+            -webkit-appearance: slider-vertical; /* WebKit */
+            width: 8px;
+            height: 100%; /* Full height */
+        }
+
+        .camera-feed {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .camera-feed img {
+            margin-right: 20px;
         }
     </style>
 </head>
 <body>
-    <h1>Welcome to Simple Web Server</h1>
+    <h1>Visor Tracker </h1>
     <p>Click the buttons to trigger functions:</p>
-    <form action="/zoom_in" method="post">
-        <button type="submit">Zoom +</button>
-    </form>
-    <form action="/zoom_out" method="post">
-        <button type="submit">Zoom -</button>
-    </form>
-    <form action="/record_on" method="post">
-        <button type="submit">Record On</button>
-    </form>
-    <form action="/record_off" method="post">
-        <button type="submit">Record Off</button>
-    </form>
+    <div class="buttons">
+        <form action="/zoom_in" method="post">
+            <button type="submit">Zoom +</button>
+        </form>
+        <form action="/zoom_out" method="post">
+            <button type="submit">Zoom -</button>
+        </form>
+        <form action="/record_on" method="post">
+            <button type="submit">Record On</button>
+        </form>
+        <form action="/record_off" method="post">
+            <button type="submit">Record Off</button>
+        </form>
+    </div>
 
-     <!-- Sliders Container -->
-     <div class="sliders">
-        <!-- Radius Slider -->
+    <div class="sliders">
+        <!-- Azimuth Slider -->
         <div>
             <label for="Azimuth">Azimuth (°):</label>
             <input type="range" id="azm" min="-360" max="360" value="0" step="0.01">
             <p id="azmValue">0</p>
         </div>
+    </div>
 
-        <!-- Lock Radius Slider -->
-        <div>
+    <div class="camera-feed">
+        <img id="live-feed" src="/video_feed" width="1280" height="720">
+        <div class="vertical-slider-container">
             <label for="Elevation">Elevation (°):</label>
-            <input type="range" id="elv" min="-30" max="60" value="0" step="0.01">
+            <input type="range" id="elv" class="vertical-slider" min="-30" max="60" value="0" step="0.01">
             <p id="elvValue">0</p>
         </div>
     </div>
-
-    <h2>Camera Live Feed</h2>
-    <img id="live-feed" src="/video_feed" width="640" height="480">
 
     <script>
         // Function to update the Python variable whenever a slider or dropdown value changes
@@ -79,12 +134,30 @@
                     body: JSON.stringify({ id: controlId, value: controlValue }),
                 });
             });
+
+            // Add mouse wheel event to control
+            control.addEventListener("wheel", function(event) {
+                event.preventDefault();
+                var delta = Math.sign(event.deltaY);
+                var newValue = parseFloat(control.value) + delta * (parseFloat(control.step) || 1);
+                if (newValue >= control.min && newValue <= control.max) {
+                    control.value = newValue;
+                    controlValueDisplay.textContent = control.value;
+
+                    fetch("/update_variable", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({ id: controlId, value: control.value }),
+                    });
+                }
+            });
         }
 
         // Update the radius sliders
         updateControlValue("azm", "azmValue");
         updateControlValue("elv", "elvValue");
     </script>
-
 </body>
 </html>

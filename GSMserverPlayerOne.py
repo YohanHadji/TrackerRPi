@@ -17,7 +17,7 @@ app = Flask(__name__)
 app.logger.setLevel(logging.DEBUG)  # Establece el nivel de logging a DEBUG para ver más detalles
 
 # Función para encontrar el Arduino basado en su VID y PID.
-def find_arduino(vid_pid="2A03:0043"):
+def find_arduino(vid_pid="2a03:0043"):
     vid_pid = vid_pid.upper()  # Asegura comparación en mayúsculas
     ports = list(serial.tools.list_ports.comports())
     for port in ports:
@@ -39,7 +39,7 @@ def create_serial_connection():
     return None
 
 # Intenta establecer la conexión serial al iniciar la aplicación.
-arduino = create_serial_connection()
+# arduino = create_serial_connection()
 
 @app.route('/send_command', methods=['POST'])
 def send_command():
