@@ -47,7 +47,7 @@ def obtain_top_contours(b_frame, n=10):
         if M['m00'] != 0:
             cx, cy = int(M['m10'] / M['m00']), int(M['m01'] / M['m00'])
             contour_radius = cv2.minEnclosingCircle(blob)[1]
-            if contour_radius > 5:
+            if contour_radius > 1:
                 contour_brightness.append(((cx, cy), cv2.contourArea(blob)))
 
     # Sort contours based on brightness
@@ -188,18 +188,26 @@ def detect(frame, sensorTimeStamp):
 
 def getLockedPoint(all_light_points, resolution, isButtonPressed=False,swLeft=False,swRight=False,swUp=False,swDown=False):
     global currentlyLocked, lockedName, lockRadius
+    
+    atLeastOnePointInRadius = False
 
     if (not currentlyLocked):
         for i, (name, firstSeen, x, y, _, _, _, _, _, _) in enumerate(all_light_points):
             if (abs(x - resolution[0]/2) <= lockRadius and abs(y - resolution[1]/2) <= lockRadius):
                 lockedName = name
                 currentlyLocked = True
+                atLeastOnePointInRadius = True
                 break
     else: 
         if (not lockedName in [name for name, firstSeen, _, _, _, _, _, _, _, _ in all_light_points]):
             currentlyLocked = False
             lockedName = "ABCD"
+        else:
+            atLeastOnePointInRadius = True
 
+    if (not atLeastOnePointInRadius):
+        currentlyLocked = False
+        lockedName = "ABCD"
 
     if (isButtonPressed and currentlyLocked):
         currentlyLocked = False

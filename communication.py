@@ -38,6 +38,9 @@ swRight = False
 trackerAzm = 0
 trackerElv = 0
 
+colimator1 = 1500
+colimator2 = 1500
+
 lastFrame = None
 
 def arduinoInit():
@@ -47,7 +50,6 @@ def arduinoInit():
         ser = serial.Serial('/dev/ttyACM0', 115200, timeout=1)
     except:
         print("Arduino not connected")
-
 
 # Variables to store slider and dropdown values
 cameraSetting = {
@@ -200,25 +202,81 @@ def sendTargetToTeensy(pointToSendIn, cameraID, Kp, maxSpeed):
     # Send the encoded packet
     sock.sendto(encoded_packet, (TEENSY_IP, TEENSY_PORT))
 
+def getPositionFromColimator():
+    global ser, colimator1, colimator2
+    
+    newPacket = False
+    
+    while ser.in_waiting > 0:
+        line = ser.readline().decode('utf-8').rstrip()
+        # print(line)
+        try:
+            colimator1, colimator2 = line.split(',')
+            newPacket = True
+        except: 
+            print("Error parsing colimator data")
+        # print("Servo 1: " + servo1Position + " Servo 2: " + servo2Position)
+        
+    return colimator1, colimator2, newPacket
+        
 # Send target to arduino via USB serial
-def sendTargetToArduino(pointToSendIn):
+def sendTargetToColimator(pointToSendIn):
     global ser
     # Send the target point to the arduino, the structure should be copied in a byte array then encoded then sent
     packet_id = 0x01
     # Pack the struct in a byte array
+    
+    
+    s1 = 1403 + (-0.01779 * pointToSendIn.x) + (0.6801 * pointToSendIn.y)
+    s2 = 1561 + (-0.8265 * pointToSendIn.x) + (-0.03777 * pointToSendIn.y)
+    
+    # x2 = round(x2, 3)
+    # y2 = round(y2, 3)
+    
+    print(f"Sending target to colimator: {s1}, {s2}")
 
-    pointToSend = LightPoint(pointToSendIn.name, pointToSendIn.isVisible, pointToSendIn.x, pointToSendIn.y, pointToSendIn.age)
+    pointToSend = LightPoint(pointToSendIn.name, pointToSendIn.isVisible, s1, s2, pointToSendIn.age)
 
     pointToSendName = str(pointToSend.name)
-    payload_data = struct.pack('4siiii', pointToSendName.encode('utf-8'), pointToSend.isVisible, pointToSend.x, pointToSend.y, pointToSend.age)
+    payload_data = struct.pack('4siiiiiff', pointToSendName.encode('utf-8'), pointToSend.isVisible, pointToSend.x, pointToSend.y, pointToSend.age, 0,0,0)
     packet_length = len(payload_data)
     encoded_packet = capsule_instance.encode(packet_id, payload_data, packet_length)
+    # Print the encoded packet
+    #print(f"Encoded Packet: {encoded_packet}")
+    # Convert encoded_packet to a bytearray
+    encoded_packet = bytearray(encoded_packet)
 
     try:
         # Send the encoded packet
         ser.write(encoded_packet)
     except Exception as e:
         print(f"Error occurred while sending data: {e}")
+        
+
+def sendAbsFocToArduino(focus):
+    global ser
+    
+    packet_id = 0x15
+    print(f"Focus: {focus}")
+
+    try:
+        payload_data = struct.pack('L', int(focus))
+        packet_length = len(payload_data)
+        encoded_packet = capsule_instance.encode(packet_id, payload_data, packet_length)
+        
+        encoded_packet = bytearray(encoded_packet)
+        
+        ser.write(encoded_packet)
+        print("Write success")
+    except struct.error as e:
+        print(f"Struct error: {e}")
+        raise
+    except serial.SerialException as e:
+        print(f"Serial error: {e}")
+        raise
+    except Exception as e:
+        print(f"General error: {e}")
+        raise
 
 def sendLightPointListToRaspi(all_light_points, n):
     global sock
