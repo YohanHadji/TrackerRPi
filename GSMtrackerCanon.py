@@ -72,7 +72,7 @@ def create_serial_connection():
     return None
 
 # Intenta establecer la conexión serial al iniciar la aplicación.
-arduino = create_serial_connection()
+# arduino = create_serial_connection()
 
 arduinoInit()
 
@@ -111,31 +111,6 @@ def send_command_to_arduino(command):
     #     raise Exception(f"Error de comunicación serial: {e}")
     # except Exception as e:
     #     raise Exception(f"Error general en la comunicación: {e}")
-
-def sendAbsFocToArduino(focus):
-    global arduino
-    
-    packet_id = 0x15
-    print(f"Focus: {focus}")
-
-    try:
-        payload_data = struct.pack('L', int(focus))
-        packet_length = len(payload_data)
-        encoded_packet = capsule_instance_arduino.encode(packet_id, payload_data, packet_length)
-        
-        encoded_packet = bytearray(encoded_packet)
-        
-        arduino.write(encoded_packet)
-        print("Write success")
-    except struct.error as e:
-        print(f"Struct error: {e}")
-        raise
-    except serial.SerialException as e:
-        print(f"Serial error: {e}")
-        raise
-    except Exception as e:
-        print(f"General error: {e}")
-        raise
 
 # camInit(30)
 playerOneCamInit()
@@ -289,13 +264,13 @@ def tracking_loop():
                 offsetY = 0
                 
                 # Draw a circle with offsetX and Y following a sin and cos of time with a frequency of 0.05Hz and amplitude of 200 pixels
-                offsetX = np.int32(300*np.cos(2*np.pi*0.05*(time.time()-startTime)))
-                offsetY = np.int32(300*np.sin(2*np.pi*0.05*(time.time()-startTime)))
+                # offsetX = np.int32(300*np.cos(2*np.pi*0.01*(time.time()-startTime)))
+                # offsetY = np.int32(300*np.sin(2*np.pi*0.01*(time.time()-startTime)))
                 
                 pointToSend.x = pointToSend.x+offsetX
                 pointToSend.y = pointToSend.y+offsetY
                 
-                sendTargetToTeensy(pointToSend, 33, 0.05, 1)
+                # sendTargetToTeensy(pointToSend, 33, 0.3, 5)
 
                 if (newPacketReceived()):
                     packetType = newPacketReceivedType()

@@ -50,9 +50,9 @@ class FrameServerCanon:
         while self._running:
             ret, array = cap.read()
             
-            print("Got frame")
+            # print("Got frame")
             try: 
-                print(array.shape)
+                # print(array.shape)
                 self._count += 1
                 with self._condition:
                     self._array = array
