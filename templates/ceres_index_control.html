@@ -143,6 +143,19 @@
         <button onclick="sendUDP()">Send</button>
     </div>
 
+    <!-- Azimuth and Elevation Controls -->
+    <div class="container">
+        <div>
+            <label for="s1">S1:</label>
+            <input type="text" id="s1" placeholder="Enter Offset S1">
+        </div>
+        <div>
+            <label for="s2">S2:</label>
+            <input type="text" id="s2" placeholder="Enter Offset S2">
+        </div>
+        <button onclick="sendOffset()">Send</button>
+    </div>
+
     <!-- Focus Controls -->
     <div class="container">
         <div>
@@ -159,6 +172,22 @@
         var data = { azm: azm, elv: elv };
 
         fetch("/send_udp", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data),
+        }).then(response => response.json())
+          .then(data => console.log(data))
+          .catch(error => console.error('Error:', error));
+    }
+
+    function sendOffset() {
+        var s1 = document.getElementById('s1').value;
+        var s2 = document.getElementById('s2').value;
+        var data = { s1: s1, s2: s2 };
+
+        fetch("/send_offset", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",

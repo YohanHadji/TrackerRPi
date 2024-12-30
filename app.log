@@ -6905,3 +6905,170 @@ Error in send_focus: 'NoneType' object has no attribute 'write'
 Error in send_focus: 'NoneType' object has no attribute 'write'
 Error in send_focus: 'NoneType' object has no attribute 'write'
 Error in send_focus: 'NoneType' object has no attribute 'write'
+Error in send_focus: 'NoneType' object has no attribute 'write'
+Error in send_focus: write failed: [Errno 5] Input/output error
+Error in send_focus: write failed: [Errno 5] Input/output error
+Error in send_focus: write failed: [Errno 5] Input/output error
+Error in send_focus: write failed: [Errno 5] Input/output error
+Error in send_focus: write failed: [Errno 5] Input/output error
+Error in send_focus: write failed: [Errno 5] Input/output error
+Error in send_focus: 'NoneType' object has no attribute 'write'
+Error in send_focus: 'NoneType' object has no attribute 'write'
+Error in send_focus: 'NoneType' object has no attribute 'write'
+Error in send_focus: write failed: [Errno 5] Input/output error
+Error in send_focus: write failed: [Errno 5] Input/output error
+Error in send_focus: write failed: [Errno 5] Input/output error
+Error in send_focus: write failed: [Errno 5] Input/output error
+Error in send_focus: write failed: [Errno 5] Input/output error
+Error in send_focus: write failed: [Errno 5] Input/output error
+Error in send_focus: write failed: [Errno 5] Input/output error
+Error in send_focus: write failed: [Errno 5] Input/output error
+Error in send_focus: write failed: [Errno 5] Input/output error
+Error in send_focus: write failed: [Errno 5] Input/output error
+Error in send_focus: write failed: [Errno 5] Input/output error
+Error in send_focus: write failed: [Errno 5] Input/output error
+Error in send_focus: write failed: [Errno 5] Input/output error
+Error in send_focus: write failed: [Errno 5] Input/output error
+Error in send_focus: write failed: [Errno 5] Input/output error
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Exception on /send_offset [POST]
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/flask/app.py", line 2525, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/flask/app.py", line 1823, in full_dispatch_request
+    return self.finalize_request(rv)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/flask/app.py", line 1842, in finalize_request
+    response = self.make_response(rv)
+               ^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/flask/app.py", line 2134, in make_response
+    raise TypeError(
+TypeError: The view function for 'send_offset' did not return a valid response. The function either returned None or ended without a return statement.
+Exception on /send_offset [POST]
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/flask/app.py", line 2525, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/flask/app.py", line 1822, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/flask/app.py", line 1820, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/flask/app.py", line 1796, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/pi/TrackerRPi/GSMtrackerCanon.py", line 346, in send_offset
+    offsetS2 = int(data.get('s2'))
+               ^^^^^^^^^^^^^^^^^^^
+ValueError: invalid literal for int() with base 10: ''
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range

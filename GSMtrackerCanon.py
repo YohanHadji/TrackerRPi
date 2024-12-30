@@ -12,6 +12,8 @@ from detection import *
 import serial.tools.list_ports
 import logging
 
+calibrationMode = False
+
 camRes = (1920, 1080)
 
 joystickX   = 0
@@ -21,6 +23,9 @@ swUp        = False
 swDown      = False
 swLeft      = False
 swRight     = False
+
+offsetS1 = 0
+offsetS2 = 0
 
 # Light point structure
 class LightPoint:
@@ -174,6 +179,7 @@ def generate_frames():
     global LightPointArray, input_values, camRes
 
     while True:
+        # print("Generating frames")
         # Get a frame with metadata
         frame,sensorTimestamp = serverPlayerOne.wait_for_frame()
         
@@ -215,7 +221,7 @@ def generate_frames():
 
 
 def tracking_loop():
-    global LightPointArray, all_light_points, input_value, xPos, yPos, img_width, img_height, startTime, firstTimeNoted, timeOffset, timeOffsetAverage, trackingEnabled, joystickX, joystickY, joystickBtn, swUp, swDown, swLeft, swRight
+    global LightPointArray, all_light_points, input_value, xPos, yPos, img_width, img_height, startTime, firstTimeNoted, timeOffset, timeOffsetAverage, trackingEnabled, joystickX, joystickY, joystickBtn, swUp, swDown, swLeft, swRight, offsetS1, offsetS2, calibrationMode
 
     frame = None
     
@@ -239,9 +245,9 @@ def tracking_loop():
             print("Time offset calculated")
             print(timeOffsetAverage)
 
-        else:
-            frame,sensorTimeStamp = serverPlayerOne.wait_for_frame(frame) 
-            
+        else:            
+            frame,sensorTimeStamp = serverPlayerOne.wait_for_frame(frame)
+                        
             # Define the rectangle coordinates
             top_left = (385, 150)
             bottom_right = (1540, 925)
@@ -255,9 +261,9 @@ def tracking_loop():
             # Apply the mask to the original image using bitwise operations
             result = cv2.bitwise_and(frame, mask)  
             frame = result   
-                              
+                                          
             all_light_points = detect(frame, sensorTimeStamp)
-            
+                        
             # If all light points is not null, then continue
             if (all_light_points is not None):
                 pointToSend = getLockedPoint(all_light_points, camRes, joystickBtn, swUp, swDown, swLeft, swRight)
@@ -268,28 +274,40 @@ def tracking_loop():
                     pointToSend.isVisible = False
                 #else:
                     # print("Tracking enabled")
+                
+                if (calibrationMode) :
+                    col1, col2, newPacket = getPositionFromColimator()
+                    if (newPacket):
+                        print(col1,col2,pointToSend.x,pointToSend.y)
+                else:
+                    # Parse text coming from the teensy via serial
+                    pointToSend.age = np.int32((((time.time()-startTime)*1e9)-(sensorTimeStamp+timeOffsetAverage))/1e6)
                     
-                col1, col2, newPacket = getPositionFromColimator()
+                    print(pointToSend.name, pointToSend.x, pointToSend.y, pointToSend.age, pointToSend.isVisible)
                     
-                # Parse text coming from the teensy via serial
-                pointToSend.age = np.int32((((time.time()-startTime)*1e9)-(sensorTimeStamp+timeOffsetAverage))/1e6)
-                
-                # print(pointToSend.name, pointToSend.x, pointToSend.y, pointToSend.age, pointToSend.isVisible
-                sendTargetToColimator(pointToSend)
-                if (newPacket):
-                    print(col1, col2, pointToSend.x, pointToSend.y)
-                
-                offsetX = 0
-                offsetY = 0
-                
-                # Draw a circle with offsetX and Y following a sin and cos of time with a frequency of 0.05Hz and amplitude of 200 pixels
-                # offsetX = np.int32(300*np.cos(2*np.pi*0.01*(time.time()-startTime)))
-                # offsetY = np.int32(300*np.sin(2*np.pi*0.01*(time.time()-startTime)))
-                
-                pointToSend.x = pointToSend.x+offsetX
-                pointToSend.y = pointToSend.y+offsetY
-                
-                # sendTargetToTeensy(pointToSend, 33, 0.3, 5)
+                    pointToSendColimator = LightPoint(pointToSend.name, pointToSend.isVisible, pointToSend.x, pointToSend.y, pointToSend.age)
+                    
+                    pointToSendColimator.x = pointToSendColimator.x+offsetS1
+                    pointToSendColimator.y = pointToSendColimator.y+offsetS2
+                    
+                    # print(offsetS1,offsetS2)                
+                    sendTargetToColimator(pointToSendColimator)
+                    # if (newPacket):
+                    #     print(col1, col2, pointToSend.x, pointToSend.y)
+                    
+                    offsetX = 0
+                    offsetY = 0
+                    
+                    # Draw a circle with offsetX and Y following a sin and cos of time with a frequency of 0.05Hz and amplitude of 200 pixels
+                    # offsetX = np.int32(250*np.cos(2*np.pi*0.03*(time.time()-startTime)))
+                    # offsetY = np.int32(250*np.sin(2*np.pi*0.03*(time.time()-startTime)))
+                    
+                    pointToSend.y = -pointToSend.y
+                    
+                    pointToSend.x = pointToSend.x+offsetX
+                    pointToSend.y = pointToSend.y+offsetY
+                                
+                    sendTargetToTeensy(pointToSend, 33, 0.05, 2)
 
                 if (newPacketReceived()):
                     packetType = newPacketReceivedType()
@@ -321,6 +339,19 @@ def send_udp():
     elv = data.get('elv')
     sendAbsPosToTeensy(azm, elv)
     
+@app.route('/send_offset', methods=['POST'])
+def send_offset():
+    global offsetS1, offsetS2
+    
+    data = request.get_json()
+    offsetS1 = int(data.get('s1'))
+    offsetS2 = int(data.get('s2'))
+    
+    print("Offset received")    
+    print(offsetS1, offsetS2)
+    
+    return jsonify({"message": "Offset command sent successfully"}), 200
+    
 @app.route('/send_focus', methods=['POST'])
 def send_focus():
     data = request.get_json()
@@ -341,6 +372,7 @@ def send_focus():
 
 @app.route('/video_feed')
 def video_feed():
+    print("Video feed requested")
     return Response(generate_frames(),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
@@ -383,5 +415,7 @@ if __name__ == '__main__':
         udp_thread.start()
         
         app.run(host='0.0.0.0', port=5001, threaded=True)
+        
     finally:
+        serverPlayerOne.stop()
         print("Closing the application")

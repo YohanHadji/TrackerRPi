@@ -230,9 +230,17 @@ def sendTargetToColimator(pointToSendIn):
     # Pack the struct in a byte array
     
     
-    s1 = 1403 + (-0.01779 * pointToSendIn.x) + (0.6801 * pointToSendIn.y)
-    s2 = 1561 + (-0.8265 * pointToSendIn.x) + (-0.03777 * pointToSendIn.y)
+    # s1 = 1403 + (-0.01779 * pointToSendIn.x) + (0.6801 * pointToSendIn.y)
+    # s2 = 1561 + (-0.8265 * pointToSendIn.x) + (-0.03777 * pointToSendIn.y)
     
+   # s1 = 1350.039802650483 + (-0.91674131 * pointToSendIn.x) + (-0.02420612 * pointToSendIn.y)
+   #  s2 = 1468.0770404111263 + (0.01674877 * pointToSendIn.x) + (0.89634829 * pointToSendIn.y)
+    # calibracion 2024-12-20
+    #s1 = 1333.141207480285 + (-0.91674131 * pointToSendIn.x) + (-0.02420612 * pointToSendIn.y)
+    #s2 = 1501.435197615967 + (0.00769191 * pointToSendIn.x) + (-0.89521636 * pointToSendIn.y)
+    # calibarcion 2024-12-28 
+    s1 = 1334.3567007257845 + (-0.95366284 * pointToSendIn.x) + (-0.01830235 * pointToSendIn.y)
+    s2 = 1551.941314303425 + (0.01582059 * pointToSendIn.x) + (-0.93854884 * pointToSendIn.y)
     # x2 = round(x2, 3)
     # y2 = round(y2, 3)
     
@@ -241,7 +249,7 @@ def sendTargetToColimator(pointToSendIn):
     pointToSend = LightPoint(pointToSendIn.name, pointToSendIn.isVisible, s1, s2, pointToSendIn.age)
 
     pointToSendName = str(pointToSend.name)
-    payload_data = struct.pack('4siiiiiff', pointToSendName.encode('utf-8'), pointToSend.isVisible, pointToSend.x, pointToSend.y, pointToSend.age, 0,0,0)
+    # payload_data = struct.pack('4siiiiiff', pointToSendName.encode('utf-8'), pointToSend.isVisible, pointToSend.x, pointToSend.y, pointToSend.age, 0,0,0)
     payload_data = struct.pack('4siiiiiff', pointToSendName.encode('utf-8'), pointToSend.isVisible, pointToSend.x, pointToSend.y, pointToSend.age, 0,0,0)
     packet_length = len(payload_data)
     encoded_packet = capsule_instance.encode(packet_id, payload_data, packet_length)
@@ -249,16 +257,19 @@ def sendTargetToColimator(pointToSendIn):
     #print(f"Encoded Packet: {encoded_packet}")
     # Convert encoded_packet to a bytearray
     encoded_packet = bytearray(encoded_packet)
-    # Print the encoded packet
-    #print(f"Encoded Packet: {encoded_packet}")
-    # Convert encoded_packet to a bytearray
-    encoded_packet = bytearray(encoded_packet)
-
-    try:
-        # Send the encoded packet
-        ser.write(encoded_packet)
-    except Exception as e:
-        print(f"Error occurred while sending data: {e}")
+        
+    if (ser != None):
+        try:
+            # Send the encoded packet
+            ser.write(encoded_packet)
+        except Exception as e:
+            print(f"Error occurred while sending data: {e}")
+    else:
+        try:
+            ser = serial.Serial('/dev/ttyACM0', 115200, timeout=1)
+        except:
+            print("Teensy not found")
+        
         
 
 def sendAbsFocToArduino(focus):

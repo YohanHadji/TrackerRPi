@@ -10,7 +10,9 @@ import numpy as np
 
 # Initialize the webcam (Elgato USB cam link)
 cap = cv2.VideoCapture(0)
-cap.set(cv2.CAP_PROP_FOURCC,cv2.VideoWriter_fourcc('M','J','P','G'))
+cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
+cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080)
+# cap.set(cv2.CAP_PROP_FOURCC,cv2.VideoWriter_fourcc('M','J','P','G'))
 
 class FrameServerCanon:
     def __init__(self):
