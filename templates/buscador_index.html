@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control Panel</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            text-align: center;
+            width: 100%;
+        }
+
+        .main-container {
+            display: flex;
+            flex-direction: row;
+            align-items: flex-start;
+            width: 100%;
+            justify-content: center;
+        }
+
+        img {
+            width: 60%; /* Set video size */
+            max-width: 800px; /* Cap maximum width */
+            border: 1px solid #ccc;
+            margin-right: 20px;
+        }
+
+        .sliders {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .highlight {
+            background-color: #f0f8ff; /* Light blue background */
+            border: 2px solid #007bff; /* Blue border */
+            padding: 10px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+
+        label {
+            margin-right: 10px;
+        }
+
+        input[type="range"], select {
+            width: 250px;
+        }
+
+        p {
+            margin-left: 10px;
+        }
+
+        .highlight select {
+            font-size: 1.2em;
+        }
+
+        .panel {
+            display: none;
+            flex-direction: column;
+            gap: 15px;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+
+        .panel.visible {
+            display: flex;
+        }
+
+        .toggle-button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+        }
+
+        .control-container {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            width: 30%;
+        }
+
+    </style>
+</head>
+<body>
+    <h1>Control Panel</h1>
+
+    <div class="main-container">
+        <img src="{{ url_for('video_feed') }}" alt="Video Feed">
+
+        <div class="control-container">
+            <div class="highlight">
+                <label for="trackingEnabled">Tracking Enabled:</label>
+                <select id="trackingEnabled">
+                    <option value="1">Enabled</option>
+                    <option value="0">Disabled</option>
+                </select>
+                <p id="trackingEnabledValue">0</p>
+            </div>
+
+            <button class="toggle-button" onclick="togglePanel()">Toggle Control Panel</button>
+
+            <div class="panel" id="controlPanel">
+                <div class="sliders">
+                    <div>
+                        <label for="idRadius">ID Radius (px):</label>
+                        <input type="range" id="idRadius" min="10" max="100" value="25">
+                        <p id="idRadiusValue">25</p>
+                    </div>
+
+                    <div>
+                        <label for="lockRadius">Lock Radius (px):</label>
+                        <input type="range" id="lockRadius" min="50" max="500" value="100">
+                        <p id="lockRadiusValue">100</p>
+                    </div>
+
+                    <div>
+                        <label for="lightLifetime">Light Lifetime (ms):</label>
+                        <input type="range" id="lightLifetime" min="100" max="1000" value="200">
+                        <p id="lightLifetimeValue">200</p>
+                    </div>
+
+                    <div>
+                        <label for="lightThreshold">Light Threshold:</label>
+                        <input type="range" id="lightThreshold" min="10" max="255" value="200">
+                        <p id="lightThresholdValue">200</p>
+                    </div>
+
+                    <div>
+                        <label for="switchFrame">Switch Frame:</label>
+                        <input type="range" id="switchFrame" min="0" max="1" value="0" step="1">
+                        <p id="switchFrameValue">0</p>
+                    </div>
+
+                    <div>
+                        <label for="exposureTime">Exposure Time (us):</label>
+                        <input type="range" id="exposureTime" min="100" max="10000" value="1000">
+                        <p id="exposureTimeValue">1000</p>
+                    </div>
+
+                    <div>
+                        <label for="gain">Gain:</label>
+                        <input type="range" id="gain" min="1.0" max="24.0" value="10.0" step="1.0">
+                        <p id="gainValue">10.0</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function togglePanel() {
+            const panel = document.getElementById('controlPanel');
+            panel.classList.toggle('visible');
+        }
+
+        function updateControlValue(controlId, displayId) {
+            const control = document.getElementById(controlId);
+            const controlValueDisplay = document.getElementById(displayId);
+
+            control.addEventListener("input", () => {
+                const controlValue = control.value || control.options[control.selectedIndex].value;
+                controlValueDisplay.textContent = controlValue;
+
+                fetch("/update_variable", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ id: controlId, value: controlValue }),
+                });
+            });
+        }
+
+        updateControlValue("idRadius", "idRadiusValue");
+        updateControlValue("lockRadius", "lockRadiusValue");
+        updateControlValue("lightLifetime", "lightLifetimeValue");
+        updateControlValue("lightThreshold", "lightThresholdValue");
+        updateControlValue("switchFrame", "switchFrameValue");
+        updateControlValue("exposureTime", "exposureTimeValue");
+        updateControlValue("gain", "gainValue");
+        updateControlValue("trackingEnabled", "trackingEnabledValue");
+    </script>
+</body>
+</html>

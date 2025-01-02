@@ -3,7 +3,8 @@ import serial
 import numpy as np
 from communication import *
 from playerOne import *
-from canon import *
+#from canon import *
+from canonAutoDetec import *
 # from camera import *
 import threading 
 import cv2
@@ -401,7 +402,8 @@ def update_variable():
 
 if __name__ == '__main__':
     try:
-        serverPlayerOne = FrameServerCanon()
+        #serverPlayerOne = FrameServerCanon() comentado 2025_01_02
+        serverPlayerOne = FrameServerCanon(get_camlink_device() or '/dev/video0')
         serverPlayerOne.start()
         
         thread1 = Thread(target=tracking_loop)
