@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Espectrómetro</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        canvas {
+            max-width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <h1>Control del Espectrómetro</h1>
+    <div>
+        <label for="integration-time">Tiempo de Exposición (µs):</label>
+        <input type="number" id="integration-time" value="200000" step="10000">
+        <button id="set-time">Actualizar Tiempo</button>
+    </div>
+    <canvas id="spectrum-chart"></canvas>
+
+    <script>
+        const ctx = document.getElementById('spectrum-chart').getContext('2d');
+        const chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: [], // Longitudes de onda
+                datasets: [{
+                    label: 'Intensidad',
+                    data: [], // Intensidades
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Longitud de Onda (nm)'
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Intensidad'
+                        }
+                    }
+                }
+            }
+        });
+
+        async function fetchSpectrum() {
+            const response = await fetch('/spectrum');
+            const data = await response.json();
+            chart.data.labels = data.wavelengths;
+            chart.data.datasets[0].data = data.intensities;
+            chart.update();
+        }
+
+        document.getElementById('set-time').addEventListener('click', async () => {
+            const integrationTime = document.getElementById('integration-time').value;
+            await fetch('/set_integration_time', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ integration_time: integrationTime })
+            });
+            alert('Tiempo de exposición actualizado');
+        });
+
+        // Actualizar el gráfico periódicamente
+        setInterval(fetchSpectrum, 1000);
+    </script>
+</body>
+</html>
