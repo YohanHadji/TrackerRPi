@@ -1,5 +1,16 @@
 from flask import Flask, jsonify, request, render_template
-from seabreeze.spectrometers import Spectrometer
+from seabreeze.spectrometers import Spectrometer, list_devices
+import serial 
+try:
+    devices = list_devices()
+    if not devices:
+        raise Exception("No se encontraron espectrómetros conectados.")
+    
+    spec = Spectrometer.from_first_available()
+    print("Espectrómetro conectado:", spec.serial_number)
+except Exception as e:
+    print("Error al conectar el espectrómetro:", e)
+
 
 app = Flask(__name__)
 

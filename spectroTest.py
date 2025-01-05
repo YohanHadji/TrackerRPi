@@ -1,4 +1,4 @@
-from seabreeze.spectrometers import Spectrometer
+from seabreeze.spectrometers import Spectrometer,list_devices 
 import serial
 
 spec = Spectrometer.from_first_available()
