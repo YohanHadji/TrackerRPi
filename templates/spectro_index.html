@@ -5,76 +5,172 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Espectrómetro</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        let chart;
+
+        // Obtiene los datos del espectro y actualiza el gráfico
+        async function fetchSpectrum() {
+            try {
+                const response = await fetch('/spectrum');
+                const data = await response.json();
+
+                if (data.error) {
+                    alert(`Error al obtener el espectro: ${data.error}`);
+                    return;
+                }
+
+                // Actualiza el gráfico
+                if (chart) {
+                    chart.data.labels = data.wavelengths;
+                    chart.data.datasets[0].data = data.intensities;
+                    chart.update();
+                } else {
+                    renderChart(data.wavelengths, data.intensities);
+                }
+            } catch (error) {
+                console.error('Error al obtener los datos del espectro:', error);
+                alert('Error al obtener los datos del espectro.');
+            }
+        }
+
+        // Renderiza el gráfico
+        function renderChart(wavelengths, intensities) {
+            const ctx = document.getElementById('spectrum-chart').getContext('2d');
+            chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: wavelengths,
+                    datasets: [{
+                        label: 'Intensidad',
+                        data: intensities,
+                        borderWidth: 2,
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        pointRadius: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Longitud de Onda (nm)',
+                                font: { size: 16 }
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Intensidad',
+                                font: { size: 16 }
+                            },
+                            beginAtZero: true
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                font: { size: 14 }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Cambia el tiempo de integración
+        async function setIntegrationTime() {
+            const integrationTime = document.getElementById("integration-time").value;
+            try {
+                const response = await fetch('/set_integration_time', {
+                    method: 'POST',
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ integration_time: integrationTime })
+                });
+                const data = await response.json();
+
+                if (data.error) {
+                    alert(`Error al establecer el tiempo de integración: ${data.error}`);
+                } else {
+                    alert(`Tiempo de integración establecido a ${integrationTime} µs.`);
+                }
+            } catch (error) {
+                console.error('Error al establecer el tiempo de integración:', error);
+                alert('Error al establecer el tiempo de integración.');
+            }
+        }
+
+        // Obtiene información general del espectrómetro
+        async function fetchEndpoint(endpoint, label) {
+            try {
+                const response = await fetch(endpoint);
+                const data = await response.json();
+
+                if (data.error) {
+                    alert(`Error al obtener ${label}: ${data.error}`);
+                } else {
+                    alert(`${label}: ${Object.values(data).join(' ')}`);
+                }
+            } catch (error) {
+                console.error(`Error al obtener ${label}:`, error);
+                alert(`Error al obtener ${label}.`);
+            }
+        }
+
+        // Refresca el espectro cada 2 segundos
+        setInterval(fetchSpectrum, 2000);
+    </script>
     <style>
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
+            text-align: center;
         }
+
         canvas {
-            max-width: 100%;
+            width: 90%;
+            height: 400px;
+            margin: 20px auto;
+        }
+
+        #controls {
+            margin: 20px;
+        }
+
+        button {
+            margin: 5px;
+            padding: 10px 15px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        input {
+            padding: 5px;
+            font-size: 16px;
+            width: 150px;
         }
     </style>
 </head>
 <body>
     <h1>Control del Espectrómetro</h1>
-    <div>
-        <label for="integration-time">Tiempo de Exposición (µs):</label>
-        <input type="number" id="integration-time" value="200000" step="10000">
-        <button id="set-time">Actualizar Tiempo</button>
+
+    <div id="controls">
+        <button onclick="fetchEndpoint('/temperature', 'Temperatura')">Obtener Temperatura</button>
+        <button onclick="fetchEndpoint('/serial_number', 'Número de Serie')">Obtener Número de Serie</button>
+        <button onclick="fetchEndpoint('/max_integration_time', 'Tiempo Máximo de Integración')">Tiempo Máximo de Integración</button>
     </div>
-    <canvas id="spectrum-chart"></canvas>
 
-    <script>
-        const ctx = document.getElementById('spectrum-chart').getContext('2d');
-        const chart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: [], // Longitudes de onda
-                datasets: [{
-                    label: 'Intensidad',
-                    data: [], // Intensidades
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                scales: {
-                    x: {
-                        title: {
-                            display: true,
-                            text: 'Longitud de Onda (nm)'
-                        }
-                    },
-                    y: {
-                        title: {
-                            display: true,
-                            text: 'Intensidad'
-                        }
-                    }
-                }
-            }
-        });
+    <div id="integration-time-control">
+        <label for="integration-time">Tiempo de Integración (µs):</label>
+        <input type="number" id="integration-time" value="100000">
+        <button onclick="setIntegrationTime()">Establecer Tiempo</button>
+    </div>
 
-        async function fetchSpectrum() {
-            const response = await fetch('/spectrum');
-            const data = await response.json();
-            chart.data.labels = data.wavelengths;
-            chart.data.datasets[0].data = data.intensities;
-            chart.update();
-        }
-
-        document.getElementById('set-time').addEventListener('click', async () => {
-            const integrationTime = document.getElementById('integration-time').value;
-            await fetch('/set_integration_time', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ integration_time: integrationTime })
-            });
-            alert('Tiempo de exposición actualizado');
-        });
-
-        // Actualizar el gráfico periódicamente
-        setInterval(fetchSpectrum, 1000);
-    </script>
+    <h2>Espectro</h2>
+    <div style="height: 500px;">
+        <canvas id="spectrum-chart"></canvas>
+    </div>
 </body>
 </html>
