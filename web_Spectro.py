@@ -1,42 +1,33 @@
-from flask import Flask, jsonify, request, render_template
-from seabreeze.spectrometers import Spectrometer, list_devices
-import serial 
-try:
-    devices = list_devices()
-    if not devices:
-        raise Exception("No se encontraron espectrómetros conectados.")
-    
-    spec = Spectrometer.from_first_available()
-    print("Espectrómetro conectado:", spec.serial_number)
-except Exception as e:
-    print("Error al conectar el espectrómetro:", e)
-
+from flask import Flask, jsonify, request,  render_template
+from seabreeze.spectrometers import Spectrometer
 
 app = Flask(__name__)
-
-# Inicializar el espectrómetro
-spec = Spectrometer.from_first_available()
-spec.integration_time_micros(200000)  # Tiempo de exposición inicial (200ms)
-
 @app.route("/")
 def index():
-    return render_template("index.html")
+    return render_template("spectro_index.html")
 
 @app.route("/spectrum", methods=["GET"])
 def get_spectrum():
-    wavelengths = spec.wavelengths().tolist()
-    intensities = spec.intensities().tolist()
-    return jsonify({"wavelengths": wavelengths, "intensities": intensities})
+    try:
+        spec = Spectrometer.from_first_available()
+        wavelengths = spec.wavelengths().tolist()
+        intensities = spec.intensities().tolist()
+        return jsonify({"wavelengths": wavelengths, "intensities": intensities})
+    finally:
+        spec.close()
 
 @app.route("/set_integration_time", methods=["POST"])
 def set_integration_time():
-    data = request.json
     try:
+        data = request.json
         integration_time = int(data["integration_time"])
+        spec = Spectrometer.from_first_available()
         spec.integration_time_micros(integration_time)
         return jsonify({"success": True})
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 400
+    finally:
+        spec.close()
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5002, debug=True)
+    app.run(host="0.0.0.0", port=5000, debug=True)
