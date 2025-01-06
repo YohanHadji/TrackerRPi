@@ -1,5 +1,6 @@
 from flask import Flask, Response, render_template
 import cv2
+import time
 from threading import Thread
 
 class FrameServer:
@@ -9,6 +10,7 @@ class FrameServer:
         if not self.cap.isOpened():
             raise RuntimeError(f"No se pudo abrir el dispositivo de video: {video_device}")
         self.running = True
+        self.frame_rate = self.cap.get(cv2.CAP_PROP_FPS) or 30  # Default to 30 FPS if not provided
 
     def get_frame(self):
         if not self.running:
@@ -16,6 +18,18 @@ class FrameServer:
         ret, frame = self.cap.read()
         if not ret:
             return None
+
+        # Obtener el tiempo actual y formatearlo
+        current_time = time.strftime("%Y-%m-%d %H:%M:%S")
+        millis = int(time.time() * 1000) % 1000
+        fps_text = f"FPS: {self.frame_rate:.2f}"
+
+        # Añadir la información de tiempo y FPS al marco
+        overlay_text = f"{current_time}.{millis:03d}"
+        cv2.putText(frame, overlay_text, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+        cv2.putText(frame, fps_text, (10, 70), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+
+        # Codificar el marco a JPEG
         _, buffer = cv2.imencode('.jpg', frame)
         return buffer.tobytes()
 
