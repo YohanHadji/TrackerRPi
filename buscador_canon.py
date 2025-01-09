@@ -1,7 +1,8 @@
-from flask import Flask, Response, render_template
+from flask import Flask, Response, render_template, request
 import cv2
 import time
 from threading import Thread
+import serial
 
 class FrameServer:
     def __init__(self, video_device='/dev/video0'):
@@ -41,6 +42,18 @@ app = Flask(__name__)
 video_device = '/dev/video0'  # Cambia esto si es necesario
 server = FrameServer(video_device)
 
+# Configuración del puerto serie para Arduino
+arduino_port = '/dev/ttyACM1'  # Cambia esto según tu sistema
+arduino_baudrate = 921620
+arduino = serial.Serial(arduino_port, arduino_baudrate, timeout=1)
+
+def send_to_arduino(command):
+    try:
+        arduino.write((command + '\n').encode())
+        print(f"Comando enviado al Arduino: {command}")
+    except Exception as e:
+        print(f"Error al enviar comando al Arduino: {e}")
+
 @app.route('/')
 def index():
     return render_template('buscador_canon_index.html')
@@ -56,8 +69,24 @@ def video_feed():
                    b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
     return Response(generate(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
+@app.route('/zoom_in', methods=['POST'])
+def zoom_in():
+    send_to_arduino("1")
+    return "OK", 200
+
+@app.route('/zoom_out', methods=['POST'])
+def zoom_out():
+    send_to_arduino("2")
+    return "OK", 200
+
+@app.route('/rec', methods=['POST'])
+def rec():
+    send_to_arduino("3")
+    return "OK", 200
+
 if __name__ == '__main__':
     try:
-        app.run(host='0.0.0.0', port=5000, threaded=True)
+        app.run(host='0.0.0.0', port=5002, threaded=True)
     finally:
         server.stop()
+        arduino.close()

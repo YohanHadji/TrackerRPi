@@ -1,4 +1,5 @@
 from flask import Flask, render_template, Response, request, stream_with_context
+from flask_cors import CORS
 import numpy as np
 from communication import *
 from camera import *
@@ -10,7 +11,7 @@ from detection import *
 import math
 
 app = Flask(__name__)
-
+CORS(app)
 #camInit(30)
 camInit(60)
 arduinoInit()
