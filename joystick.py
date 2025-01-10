@@ -83,7 +83,7 @@ try:
             # Send the encoded packet over UDP
             send_udp_packet(encoded_packet)
 
-            print(f"X-axis: {x_axis:.4f}, Y-axis: {y_axis:.4f}, Throttle: {speed:.2f}")
+            print(f"X-axis: {x_axis:.4f}, Y-axis: {y_axis:.4f}, Throttle: {speed:.2f} , triger:{trigger:.2f} ")
             
         time.sleep(0.05)
     

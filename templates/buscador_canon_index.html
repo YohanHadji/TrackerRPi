@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Feed</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f4f4f4;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        img {
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            font-size: 16px;
+            margin: 10px;
+            color: #fff;
+            background-color: #007bff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .button:hover {
+            background-color: #0056b3;
+        }
+
+        .button:active {
+            background-color: #003f7f;
+        }
+
+        .button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+
+        .active {
+            background-color: #28a745 !important;
+        }
+
+        audio {
+            margin-top: 20px;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <h1>Video Feed with Controls</h1>
+    <img src="{{ url_for('video_feed') }}" alt="Video Feed" style="width:100%; max-width:800px;">
+
+   
+    <div>
+        <button id="zoomIn" class="button" onclick="sendCommand('zoom_in', this)">Zoom In</button>
+        <button id="zoomOut" class="button" onclick="sendCommand('zoom_out', this)">Zoom Out</button>
+        <button id="rec" class="button" onclick="sendCommand('rec', this)">Rec</button>
+    </div>
+
+    <script>
+        function sendCommand(command, button) {
+            // Deshabilitar botón mientras se procesa
+            button.disabled = true;
+            button.classList.add('active');
+
+            fetch(`/${command}`, { method: 'POST' })
+                .then(response => {
+                    if (response.ok) {
+                        console.log(`${command} enviado con éxito.`);
+                    } else {
+                        console.error(`Error al enviar ${command}.`);
+                    }
+                })
+                .catch(error => console.error('Error:', error))
+                .finally(() => {
+                    // Rehabilitar botón después de un corto tiempo
+                    setTimeout(() => {
+                        button.disabled = false;
+                        button.classList.remove('active');
+                    }, 1000);
+                });
+        }
+    </script>
+</body>
+</html>
