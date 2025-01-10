@@ -3,7 +3,7 @@ import serial
 import numpy as np
 from communication import *
 from playerOne import *
-from camera import *
+#from camera import *
 import threading 
 #from picamera2 import Picamera2
 import cv2
@@ -99,7 +99,7 @@ input_values = {
     "trackingEnabled": 0
 }
 
-picam2.set_controls({"AnalogueGain": np.int32(input_values["gain"]), "ExposureTime": np.int32(input_values["exposureTime"])})
+#picam2.set_controls({"AnalogueGain": np.int32(input_values["gain"]), "ExposureTime": np.int32(input_values["exposureTime"])})
 
 # input_values = {}  # Assuming you have a global dictionary to store input values
 
@@ -215,12 +215,9 @@ def update_variable():
     return "Variable updated successfully!"
 
 if __name__ == '__main__':
-    try:
-        handler = logging.FileHandler('app.log')  # Guarda los logs en app.log
-        handler.setLevel(logging.DEBUG)
-        app.logger.addHandler(handler)
-        udp_thread = threading.Thread(target=udp_listener)
-        udp_thread.start()
-        app.run(host='0.0.0.0', port=5000, threaded=True)
-    finally:
-        picam2.stop()
+    handler = logging.FileHandler('app.log')  # Guarda los logs en app.log
+    handler.setLevel(logging.DEBUG)
+    app.logger.addHandler(handler)
+    udp_thread = threading.Thread(target=udp_listener)
+    udp_thread.start()
+    app.run(host='0.0.0.0', port=5002, threaded=True)
