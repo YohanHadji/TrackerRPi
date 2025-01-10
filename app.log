@@ -7072,3 +7072,181 @@ Error in send_focus: argument out of range
 Error in send_focus: argument out of range
 Error in send_focus: argument out of range
 Error in send_focus: argument out of range
+Exception on /send_udp [POST]
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/flask/app.py", line 2525, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/flask/app.py", line 1822, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/flask/app.py", line 1820, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/flask/app.py", line 1796, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/pi/TrackerRPi/GSMtrackerCanon.py", line 341, in send_udp
+    sendAbsPosToTeensy(azm, elv)
+  File "/home/pi/TrackerRPi/communication.py", line 179, in sendAbsPosToTeensy
+    payload_data = struct.pack('ff', float(azm), float(elv))
+                                     ^^^^^^^^^^
+ValueError: could not convert string to float: ''
+Exception on /send_udp [POST]
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/flask/app.py", line 2525, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/flask/app.py", line 1822, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/flask/app.py", line 1820, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/flask/app.py", line 1796, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/pi/TrackerRPi/GSMtrackerCanon.py", line 341, in send_udp
+    sendAbsPosToTeensy(azm, elv)
+  File "/home/pi/TrackerRPi/communication.py", line 179, in sendAbsPosToTeensy
+    payload_data = struct.pack('ff', float(azm), float(elv))
+                                     ^^^^^^^^^^
+ValueError: could not convert string to float: ''
+Exception on /send_udp [POST]
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/flask/app.py", line 2525, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/flask/app.py", line 1822, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/flask/app.py", line 1820, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/flask/app.py", line 1796, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/pi/TrackerRPi/GSMtrackerCanon.py", line 341, in send_udp
+    sendAbsPosToTeensy(azm, elv)
+  File "/home/pi/TrackerRPi/communication.py", line 179, in sendAbsPosToTeensy
+    payload_data = struct.pack('ff', float(azm), float(elv))
+                                     ^^^^^^^^^^
+ValueError: could not convert string to float: ''
+Exception on /send_udp [POST]
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/flask/app.py", line 2525, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/flask/app.py", line 1822, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/flask/app.py", line 1820, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/flask/app.py", line 1796, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/pi/TrackerRPi/GSMtrackerCanon.py", line 341, in send_udp
+    sendAbsPosToTeensy(azm, elv)
+  File "/home/pi/TrackerRPi/communication.py", line 179, in sendAbsPosToTeensy
+    payload_data = struct.pack('ff', float(azm), float(elv))
+                                     ^^^^^^^^^^
+ValueError: could not convert string to float: ''
+Exception on /send_udp [POST]
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/flask/app.py", line 2525, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/flask/app.py", line 1823, in full_dispatch_request
+    return self.finalize_request(rv)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/flask/app.py", line 1842, in finalize_request
+    response = self.make_response(rv)
+               ^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/flask/app.py", line 2134, in make_response
+    raise TypeError(
+TypeError: The view function for 'send_udp' did not return a valid response. The function either returned None or ended without a return statement.
+Exception on /send_udp [POST]
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/flask/app.py", line 2525, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/flask/app.py", line 1823, in full_dispatch_request
+    return self.finalize_request(rv)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/flask/app.py", line 1842, in finalize_request
+    response = self.make_response(rv)
+               ^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/flask/app.py", line 2134, in make_response
+    raise TypeError(
+TypeError: The view function for 'send_udp' did not return a valid response. The function either returned None or ended without a return statement.
+Exception on /send_udp [POST]
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/flask/app.py", line 2525, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/flask/app.py", line 1823, in full_dispatch_request
+    return self.finalize_request(rv)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/flask/app.py", line 1842, in finalize_request
+    response = self.make_response(rv)
+               ^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/flask/app.py", line 2134, in make_response
+    raise TypeError(
+TypeError: The view function for 'send_udp' did not return a valid response. The function either returned None or ended without a return statement.
+Exception on /send_udp [POST]
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/flask/app.py", line 2525, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/flask/app.py", line 1823, in full_dispatch_request
+    return self.finalize_request(rv)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/flask/app.py", line 1842, in finalize_request
+    response = self.make_response(rv)
+               ^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/flask/app.py", line 2134, in make_response
+    raise TypeError(
+TypeError: The view function for 'send_udp' did not return a valid response. The function either returned None or ended without a return statement.
+Exception on /send_udp [POST]
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/flask/app.py", line 2525, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/flask/app.py", line 1823, in full_dispatch_request
+    return self.finalize_request(rv)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/flask/app.py", line 1842, in finalize_request
+    response = self.make_response(rv)
+               ^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/flask/app.py", line 2134, in make_response
+    raise TypeError(
+TypeError: The view function for 'send_udp' did not return a valid response. The function either returned None or ended without a return statement.
+Exception on /send_udp [POST]
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/flask/app.py", line 2525, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/flask/app.py", line 1823, in full_dispatch_request
+    return self.finalize_request(rv)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/flask/app.py", line 1842, in finalize_request
+    response = self.make_response(rv)
+               ^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/flask/app.py", line 2134, in make_response
+    raise TypeError(
+TypeError: The view function for 'send_udp' did not return a valid response. The function either returned None or ended without a return statement.
+Exception on /send_udp [POST]
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/flask/app.py", line 2525, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/flask/app.py", line 1823, in full_dispatch_request
+    return self.finalize_request(rv)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/flask/app.py", line 1842, in finalize_request
+    response = self.make_response(rv)
+               ^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/flask/app.py", line 2134, in make_response
+    raise TypeError(
+TypeError: The view function for 'send_udp' did not return a valid response. The function either returned None or ended without a return statement.

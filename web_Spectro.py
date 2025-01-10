@@ -1,33 +1,34 @@
-from flask import Flask, jsonify, request,  render_template
-from seabreeze.spectrometers import Spectrometer
+from flask import Flask, jsonify
+from seabreeze.spectrometers import Spectrometer, SeaBreezeError
 
 app = Flask(__name__)
-@app.route("/")
-def index():
-    return render_template("spectro_index.html")
 
-@app.route("/spectrum", methods=["GET"])
+@app.route('/spectrum')
 def get_spectrum():
+    spec = None
     try:
+        # Intentar conectar con el espectrómetro
         spec = Spectrometer.from_first_available()
         wavelengths = spec.wavelengths().tolist()
         intensities = spec.intensities().tolist()
         return jsonify({"wavelengths": wavelengths, "intensities": intensities})
-    finally:
-        spec.close()
-
-@app.route("/set_integration_time", methods=["POST"])
-def set_integration_time():
-    try:
-        data = request.json
-        integration_time = int(data["integration_time"])
-        spec = Spectrometer.from_first_available()
-        spec.integration_time_micros(integration_time)
-        return jsonify({"success": True})
+    
+    except SeaBreezeError as e:
+        # Manejo específico de errores del espectrómetro
+        return jsonify({"error": f"SeaBreezeError: {str(e)}"}), 500
+    
     except Exception as e:
-        return jsonify({"success": False, "error": str(e)}), 400
+        # Manejo genérico de errores
+        return jsonify({"error": f"Unexpected error: {str(e)}"}), 500
+    
     finally:
-        spec.close()
-
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
+        # Cerrar conexión si el espectrómetro fue inicializado
+        if spec is not None:
+            try:
+                spec.close()
+            except SeaBreezeError as e:
+                # Loggear errores de cierre, si ocurren
+                print(f"Error closing spectrometer: {str(e)}")
+    
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', debug=True)
