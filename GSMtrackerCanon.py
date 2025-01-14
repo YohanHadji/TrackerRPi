@@ -173,7 +173,7 @@ def sendSettingToTracker():
     packet_length = len(payload_data)
     encoded_packet = capsule_instance.encode(packet_id, payload_data, packet_length)
     encoded_packet = bytearray(encoded_packet)
-    # sock.sendto(encoded_packet, (UDP_IP_TRACKER, UDP_PORT)) gustavo 14-01-2025
+    sock.sendto(encoded_packet, (UDP_IP_TRACKER, UDP_PORT)) 
     print("Sent settings to tracker")
 
 def generate_frames():

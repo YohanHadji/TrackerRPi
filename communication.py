@@ -239,8 +239,8 @@ def sendTargetToColimator(pointToSendIn):
     #s1 = 1333.141207480285 + (-0.91674131 * pointToSendIn.x) + (-0.02420612 * pointToSendIn.y)
     #s2 = 1501.435197615967 + (0.00769191 * pointToSendIn.x) + (-0.89521636 * pointToSendIn.y)
     # calibarcion 2024-12-28 
-    s1 = 1334.3567007257845 + (-0.95366284 * pointToSendIn.x) + (-0.01830235 * pointToSendIn.y)
-    s2 = 1551.941314303425 + (0.01582059 * pointToSendIn.x) + (-0.93854884 * pointToSendIn.y)
+    s1 = 1343.7939625310407 + (-0.01367876 * pointToSendIn.x) + (-0.90776423 * pointToSendIn.y)
+    s2 = 1503.554479850552 + (-0.91229297 * pointToSendIn.x) + (-0.01122311 * pointToSendIn.y)
     # x2 = round(x2, 3)
     # y2 = round(y2, 3)
     
