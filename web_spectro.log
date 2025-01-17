@@ -2738,3 +2738,39 @@
 2025-01-17 15:16:20,804 [INFO]: 192.168.1.185 - - [17/Jan/2025 15:16:20] "GET /spectrum HTTP/1.1" 200 -
 2025-01-17 15:16:21,632 [INFO]: Datos escritos en /home/pi/spectrometer_data/spectrum_data_2025-01-17_15-08-52.txt: 1044 puntos
 2025-01-17 15:16:21,811 [INFO]: 192.168.1.185 - - [17/Jan/2025 15:16:21] "GET /spectrum HTTP/1.1" 200 -
+2025-01-17 15:16:22,648 [INFO]: Datos escritos en /home/pi/spectrometer_data/spectrum_data_2025-01-17_15-08-52.txt: 1044 puntos
+2025-01-17 15:16:22,803 [INFO]: 192.168.1.185 - - [17/Jan/2025 15:16:22] "GET /spectrum HTTP/1.1" 200 -
+2025-01-17 15:16:23,661 [INFO]: Datos escritos en /home/pi/spectrometer_data/spectrum_data_2025-01-17_15-08-52.txt: 1044 puntos
+2025-01-17 15:16:23,802 [INFO]: 192.168.1.185 - - [17/Jan/2025 15:16:23] "GET /spectrum HTTP/1.1" 200 -
+2025-01-17 15:16:24,671 [INFO]: Datos escritos en /home/pi/spectrometer_data/spectrum_data_2025-01-17_15-08-52.txt: 1044 puntos
+2025-01-17 15:16:24,799 [INFO]: 192.168.1.185 - - [17/Jan/2025 15:16:24] "GET /spectrum HTTP/1.1" 200 -
+2025-01-17 15:16:25,687 [INFO]: Datos escritos en /home/pi/spectrometer_data/spectrum_data_2025-01-17_15-08-52.txt: 1044 puntos
+2025-01-17 15:16:25,805 [INFO]: 192.168.1.185 - - [17/Jan/2025 15:16:25] "GET /spectrum HTTP/1.1" 200 -
+2025-01-17 15:16:26,696 [INFO]: Datos escritos en /home/pi/spectrometer_data/spectrum_data_2025-01-17_15-08-52.txt: 1044 puntos
+2025-01-17 15:16:26,804 [INFO]: 192.168.1.185 - - [17/Jan/2025 15:16:26] "GET /spectrum HTTP/1.1" 200 -
+2025-01-17 15:16:27,713 [INFO]: Datos escritos en /home/pi/spectrometer_data/spectrum_data_2025-01-17_15-08-52.txt: 1044 puntos
+2025-01-17 15:16:27,805 [INFO]: 192.168.1.185 - - [17/Jan/2025 15:16:27] "GET /spectrum HTTP/1.1" 200 -
+2025-01-17 15:16:28,724 [INFO]: Datos escritos en /home/pi/spectrometer_data/spectrum_data_2025-01-17_15-08-52.txt: 1044 puntos
+2025-01-17 15:16:28,797 [INFO]: 192.168.1.185 - - [17/Jan/2025 15:16:28] "GET /spectrum HTTP/1.1" 200 -
+2025-01-17 15:16:29,740 [INFO]: Datos escritos en /home/pi/spectrometer_data/spectrum_data_2025-01-17_15-08-52.txt: 1044 puntos
+2025-01-17 15:16:29,801 [INFO]: 192.168.1.185 - - [17/Jan/2025 15:16:29] "GET /spectrum HTTP/1.1" 200 -
+2025-01-17 15:16:30,758 [INFO]: Datos escritos en /home/pi/spectrometer_data/spectrum_data_2025-01-17_15-08-52.txt: 1044 puntos
+2025-01-17 15:16:30,803 [INFO]: 192.168.1.185 - - [17/Jan/2025 15:16:30] "GET /spectrum HTTP/1.1" 200 -
+2025-01-17 15:16:31,776 [INFO]: Datos escritos en /home/pi/spectrometer_data/spectrum_data_2025-01-17_15-08-52.txt: 1044 puntos
+2025-01-17 15:16:31,797 [INFO]: 192.168.1.185 - - [17/Jan/2025 15:16:31] "GET /spectrum HTTP/1.1" 200 -
+2025-01-17 15:16:32,789 [INFO]: Datos escritos en /home/pi/spectrometer_data/spectrum_data_2025-01-17_15-08-52.txt: 1044 puntos
+2025-01-17 15:16:32,893 [INFO]: 192.168.1.185 - - [17/Jan/2025 15:16:32] "GET /spectrum HTTP/1.1" 200 -
+2025-01-17 15:16:33,829 [INFO]: Datos escritos en /home/pi/spectrometer_data/spectrum_data_2025-01-17_15-08-52.txt: 1044 puntos
+2025-01-17 15:16:33,887 [INFO]: 192.168.1.185 - - [17/Jan/2025 15:16:33] "GET /spectrum HTTP/1.1" 200 -
+2025-01-17 15:16:34,798 [INFO]: 192.168.1.185 - - [17/Jan/2025 15:16:34] "GET /spectrum HTTP/1.1" 200 -
+2025-01-17 15:16:34,886 [INFO]: Datos escritos en /home/pi/spectrometer_data/spectrum_data_2025-01-17_15-08-52.txt: 1044 puntos
+2025-01-17 15:16:35,797 [INFO]: 192.168.1.185 - - [17/Jan/2025 15:16:35] "GET /spectrum HTTP/1.1" 200 -
+2025-01-17 15:16:35,896 [INFO]: Datos escritos en /home/pi/spectrometer_data/spectrum_data_2025-01-17_15-08-52.txt: 1044 puntos
+2025-01-17 15:16:36,803 [INFO]: 192.168.1.185 - - [17/Jan/2025 15:16:36] "GET /spectrum HTTP/1.1" 200 -
+2025-01-17 15:16:36,916 [INFO]: Datos escritos en /home/pi/spectrometer_data/spectrum_data_2025-01-17_15-08-52.txt: 1044 puntos
+2025-01-17 15:16:37,804 [INFO]: 192.168.1.185 - - [17/Jan/2025 15:16:37] "GET /spectrum HTTP/1.1" 200 -
+2025-01-17 15:16:37,927 [INFO]: Datos escritos en /home/pi/spectrometer_data/spectrum_data_2025-01-17_15-08-52.txt: 1044 puntos
+2025-01-17 15:16:38,806 [INFO]: 192.168.1.185 - - [17/Jan/2025 15:16:38] "GET /spectrum HTTP/1.1" 200 -
+2025-01-17 15:16:38,936 [INFO]: Datos escritos en /home/pi/spectrometer_data/spectrum_data_2025-01-17_15-08-52.txt: 1044 puntos
+2025-01-17 15:16:39,801 [INFO]: 192.168.1.185 - - [17/Jan/2025 15:16:39] "GET /spectrum HTTP/1.1" 200 -
+2025-01-17 15:16:39,948 [INFO]: Datos escritos en /home/pi/spectrometer_data/spectrum_data_2025-01-17_15-08-52.txt: 1044 puntos
