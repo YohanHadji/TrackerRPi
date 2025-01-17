@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Colimador Control Canon</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        .container {
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            margin: 20px 0;
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        img {
+            max-width: 50%;
+            height: auto;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-right: 20px;
+        }
+
+        .sliders {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            max-height: 70vh; /* Limit height for scrolling */
+            overflow-y: auto;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+
+        .sliders div {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        label {
+            margin-right: 10px;
+            flex: 1;
+        }
+
+        input[type="range"] {
+            flex: 2;
+            margin: 0 10px;
+        }
+
+        p {
+            flex: 0.5;
+            margin: 0;
+            text-align: center;
+        }
+
+        select {
+            flex: 2;
+            margin: 0 10px;
+        }
+
+        .button-container {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .container-extra {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .container-extra div {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        button {
+            padding: 8px 12px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        input[type="text"] {
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Colimador Canon  Control</h1>
+   
+    <!-- Video Feed and Sliders Container -->
+    <div class="container">
+        <!-- Video Feed -->
+        <img src="{{ url_for('video_feed') }}" alt="Video Feed">
+
+        <!-- Sliders Container -->
+        <div class="sliders">
+            <div>
+                <label for="idRadius">ID Radius (px):</label>
+                <input type="range" id="idRadius" min="1" max="100" value="25">
+                <p id="idRadiusValue">25</p>
+            </div>
+            <div>
+                <label for="lockRadius">Lock Radius (px):</label>
+                <input type="range" id="lockRadius" min="50" max="500" value="400">
+                <p id="lockRadiusValue">400</p>
+            </div>
+            <div>
+                <label for="lightLifetime">Light Lifetime (ms):</label>
+                <input type="range" id="lightLifetime" min="100" max="1000" value="200">
+                <p id="lightLifetimeValue">200</p>
+            </div>
+            <div>
+                <label for="lightThreshold">Light Threshold:</label>
+                <input type="range" id="lightThreshold" min="10" max="255" value="200">
+                <p id="lightThresholdValue">200</p>
+            </div>
+            <div>
+                <label for="switchFrame">Switch Frame:</label>
+                <input type="range" id="switchFrame" min="0" max="1" value="1" step="1">
+                <p id="switchFrameValue">1</p>
+            </div>
+            <div>
+                <label for="trackingEnabled">Tracking Enabled:</label>
+                <select id="trackingEnabled">
+                    <option value="1">1</option>
+                    <option value="0">0</option>
+                </select>
+                <p id="trackingEnabledValue">0</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Azimuth, Elevation, and Focus Controls -->
+    <div class="container-extra">
+        <div>
+            <label for="azm">Azimuth:</label>
+            <input type="text" id="azm" placeholder="Enter azimuth">
+        </div>
+        <div>
+            <label for="elv">Elevation:</label>
+            <input type="text" id="elv" placeholder="Enter elevation">
+        </div>
+        <button onclick="sendUDP()">Send</button>
+    </div>
+
+    <div class="container-extra">
+        <div>
+            <label for="s1">S1:</label>
+            <input type="text" id="s1" placeholder="Enter Offset S1">
+        </div>
+        <div>
+            <label for="s2">S2:</label>
+            <input type="text" id="s2" placeholder="Enter Offset S2">
+        </div>
+        <button onclick="sendOffset()">Send</button>
+    </div>
+
+    <div class="container-extra">
+        <div>
+            <label for="focus">Focus:</label>
+            <input type="text" id="foc" placeholder="Enter Focus">
+        </div>
+        <button onclick="sendFocus()">Send</button>
+    </div>
+</body>
+<script>
+    // Actualiza el valor visual del control y envía al servidor
+    function updateControlValue(controlId, displayId) {
+        const control = document.getElementById(controlId);
+        const display = document.getElementById(displayId);
+
+        control.addEventListener("input", function () {
+            const value = control.value;
+            display.textContent = value;
+
+            // Enviar al servidor
+            fetch("/update_variable", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ id: controlId, value: value }),
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`Server error: ${response.statusText}`);
+                    }
+                    return response.json();
+                })
+                .then(data => console.log(`Updated ${controlId}:`, data))
+                .catch(error => console.error(`Error updating ${controlId}:`, error));
+        });
+    }
+
+    // Asignar dinámicamente a cada control
+    updateControlValue("idRadius", "idRadiusValue");
+    updateControlValue("lockRadius", "lockRadiusValue");
+    updateControlValue("lightLifetime", "lightLifetimeValue");
+    updateControlValue("lightThreshold", "lightThresholdValue");
+    updateControlValue("switchFrame", "switchFrameValue");
+    updateControlValue("trackingEnabled", "trackingEnabledValue");
+
+    // Manejo de enfoque dinámico
+    function sendDynamicFocus(value) {
+        fetch("/send_focus", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ foc: value }),
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Server error: ${response.statusText}`);
+                }
+                return response.json();
+            })
+            .then(data => console.log("Focus updated:", data))
+            .catch(error => console.error("Error updating focus:", error));
+    }
+
+    // Evento para actualizar el foco dinámicamente con la rueda del mouse
+    const focusInput = document.getElementById('foc');
+    focusInput.addEventListener('wheel', function (event) {
+        event.preventDefault();
+        let currentValue = parseFloat(this.value) || 0;
+        const step = event.deltaY < 0 ? 100 : -100; // Incremento o decremento
+        currentValue += step;
+        this.value = currentValue;
+        sendDynamicFocus(currentValue);
+    });
+</script>
+
+</html>

@@ -124,12 +124,10 @@ playerOneCamInit()
 # Variables to store slider and dropdown values
 input_values = {
     "idRadius": 25,
-    "lockRadius": 100,
+    "lockRadius": 400,
     "lightLifetime": 200,
     "lightThreshold": 200,
     "switchFrame": 0,  # Assuming it's initially set to 0
-    "gain": 1.0,
-    "exposureTime": 100,
     "trackingEnabled": 0
 }
 
@@ -379,7 +377,7 @@ def video_feed():
 
 @app.route('/')
 def index():
-    return render_template('ceres_index_control.html')
+    return render_template('colimador_index.html')
 
 @app.route('/update_variable', methods=['POST'])
 def update_variable():
