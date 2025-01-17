@@ -14,6 +14,7 @@ lockRadius = 100
 idRadius = 10
 lightLifetime = 200
 lightThreshold = 200
+trackingEnabled = False
 
 
 class LightPoint:
@@ -154,6 +155,7 @@ def detect(frame, sensorTimeStamp):
     try: 
         gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         # Method 1: Apply a simple threshold
+        print(lightThreshold)
         _dummy, b_frame = cv2.threshold(gray_frame,lightThreshold, 255, cv2.THRESH_BINARY)
 
         # Method 2: Apply adaptive threshold
@@ -182,7 +184,7 @@ def detect(frame, sensorTimeStamp):
         # # Perform non-maximum suppression
         # b_frame = cv2.dilate(thresh, None)
 
-        result = obtain_top_contours(b_frame, 10)
+        result = obtain_top_contours(b_frame, 30)
         all_light_points = process_and_store_light_points(result, sensorTimeStamp)
         return all_light_points
     
@@ -279,9 +281,14 @@ def getLockedPoint(all_light_points, resolution, isButtonPressed=False,swLeft=Fa
 
     return lockedPoint
 
-def setDetectionSettings(idRadiusIn, lockRadiusIn, lightLifetimeIn, lightThresholdIn):
-    global idRadius, lockRadius, lightLifetime, lightThreshold 
+def setDetectionSettings(idRadiusIn, lockRadiusIn, lightLifetimeIn, lightThresholdIn, trackingEnabledIn):
+    global idRadius, lockRadius, lightLifetime, lightThreshold, trackingEnabled 
     idRadius = idRadiusIn
     lockRadius = lockRadiusIn
     lightLifetime = lightLifetimeIn
     lightThreshold = lightThresholdIn
+    trackingEnabled = trackingEnabledIn
+
+def getTrackingEnabled():
+    global trackingEnabled
+    return trackingEnabled

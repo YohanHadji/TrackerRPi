@@ -181,20 +181,24 @@ def generate_frames():
         # print("Generating frames")
         # Get a frame with metadata
         frame,sensorTimestamp = serverPlayerOne.wait_for_frame()
+           
+        top_left = (375, 150)
+        bottom_right = (1550, 925)
         
-        LightPointArray = [LightPoint(name="ABCD", isVisible=False, x=0, y=0, age=0) for _ in range(10)]
+        # all_light_points = detect(frame, sensorTimestamp)
+        # # print(all_light_points)
+        
+        LightPointArray = [LightPoint(name="ABCD", isVisible=False, x=0, y=0, age=0) for _ in range(30)]
 
         # Print only the first 3 light points with their name, position x and y only.
-        for i, (name, _, x, y, age, _, speed_x, speed_y, acceleration_x, acceleration_y) in enumerate(all_light_points[:10]):
+        for i, (name, _, x, y, age, _, speed_x, speed_y, acceleration_x, acceleration_y) in enumerate(all_light_points[:30]):
             # print("Point %d: (%s, %d, %d, %d, %d, %d, %d)" % (i + 1, name, x, y, speed_x, speed_y, acceleration_x, acceleration_y))
             LightPointArray[i] = LightPoint(name, 1, x, y, age)
 
 
         gray_frame = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)
         _dummy, b_frame = cv2.threshold(gray_frame,np.int32(input_values["lightThreshold"]), 255, cv2.THRESH_BINARY)
-                
-        top_left = (375, 150)
-        bottom_right = (1550, 925)
+
         
         # Encode the frame
         if (input_values["switchFrame"] == 0):
@@ -248,8 +252,8 @@ def tracking_loop():
             frame,sensorTimeStamp = serverPlayerOne.wait_for_frame(frame)
                         
             # Define the rectangle coordinates
-            top_left = (385, 150)
-            bottom_right = (1540, 925)
+            top_left = (375, 150)
+            bottom_right = (1550, 925)
 
             # Create a mask with the same dimensions as the frame, initially all black
             mask = np.zeros_like(frame)
@@ -259,20 +263,22 @@ def tracking_loop():
 
             # Apply the mask to the original image using bitwise operations
             result = cv2.bitwise_and(frame, mask)  
+            
             frame = result   
                                           
             all_light_points = detect(frame, sensorTimeStamp)
+            print(all_light_points)
                         
             # If all light points is not null, then continue
             if (all_light_points is not None):
                 pointToSend = getLockedPoint(all_light_points, camRes, joystickBtn, swUp, swDown, swLeft, swRight)
                 # print(pointToSend.name, pointToSend.x, pointToSend.y)
 
-                if (not trackingEnabled):
-                    # print("Tracking disabled")
+                if (not getTrackingEnabled()):
+                    print("Tracking disabled")
                     pointToSend.isVisible = False
-                #else:
-                    # print("Tracking enabled")
+                else:
+                    print("Tracking enabled")
                 
                 if (calibrationMode) :
                     col1, col2, newPacket = getPositionFromColimator()
@@ -306,7 +312,7 @@ def tracking_loop():
                     pointToSend.x = pointToSend.x+offsetX
                     pointToSend.y = pointToSend.y+offsetY
                                 
-                    sendTargetToTeensy(pointToSend, 33, 0.05, 2)
+                    # sendTargetToTeensy(pointToSend, 33, 0.05, 2)
 
                 if (newPacketReceived()):
                     packetType = newPacketReceivedType()
@@ -320,12 +326,12 @@ def tracking_loop():
                         cameraSetting = returnLastPacketData(packetType)
                         # setCameraSettings(cameraSetting["gain"], cameraSetting["exposureTime"])
                         print("Applied camera settings")
-                        setDetectionSettings(cameraSetting["idRadius"], cameraSetting["lockRadius"], cameraSetting["lightLifetime"], cameraSetting["lightThreshold"])
-                        print(cameraSetting["trackingEnabled"])
-                        if (not cameraSetting["trackingEnabled"]):
-                            trackingEnabled = False
-                        else:
-                            trackingEnabled = True
+                        # setDetectionSettings(cameraSetting["idRadius"], cameraSetting["lockRadius"], cameraSetting["lightLifetime"], cameraSetting["lightThreshold"])
+                        # print(cameraSetting["trackingEnabled"])
+                        # if (not cameraSetting["trackingEnabled"]):
+                        #     trackingEnabled = False
+                        # else:
+                        #     trackingEnabled = True
                     # elif (packetType == "dataFromTracker"):
                     #     # Print the position of tracker and pointToSendX, pointToSendY
                     #     trackerAzm, trackerElv = returnLastPacketData(packetType)
@@ -390,9 +396,10 @@ def update_variable():
     if control_id in input_values:
         input_values[control_id] = int(value)
         print(f"Slider {control_id} updated to {value}")
-        sendSettingToTracker()
+        # sendSettingToTracker()
         # setCameraSettings(input_values["gain"], input_values["exposureTime"])
-        setPlayerOneCameraSettings(input_values["gain"], input_values["exposureTime"])
+        # setPlayerOneCameraSettings(input_values["gain"], input_values["exposureTime"])
+        setDetectionSettings(input_values["idRadius"], input_values["lockRadius"], input_values["lightLifetime"], input_values["lightThreshold"], input_values["trackingEnabled"])
     else:
         print(f"Unknown control ID: {control_id}")
     

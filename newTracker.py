@@ -206,6 +206,7 @@ def generate_frames():
         #        b'Content-Type: image/jpeg\r\n\r\n' + b_frame + b'\r\n')
 
 def tracking_loop():
+
     global LightPointArray, all_light_points, input_values, resolution, picam2, xPos, yPos, img_width, img_height, startTime, firstTimeNoted, timeOffset, timeOffsetAverage, trackingEnabled, joystickX, joystickY, joystickBtn, swUp, swDown, swLeft, swRight
 
     frame = None
@@ -275,6 +276,8 @@ def tracking_loop():
             pointToSend.age = np.int32((((time.time()-startTime)*1e9)-(sensorTimeStamp+timeOffsetAverage))/1e6)
             # print(pointToSend.age)
             # oldX = pointToSend.x
+            
+            
             # pointToSend.x = pointToSend.x+15
             # pointToSend.y = pointToSend.y-13
             

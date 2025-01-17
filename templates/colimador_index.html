@@ -155,41 +155,13 @@
                 </select>
                 <p id="trackingEnabledValue">0</p>
             </div>
+            <div>
+                <label for="focus">Focus:</label>
+                <input type="text" id="foc" placeholder="Enter Focus">
+            </div>
         </div>
     </div>
 
-    <!-- Azimuth, Elevation, and Focus Controls -->
-    <div class="container-extra">
-        <div>
-            <label for="azm">Azimuth:</label>
-            <input type="text" id="azm" placeholder="Enter azimuth">
-        </div>
-        <div>
-            <label for="elv">Elevation:</label>
-            <input type="text" id="elv" placeholder="Enter elevation">
-        </div>
-        <button onclick="sendUDP()">Send</button>
-    </div>
-
-    <div class="container-extra">
-        <div>
-            <label for="s1">S1:</label>
-            <input type="text" id="s1" placeholder="Enter Offset S1">
-        </div>
-        <div>
-            <label for="s2">S2:</label>
-            <input type="text" id="s2" placeholder="Enter Offset S2">
-        </div>
-        <button onclick="sendOffset()">Send</button>
-    </div>
-
-    <div class="container-extra">
-        <div>
-            <label for="focus">Focus:</label>
-            <input type="text" id="foc" placeholder="Enter Focus">
-        </div>
-        <button onclick="sendFocus()">Send</button>
-    </div>
 </body>
 <script>
     // Actualiza el valor visual del control y envía al servidor

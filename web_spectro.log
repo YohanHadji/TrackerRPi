@@ -2793,3 +2793,12 @@
 2025-01-17 15:16:48,799 [INFO]: 192.168.1.185 - - [17/Jan/2025 15:16:48] "GET /spectrum HTTP/1.1" 200 -
 2025-01-17 15:16:49,076 [INFO]: Datos escritos en /home/pi/spectrometer_data/spectrum_data_2025-01-17_15-08-52.txt: 1044 puntos
 2025-01-17 15:16:49,450 [INFO]: Espectrómetro cerrado correctamente al salir.
+2025-01-17 20:11:00,408 [INFO]: Usuario actual: pi
+2025-01-17 20:11:00,408 [INFO]: Inicializando espectrómetro...
+2025-01-17 20:11:00,446 [WARNING]: No se encontraron espectrómetros conectados (intento 1/5).
+2025-01-17 20:11:02,450 [WARNING]: No se encontraron espectrómetros conectados (intento 2/5).
+2025-01-17 20:11:04,455 [WARNING]: No se encontraron espectrómetros conectados (intento 3/5).
+2025-01-17 20:11:06,460 [WARNING]: No se encontraron espectrómetros conectados (intento 4/5).
+2025-01-17 20:11:08,465 [WARNING]: No se encontraron espectrómetros conectados (intento 5/5).
+2025-01-17 20:11:10,467 [CRITICAL]: No se pudo inicializar el espectrómetro tras múltiples intentos.
+2025-01-17 20:11:10,467 [CRITICAL]: Error crítico al iniciar el servidor: No se encontraron espectrómetros conectados tras varios intentos.
