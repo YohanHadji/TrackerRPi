@@ -337,7 +337,7 @@ def parseIncomingDataFromUDP():
     global sock
     try:
         data, addr = sock.recvfrom(1024)  # Adjust the buffer size as needed
-        # print(f"Received {len(data)} bytes from {addr}")
+        print(f"Received {len(data)} bytes from {addr}")
 
         # Decode the data with capsule
         for byte in data:

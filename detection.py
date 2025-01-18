@@ -155,7 +155,6 @@ def detect(frame, sensorTimeStamp):
     try: 
         gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         # Method 1: Apply a simple threshold
-        print(lightThreshold)
         _dummy, b_frame = cv2.threshold(gray_frame,lightThreshold, 255, cv2.THRESH_BINARY)
 
         # Method 2: Apply adaptive threshold

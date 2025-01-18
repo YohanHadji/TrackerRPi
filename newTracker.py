@@ -69,19 +69,32 @@ timeOffset = 0
 timeOffsetAverage = 0
 trackingEnabled = False
 
-def udp_listener():
-    UDP_IP = "0.0.0.0" 
-    UDP_PORT = 8888
+trackerAzmGlobal = 0
+trackerElvGlobal = 0
 
-    sock = socket.socket(socket.AF_INET, # Internet
-                         socket.SOCK_DGRAM) # UDP
-    sock.bind((UDP_IP, UDP_PORT))
+def udp_receiver():
+    global trackerAzmGlobal, trackerElvGlobal
+    """
+    Hilo para recibir datos UDP y actualizar azimut y elevación en el servidor.
+    """
+    udp_ip = '0.0.0.0'
+    udp_port = 8888
+
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    sock.bind((udp_ip, udp_port))
+    print(f"Escuchando datos UDP en {udp_ip}:{udp_port}...")
 
     while True:
-        data, addr = sock.recvfrom(1024) 
-        # Decode the data with capsule
-        for byte in data:
-            capsule_instance.decode(byte)
+        try:
+            data, _ = sock.recvfrom(1024)
+            if len(data) >= 12:
+                packet_id = data[2]
+                if packet_id == 33:
+                    trackerAzmGlobal, trackerElvGlobal = struct.unpack_from('<ff', data, offset=4)
+                    print(trackerAzmGlobal, trackerElvGlobal)
+        except Exception as e:
+            print(f"Error en UDP receiver: {e}")
+
 
 def sendSettingToTracker():
     global input_values, sock
@@ -209,13 +222,14 @@ def tracking_loop():
 
     global LightPointArray, all_light_points, input_values, resolution, picam2, xPos, yPos, img_width, img_height, startTime, firstTimeNoted, timeOffset, timeOffsetAverage, trackingEnabled, joystickX, joystickY, joystickBtn, swUp, swDown, swLeft, swRight
 
+    scanningMode = False
     frame = None
+    
     while True:
-
+        
         if (not firstTimeNoted):
             frame,sensorTimeStamp = server.wait_for_frame(frame)
             firstTimeNoted = True
-            # print("First frame received")
 
             numberOfFrames = 0
 
@@ -227,70 +241,45 @@ def tracking_loop():
 
             timeOffset /= numberOfFrames
             timeOffsetAverage = np.int64(timeOffset)
-            # print("Time offset calculated")
-            # print(timeOffsetAverage)
 
         else:
             frame,sensorTimeStamp = server.wait_for_frame(frame)
-            # frame = cv2.rotate(frame, cv2.ROTATE_90_COUNTERCLOCKWISE)
-            # frame = cv2.rotate(frame, cv2.ROTATE_90_COUNTERCLOCKWISE)
-            #Vertical flip 
-            #frame = cv2.flip(frame, -1)
-            #Horizontal flip
-            #frame = cv2.flip(frame, -1)
 
             # Rotate frame by 90° to the left
-
             all_light_points = detect(frame, sensorTimeStamp)
             
+            if (scanningMode): 
+                azmSetpoint = 20
+                elvSetpoint = 20
+                
+                azmError = azmSetpoint-trackerAzmGlobal
+                elvError = elvSetpoint-trackerElvGlobal
+                
+                gain = 50
+                
+                pointToSendControl = LightPoint(name="ABCD", isVisible=True, x=azmError*gain, y=elvError*gain, age=0)
+                print(trackerAzmGlobal, azmSetpoint, trackerElvGlobal, elvSetpoint)
+                
+                sendTargetToTeensy(pointToSendControl, 33, 30, 5)
+                
+            else:
+                # parseIncomingDataFromUDP()
+                pointToSend = getLockedPoint(all_light_points, camRes, joystickBtn, swUp, swDown, swLeft, swRight)
+                
+                # print(pointToSend.name, pointToSend.x, pointToSend.y)
+                if (not trackingEnabled):
+                    # print("Tracking disabled")
+                    pointToSend.isVisible = False
+                #else:
+                    # print("Tracking enabled")
+                
+                pointToSend.age = np.int32((((time.time()-startTime)*1e9)-(sensorTimeStamp+timeOffsetAverage))/1e6)
             
-            # Print in line the first 3 points in all light points
-            # for i, (existing_name, existing_firstSeen, existing_x, existing_y, age, existing_timestamp, existing_speed_x, existing_speed_y, existing_acceleration_x, existing_acceleration_Y)in enumerate(all_light_points):
-            #     print(existing_name, existing_x, existing_y)
+                sendTargetToTeensy(pointToSend, 33, 30, 50)
+                
+                # print(pointToSend.name, pointToSend.x, pointToSend.y, pointToSend.age, pointToSend.isVisible)
+                # printFps()
             
-            # print(" --- ")
-
-            # if (newPacketReceived()):
-            #     packetType = newPacketReceivedType()
-            #     if (packetType == "pointList"):
-            #         LightPointArray = returnLastPacketData(packetType)
-            #     if (packetType == "dataFromTracker"):
-            #         trackerAzm, trackerElv = returnLastPacketData(packetType)
-            #         # print(trackerAzm)
-            #         # print(trackerElv)
-            #         # Draw a white point on the frame at coordinate x and y (in pixels)
-
-            # parseIncomingDataFromUDP()
-
-            pointToSend = getLockedPoint(all_light_points, camRes, joystickBtn, swUp, swDown, swLeft, swRight)
-            # print(pointToSend.name, pointToSend.x, pointToSend.y)
-
-            if (not trackingEnabled):
-                # print("Tracking disabled")
-                pointToSend.isVisible = False
-            #else:
-                # print("Tracking enabled")
-            
-            # pointToSend.age = np.int32((np.int64((time.time()-startTime)*1e9)-timeOffsetAverage)-sensorTimeStamp)
-            # print(sensorTimeStamp, timeOffsetAverage)
-            pointToSend.age = np.int32((((time.time()-startTime)*1e9)-(sensorTimeStamp+timeOffsetAverage))/1e6)
-            # print(pointToSend.age)
-            # oldX = pointToSend.x
-            
-            
-            # pointToSend.x = pointToSend.x+15
-            # pointToSend.y = pointToSend.y-13
-            
-                        
-            pointToSend.x = pointToSend.x
-            pointToSend.y = pointToSend.y 
-
-            print(pointToSend.name, pointToSend.x, pointToSend.y, pointToSend.age, pointToSend.isVisible)
-
-            sendTargetToTeensy(pointToSend, 33, 30, 50)
-
-            printFps()
-
             if (newPacketReceived()):
                 packetType = newPacketReceivedType()
                 if (packetType == "controller"):
@@ -309,10 +298,11 @@ def tracking_loop():
                         trackingEnabled = False
                     else:
                         trackingEnabled = True
-                # elif (packetType == "dataFromTracker"):
-                #     # Print the position of tracker and pointToSendX, pointToSendY
-                #     trackerAzm, trackerElv = returnLastPacketData(packetType)
-                #     print(trackerAzm, trackerElv, pointToSend.x, pointToSend.y)
+                elif (packetType == "dataFromTracker"):
+                    print("Received data from teensy")
+                    # Print the position of tracker and pointToSendX, pointToSendY
+                    trackerAzm, trackerElv = returnLastPacketData(packetType)
+                    print(trackerAzm, trackerElv)
 
 
 @app.route('/video_feed')
@@ -337,11 +327,7 @@ def update_variable():
         print(f"Slider {control_id} updated to {value}")
         # sendSettingToTracker()
         setCameraSettings(input_values["gain"], input_values["exposureTime"])
-        setDetectionSettings(input_values["idRadius"], input_values["lockRadius"], input_values["lightLifetime"], input_values["lightThreshold"])
-        if (not input_values["trackingEnabled"]):
-            trackingEnabled = False
-        else:
-            trackingEnabled = True
+        setDetectionSettings(input_values["idRadius"], input_values["lockRadius"], input_values["lightLifetime"], input_values["lightThreshold"], input_values["trackingEnabled"])
     else:
         print(f"Unknown control ID: {control_id}")
     
@@ -357,8 +343,9 @@ if __name__ == '__main__':
         thread1 = Thread(target=tracking_loop)
         thread1.start()
 
-        udp_thread = threading.Thread(target=udp_listener)
+        udp_thread = threading.Thread(target=udp_receiver)
         udp_thread.start()
+        
         app.run(host='0.0.0.0', port=5000, threaded=True)
 
     finally:
