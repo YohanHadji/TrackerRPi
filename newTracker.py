@@ -43,6 +43,7 @@ input_values = {
     "switchFrame": 0,  # Assuming it's initially set to 0
     "gain": 1.0,
     "exposureTime": 100,
+    "scanWaitTime": 5,
     "trackingEnabled": 0
 }
 
@@ -72,6 +73,8 @@ trackingEnabled = False
 trackerAzmGlobal = 0
 trackerElvGlobal = 0
 
+scanInProgress = False
+
 def udp_receiver():
     global trackerAzmGlobal, trackerElvGlobal
     """
@@ -91,7 +94,7 @@ def udp_receiver():
                 packet_id = data[2]
                 if packet_id == 33:
                     trackerAzmGlobal, trackerElvGlobal = struct.unpack_from('<ff', data, offset=4)
-                    print(trackerAzmGlobal, trackerElvGlobal)
+                    # print(trackerAzmGlobal, trackerElvGlobal)
         except Exception as e:
             print(f"Error en UDP receiver: {e}")
 
@@ -220,9 +223,8 @@ def generate_frames():
 
 def tracking_loop():
 
-    global LightPointArray, all_light_points, input_values, resolution, picam2, xPos, yPos, img_width, img_height, startTime, firstTimeNoted, timeOffset, timeOffsetAverage, trackingEnabled, joystickX, joystickY, joystickBtn, swUp, swDown, swLeft, swRight
+    global LightPointArray, all_light_points, input_values, resolution, picam2, xPos, yPos, img_width, img_height, startTime, firstTimeNoted, timeOffset, timeOffsetAverage, trackingEnabled, joystickX, joystickY, joystickBtn, swUp, swDown, swLeft, swRight, scanInProgress, trackerAzmGlobal, trackerElvGlobal
 
-    scanningMode = False
     frame = None
     
     while True:
@@ -248,37 +250,83 @@ def tracking_loop():
             # Rotate frame by 90° to the left
             all_light_points = detect(frame, sensorTimeStamp)
             
-            if (scanningMode): 
-                azmSetpoint = 20
-                elvSetpoint = 20
+            if (scanInProgress): 
                 
-                azmError = azmSetpoint-trackerAzmGlobal
-                elvError = elvSetpoint-trackerElvGlobal
+                # Constants
+                image_width = 800  # Image width in pixels
+                image_height = 606  # Image height in pixels
+                fov_horizontal = 14.8154  # Field of view in degrees (horizontal)
+                fov_vertical = 10.8134  # Field of view in degrees (vertical)
+
+
+                # Calculate degrees per pixel
+                deg_per_pixel_h = fov_horizontal / image_width
+                deg_per_pixel_v = fov_vertical / image_height
+
+                # Create the new list with azimuth and elevation coordinates
+                light_points_with_coordinates = [
+                    (
+                        name, 
+                        trackerAzmGlobal + ((x-image_width/2.0) * deg_per_pixel_h),  # Absolute azimuth
+                        trackerElvGlobal + (-(y-image_height/2.0) * deg_per_pixel_v)   # Absolute elevation
+                    )
+                    for name, firstSeen, x, y, age, timestamp, speed_x, speed_y, acceleration_x, acceleration_y in all_light_points
+                ]
                 
-                gain = 50
+                print(light_points_with_coordinates)
                 
-                pointToSendControl = LightPoint(name="ABCD", isVisible=True, x=azmError*gain, y=elvError*gain, age=0)
-                print(trackerAzmGlobal, azmSetpoint, trackerElvGlobal, elvSetpoint)
+                ## To save points -->
+                # for point in light_points_with_coordinates:
+                #     name, abs_az, abs_el = point
+                #     save(name, az, el, "saved.txt")
                 
-                sendTargetToTeensy(pointToSendControl, 33, 30, 5)
+                initialAzm = trackerAzmGlobal
+                initialElv = trackerElvGlobal
+                
+                light_points_with_coordinates.append(["ZZZZ", initialAzm, initialElv])
+                
+                for point in light_points_with_coordinates:
+                    name, abs_az, abs_el = point
+                    
+                    print("Going to point:", name)
+                    
+                    azmSetpoint = abs_az
+                    elvSetpoint = abs_el
+                    
+                    azmError = azmSetpoint-trackerAzmGlobal
+                    elvError = elvSetpoint-trackerElvGlobal
+                    timeEnd = time.time()
+                    loopTime = time.time()
+                    
+                    while (abs(azmError)>0.05 or abs(elvError)>0.05): 
+                        azmError = azmSetpoint-trackerAzmGlobal
+                        elvError = elvSetpoint-trackerElvGlobal
+                        
+                        gain = 50
+                        
+                        pointToSendControl = LightPoint(name="ABCD", isVisible=True, x=azmError*gain, y=elvError*gain, age=0)
+                        sendTargetToTeensy(pointToSendControl, 33, 30, 3)
+                        
+                    
+                    print("Point reached!")
+                    
+                    time.sleep(input_values["scanWaitTime"])
+                
+                scanInProgress = False
                 
             else:
                 # parseIncomingDataFromUDP()
                 pointToSend = getLockedPoint(all_light_points, camRes, joystickBtn, swUp, swDown, swLeft, swRight)
                 
-                # print(pointToSend.name, pointToSend.x, pointToSend.y)
-                if (not trackingEnabled):
-                    # print("Tracking disabled")
+                if (not getTrackingEnabled()):
                     pointToSend.isVisible = False
-                #else:
-                    # print("Tracking enabled")
                 
                 pointToSend.age = np.int32((((time.time()-startTime)*1e9)-(sensorTimeStamp+timeOffsetAverage))/1e6)
             
-                sendTargetToTeensy(pointToSend, 33, 30, 50)
+                sendTargetToTeensy(pointToSend, 33, 15, 50)
                 
-                # print(pointToSend.name, pointToSend.x, pointToSend.y, pointToSend.age, pointToSend.isVisible)
-                # printFps()
+                print(pointToSend.name, pointToSend.x, pointToSend.y, pointToSend.age, pointToSend.isVisible)
+                printFps()
             
             if (newPacketReceived()):
                 packetType = newPacketReceivedType()
@@ -316,7 +364,7 @@ def index():
 
 @app.route('/update_variable', methods=['POST'])
 def update_variable():
-    global input_values, trackingEnabled
+    global input_values, trackingEnabled, scanInProgress 
 
     data = request.get_json()
     control_id = data.get("id")
@@ -328,8 +376,12 @@ def update_variable():
         # sendSettingToTracker()
         setCameraSettings(input_values["gain"], input_values["exposureTime"])
         setDetectionSettings(input_values["idRadius"], input_values["lockRadius"], input_values["lightLifetime"], input_values["lightThreshold"], input_values["trackingEnabled"])
+    elif control_id == 99:
+        print("Start Scanning")
+        scanInProgress = True
     else:
         print(f"Unknown control ID: {control_id}")
+        
     
     picam2.set_controls({"AnalogueGain": np.int32(input_values["gain"]), "ExposureTime": np.int32(input_values["exposureTime"])})
 
