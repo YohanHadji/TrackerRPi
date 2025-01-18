@@ -61,7 +61,8 @@ try:
         y_axis = -round(joystick.get_axis(1),2) # Y-axis value
         speed = joystick.get_axis(2)  # Throttle level
         trigger = joystick.get_button(0)
-        print(pygame.event.type)
+        
+        print(joystick.get_button(1))
         
         
         if  (x_axis==0):
