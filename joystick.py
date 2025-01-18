@@ -63,6 +63,7 @@ try:
         trigger = joystick.get_button(0)
         print(pygame.event.type)
         
+        
         if  (x_axis==0):
             joystickInitialized = True
         if (y_axis==0):
