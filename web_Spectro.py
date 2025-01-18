@@ -25,6 +25,11 @@ output_dir = "/home/pi/spectrometer_data"
 file_lock = threading.Lock()
 current_integration_time = 100000  # Tiempo de integración inicial en µs
 
+wavelengths = None
+intensities = None
+
+spectroNotReady = True
+
 # Verifica y crea el directorio de salida si no existe
 if not os.path.exists(output_dir):
     try:
@@ -164,21 +169,58 @@ def stop_capture():
 def index():
     return render_template("spectro_index.html")
 
+def spectrum_reader():
+    global spec, current_integration_time, wavelengths, intensities, spectroNotReady
+    
+    while True:
+        wavelengths = spec.wavelengths()
+        intensities = spec.intensities()
+        
+        # # Find the peak intensity value
+        peak_intensity = max(intensities)
+        
+        saturation_value = 200000
+
+        # Check if the peak intensity is saturated
+        if peak_intensity >= saturation_value:
+            # Saturated: reduce integration time by half
+            new_integration_time = current_integration_time / 2
+        else:
+            # Not saturated: adjust integration time to optimize for peak value
+            adjustment_ratio = 180000 / peak_intensity
+            new_integration_time = current_integration_time*(((adjustment_ratio-1)/10)+1)
+        
+        if new_integration_time>10000000:
+            new_integration_time = 10000000
+            
+        if new_integration_time<10000:
+            new_integration_time = 10000
+            
+        current_integration_time = new_integration_time
+
+        # Set the new integration time
+        spec.integration_time_micros(current_integration_time)
+
+        # Output for debugging or confirmation
+        print(f"Peak Intensity: {peak_intensity}")
+        print(f"New Integration Time: {current_integration_time}")
+        
+        spectroNotReady = False
+    
+
 @app.route("/spectrum", methods=["GET"])
 def get_spectrum_endpoint():
     """Obtiene el espectro en tiempo real."""
-    global spec
+    global spec, current_integration_time, wavelengths, intensities, spectroNotReady
     try:
-        if not spec:
+        if ((not spec) or spectroNotReady):
             return jsonify({"error": "Espectrómetro no inicializado"}), 500
-
-        wavelengths = spec.wavelengths()
-        intensities = spec.intensities()
-
+        
         return jsonify({
             "wavelengths": wavelengths.tolist(),
             "intensities": intensities.tolist(),
         })
+        
     except Exception as e:
         logging.error(f"Error al obtener el espectro: {e}")
         return jsonify({"error": str(e)}), 500
@@ -187,6 +229,10 @@ if __name__ == "__main__":
     try:
         logging.info(f"Usuario actual: {os.getlogin()}")
         initialize_spectrometer()
+        
+        thread1 = threading.Thread(target=spectrum_reader)
+        thread1.start()
+        
         app.run(host="0.0.0.0", port=5000, debug=False)
     except Exception as e:
         logging.critical(f"Error crítico al iniciar el servidor: {e}")

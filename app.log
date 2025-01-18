@@ -44246,3 +44246,12 @@ Traceback (most recent call last):
     payload_data = struct.pack('iiiiiii', np.int32(input_values["idRadius"]), np.int32(input_values["lockRadius"]), np.int32(input_values["lightLifetime"]), np.int32(input_values["lightThreshold"]), np.int32(input_values["switchFrame"]), np.int32(input_values["exposureTime"]), np.int32(input_values["trackingEnabled"]))
                                                                                                                                                                                                                                                        ~~~~~~~~~~~~^^^^^^^^^^^^^^^^
 KeyError: 'exposureTime'
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
+Error in send_focus: argument out of range
