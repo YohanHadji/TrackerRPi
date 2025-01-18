@@ -62,9 +62,6 @@ try:
         speed = joystick.get_axis(2)  # Throttle level
         trigger = joystick.get_button(0)
         
-        print(joystick.get_button(1))
-        
-        
         if  (x_axis==0):
             joystickInitialized = True
         if (y_axis==0):
