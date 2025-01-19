@@ -50,7 +50,7 @@ def arduinoInit():
     global ser
     # Arduino connected on USB serial, use try, except to try to connect
     try:
-        ser = serial.Serial('/dev/ttyACM0', 115200, timeout=1)
+        ser = serial.Serial('/dev/ttyACM0', 115200, timeout=0)
     except:
         print("Arduino not connected")
 
@@ -244,7 +244,7 @@ def sendTargetToColimator(pointToSendIn):
     # x2 = round(x2, 3)
     # y2 = round(y2, 3)
     
-    print(f"Sending target to colimator: {s1}, {s2}")
+    # print(f"Sending target to colimator: {s1}, {s2}")
 
     pointToSend = LightPoint(pointToSendIn.name, pointToSendIn.isVisible, s1, s2, pointToSendIn.age)
 

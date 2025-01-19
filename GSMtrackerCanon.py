@@ -267,7 +267,7 @@ def tracking_loop():
             frame = result   
                                           
             all_light_points = detect(frame, sensorTimeStamp)
-            print(all_light_points)
+            # print(all_light_points)
                         
             # If all light points is not null, then continue
             if (all_light_points is not None):
@@ -275,10 +275,10 @@ def tracking_loop():
                 # print(pointToSend.name, pointToSend.x, pointToSend.y)
 
                 if (not getTrackingEnabled()):
-                    print("Tracking disabled")
+                    # print("Tracking disabled")
                     pointToSend.isVisible = False
-                else:
-                    print("Tracking enabled")
+                # else:
+                    # print("Tracking enabled")
                 
                 if (calibrationMode) :
                     col1, col2, newPacket = getPositionFromColimator()
@@ -288,7 +288,7 @@ def tracking_loop():
                     # Parse text coming from the teensy via serial
                     pointToSend.age = np.int32((((time.time()-startTime)*1e9)-(sensorTimeStamp+timeOffsetAverage))/1e6)
                     
-                    print(pointToSend.name, pointToSend.x, pointToSend.y, pointToSend.age, pointToSend.isVisible)
+                    # print(pointToSend.name, pointToSend.x, pointToSend.y, pointToSend.age, pointToSend.isVisible)
                     
                     pointToSendColimator = LightPoint(pointToSend.name, pointToSend.isVisible, pointToSend.x, pointToSend.y, pointToSend.age)
                     
