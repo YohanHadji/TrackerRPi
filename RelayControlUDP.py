@@ -6,7 +6,7 @@ import time
 locale.setlocale(locale.LC_ALL, '')  # Configurar localización del sistema
 
 TEENSY_IP = "192.168.1.150"
-TEENSY_PORT = 5555
+TEENSY_PORT = 60000
 STATUS_REFRESH_INTERVAL = 2  # Tiempo en segundos entre solicitudes automáticas de estado
 
 def clean_response(response):
@@ -42,7 +42,7 @@ def update_status(stdscr, status):
     stdscr.addstr(0, 2, "Interfaz de Control de Rele", curses.color_pair(1))
     stdscr.addstr(2, 2, "Usa las teclas para controlar los reles y ver el estado", curses.color_pair(1))
     stdscr.addstr(3, 2, "[1-8] Encender rele | [q-w-e-r-t-z-u-i] Apagar rele", curses.color_pair(1))
-    stdscr.addstr(4, 2, "[S] Ver estado del sistema | [Q] Salir", curses.color_pair(1))
+    stdscr.addstr(4, 2, "[S] Ver estado del sistema | [D] Salir", curses.color_pair(1))
 
     stdscr.addstr(10, 2, "Estado del sistema:", curses.color_pair(2))
     for i, line in enumerate(status.split('\n')):
@@ -108,7 +108,7 @@ def main(stdscr):
             status = f"Estado solicitado manualmente:\n{response}"
 
         # Salir
-        elif key in (ord('q'), ord('Q')):  
+        elif key in (ord('d'), ord('D')):  
             break
 
 curses.wrapper(main)
