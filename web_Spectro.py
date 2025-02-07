@@ -21,7 +21,8 @@ app = Flask(__name__)
 spec = None
 capture_thread = None
 capture_running = False
-output_dir = "/home/pi/spectrometer_data"
+#output_dir = "/home/pi/spectrometer_data"
+output_dir = "/mnt/nvme/spectros_DATA"
 file_lock = threading.Lock()
 current_integration_time = 100000  # Tiempo de integración inicial en µs
 
