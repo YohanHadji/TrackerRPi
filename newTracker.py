@@ -119,6 +119,8 @@ def generate_frames():
 
     while True:
         frame, sensorTimeStamp = server.wait_for_frame(frame)
+        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)  # Conversión de color
+
         # frame = cv2.rotate(frame, cv2.ROTATE_90_COUNTERCLOCKWISE)
         # Vertical flip 
         # frame = cv2.flip(frame, 0)
