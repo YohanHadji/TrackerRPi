@@ -16,7 +16,7 @@ RELAY_NAMES = {
     1: "Teensy control motores (Q)",
     2: "Driver Motores Azi y Ele (W)",
     3: "Swich Eternet (E)",
-    4: "Camara Canon Colimador pi (R)",
+    4: "Camara Buscador  pi (R)",
     5: "Control Fuente 12V Servos del colimador (T)",
     6: "control Swich USB colimador (G)",
     7: "Colimador PI5 (U)",
