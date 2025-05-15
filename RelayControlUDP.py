@@ -2,113 +2,173 @@ import locale
 import curses
 import socket
 import time
+from datetime import datetime
 
-locale.setlocale(locale.LC_ALL, '')  # Configurar localización del sistema
+locale.setlocale(locale.LC_ALL, '')
 
 TEENSY_IP = "192.168.1.150"
 TEENSY_PORT = 60000
-STATUS_REFRESH_INTERVAL = 2  # Tiempo en segundos entre solicitudes automáticas de estado
+STATUS_REFRESH_INTERVAL = 2
+LOG_FILE = "relay_log.txt"
+
+
+RELAY_NAMES = {
+    1: "Teensy control motores (Q)",
+    2: "Driver Motores Azi y Ele (W)",
+    3: "Swich Eternet (E)",
+    4: "Camara Canon Colimador pi (R)",
+    5: "Control Fuente 12V Servos del colimador (T)",
+    6: "control Swich USB colimador (G)",
+    7: "Colimador PI5 (U)",
+    8: "Camara canon colimador (I)",
+    9: "....(O)",
+    10: ".....(P)",
+    11: ".....(J)",
+    12: "......(K)"
+}
+def log_action(relay, action, origin="RPI-Terminal"):
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    name = RELAY_NAMES.get(relay, f"RELAY {relay}")
+    with open(LOG_FILE, "a") as f:
+        f.write(f"{timestamp} | {name} (RELAY {relay}) | {action.upper()} | from {origin}\n")
 
 def clean_response(response):
-    """Limpia y organiza la respuesta eliminando duplicados y caracteres innecesarios."""
     lines = response.replace("\r", "").strip().split("\n")
-    cleaned_lines = []
-    seen_lines = set()
+    cleaned, seen = [], set()
     for line in lines:
-        if line not in seen_lines:  # Evitar líneas duplicadas
-            cleaned_lines.append(line.strip())
-            seen_lines.add(line.strip())
-    return "\n".join(cleaned_lines)
+        line = line.strip()
+        if line and line not in seen:
+            cleaned.append(line)
+            seen.add(line)
+    return "\n".join(cleaned)
+
+def format_status_with_names(status_text):
+    lines = status_text.split("\n")
+    formatted_lines = []
+    for line in lines:
+        if line.startswith("Relé"):
+            try:
+                num = int(line.split()[1].strip(":"))
+                name = RELAY_NAMES.get(num, "")
+                if name and f"→ {name}" not in line:
+                    line += f"  → {name}"
+            except:
+                pass
+        formatted_lines.append(line)
+    return "\n".join(formatted_lines)
 
 def send_udp_command(command):
-    """Envía un comando UDP al Teensy y devuelve la respuesta limpia."""
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    sock.settimeout(1.0)  # Timeout de 1 segundo para recibir respuesta
+    sock.settimeout(1.0)
     try:
         sock.sendto(command.encode(), (TEENSY_IP, TEENSY_PORT))
-        response, _ = sock.recvfrom(1024)  # Espera una respuesta del Teensy
-        cleaned_response = clean_response(response.decode())
-        print(f"\nComando enviado: {command}\nRespuesta recibida:\n{cleaned_response}\n")  # Depuración clara
-        return cleaned_response
+        response, _ = sock.recvfrom(1024)
+        return clean_response(response.decode())
     except socket.timeout:
-        print(f"\nComando enviado: {command}\nSin respuesta del servidor.\n")  # Depuración clara
-        return "No hay respuesta del servidor."
+        return "⚠️ Sin respuesta del Teensy."
+    except Exception as e:
+        return f"⚠️ Error: {e}"
     finally:
         sock.close()
 
-def update_status(stdscr, status):
-    """Actualiza la sección de estado en la interfaz, limpiando el área antes de escribir."""
-    stdscr.clear()  # Limpia toda la pantalla para evitar superposición
-    stdscr.addstr(0, 2, "Interfaz de Control de Rele", curses.color_pair(1))
-    stdscr.addstr(2, 2, "Usa las teclas para controlar los reles y ver el estado", curses.color_pair(1))
-    stdscr.addstr(3, 2, "[1-8] Encender rele | [q-w-e-r-t-z-u-i] Apagar rele", curses.color_pair(1))
-    stdscr.addstr(4, 2, "[S] Ver estado del sistema | [D] Salir", curses.color_pair(1))
+def update_status(stdscr, status_text, msg=""):
+    stdscr.clear()
+    height, width = stdscr.getmaxyx()
 
-    stdscr.addstr(10, 2, "Estado del sistema:", curses.color_pair(2))
-    for i, line in enumerate(status.split('\n')):
-        stdscr.addstr(11 + i, 4, line, curses.color_pair(2))
+    stdscr.addstr(0, 2, "🟢 Interfaz de Control de Rele", curses.color_pair(1))
+    stdscr.addstr(2, 2, "[1–9,a,b,c]=ON | [q–g,o,p,j,k]=OFF", curses.color_pair(1))
+    stdscr.addstr(3, 2, "[S]=Estado | [X]=All ON | [Z]=All OFF | [D]=Salir", curses.color_pair(1))
+
+    stdscr.addstr(5, 2, "📊 Estado del sistema:", curses.color_pair(2))
+
+    for i, line in enumerate(status_text.split('\n')):
+        if 6 + i < height:
+            if "ON" in line:
+                color = curses.color_pair(1)
+            elif "OFF" in line:
+                color = curses.color_pair(3)
+            else:
+                color = curses.color_pair(2)
+            stdscr.addstr(6 + i, 4, line[:width - 5], color)
+
+    if msg:
+        stdscr.addstr(height - 3, 2, msg[:width - 4], curses.color_pair(3))
+
     stdscr.refresh()
 
 def main(stdscr):
     curses.start_color()
-    curses.init_pair(1, curses.COLOR_GREEN, curses.COLOR_BLACK)
-    curses.init_pair(2, curses.COLOR_YELLOW, curses.COLOR_BLACK)
-    curses.init_pair(3, curses.COLOR_RED, curses.COLOR_BLACK)
+    curses.init_pair(1, curses.COLOR_GREEN, curses.COLOR_BLACK)  # ON
+    curses.init_pair(2, curses.COLOR_YELLOW, curses.COLOR_BLACK) # Info
+    curses.init_pair(3, curses.COLOR_RED, curses.COLOR_BLACK)    # OFF
     curses.curs_set(0)
 
-    status = "Cargando estado del sistema..."
-    last_status_update = time.time() - STATUS_REFRESH_INTERVAL  # Forzar actualización inicial
+    raw_status = send_udp_command("STATUS")
+    status = format_status_with_names(raw_status)
+    last_status_update = time.time()
+    message = ""
 
-    # Mapeo de teclas para apagar relés
+    on_keys = {
+        ord('1'): 1, ord('2'): 2, ord('3'): 3, ord('4'): 4, ord('5'): 5,
+        ord('6'): 6, ord('7'): 7, ord('8'): 8, ord('9'): 9,
+        ord('a'): 10, ord('b'): 11, ord('c'): 12
+    }
+
     off_keys = {
-        ord('q'): 1,
-        ord('w'): 2,
-        ord('e'): 3,
-        ord('r'): 4,
-        ord('t'): 5,
-        ord('z'): 6,
-        ord('u'): 7,
-        ord('i'): 8,
+        ord('q'): 1, ord('w'): 2, ord('e'): 3, ord('r'): 4, ord('t'): 5,
+        ord('g'): 6, ord('u'): 7, ord('i'): 8,
+        ord('o'): 9, ord('p'): 10, ord('j'): 11, ord('k'): 12
     }
 
     while True:
-        # Solicitar estado automáticamente cada intervalo definido
         if time.time() - last_status_update >= STATUS_REFRESH_INTERVAL:
-            status = send_udp_command("STATUS")
+            raw_status = send_udp_command("STATUS")
+            status = format_status_with_names(raw_status)
             last_status_update = time.time()
 
-        # Mostrar el estado actual en la interfaz
-        update_status(stdscr, status)
+        update_status(stdscr, status, message)
+        message = ""
 
-        # Dibuja comandos enviados
-        stdscr.addstr(6, 2, "Comandos enviados:", curses.color_pair(2))
-        stdscr.refresh()
-
-        # Lee la entrada del usuario
         key = stdscr.getch()
 
-        # Encender relé 1-8
-        if key in range(ord('1'), ord('9')):  
-            relay = chr(key)
-            command = f"RELAY_ON {relay}"
-            response = send_udp_command(command)
-            status = f"Comando enviado: {command}\n{response}"
+        if key in on_keys:
+            relay = on_keys[key]
+            command = f"RELAY_ON{relay}"
+            result = send_udp_command(command)
+            log_action(relay, "ON")
+            message = f"✅ {RELAY_NAMES[relay]} encendido."
+            raw_status = send_udp_command("STATUS")
+            status = format_status_with_names(raw_status)
 
-        # Apagar relé 1-8 usando las teclas 'q-w-e-r-t-z-u-i'
-        elif key in off_keys:  
+        elif key in off_keys:
             relay = off_keys[key]
-            command = f"RELAY_OFF {relay}"
-            response = send_udp_command(command)
-            status = f"Comando enviado: {command}\n{response}"
+            command = f"RELAY_OFF{relay}"
+            result = send_udp_command(command)
+            log_action(relay, "OFF")
+            message = f"⛔ {RELAY_NAMES[relay]} apagado."
+            raw_status = send_udp_command("STATUS")
+            status = format_status_with_names(raw_status)
 
-        # Ver estado manualmente
-        elif key in (ord('s'), ord('S')):  
-            command = "STATUS"
-            response = send_udp_command(command)
-            status = f"Estado solicitado manualmente:\n{response}"
+        elif key in (ord('s'), ord('S')):
+            raw_status = send_udp_command("STATUS")
+            status = format_status_with_names(raw_status)
+            message = "🔄 Estado actualizado."
 
-        # Salir
-        elif key in (ord('d'), ord('D')):  
+        elif key in (ord('x'), ord('X')):
+            send_udp_command("RELAY_ALL_ON")
+            log_action("ALL", "ON")
+            message = "✅ Todos los relés ENCENDIDOS."
+            raw_status = send_udp_command("STATUS")
+            status = format_status_with_names(raw_status)
+
+        elif key in (ord('z'), ord('Z')):
+            send_udp_command("RELAY_ALL_OFF")
+            log_action("ALL", "OFF")
+            message = "⛔ Todos los relés APAGADOS."
+            raw_status = send_udp_command("STATUS")
+            status = format_status_with_names(raw_status)
+
+        elif key in (ord('d'), ord('D')):
             break
 
 curses.wrapper(main)

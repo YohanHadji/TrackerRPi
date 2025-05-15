@@ -1,0 +1,27 @@
+2025-05-15 11:28:38 | Teensy control motores (Q) (RELAY 1) | ON | from RPI-Terminal
+2025-05-15 11:28:40 | Driver Motores Azi y Ele (W) (RELAY 2) | ON | from RPI-Terminal
+2025-05-15 11:28:40 | Swich Eternet (E) (RELAY 3) | ON | from RPI-Terminal
+2025-05-15 11:28:41 | Camara Canon Colimador pi (R) (RELAY 4) | ON | from RPI-Terminal
+2025-05-15 11:28:41 | Control Fuente 12V Servos del colimador (T) (RELAY 5) | ON | from RPI-Terminal
+2025-05-15 11:28:41 | control Swich USB colimador (G) (RELAY 6) | ON | from RPI-Terminal
+2025-05-15 11:28:41 | Colimador PI5 (U) (RELAY 7) | ON | from RPI-Terminal
+2025-05-15 11:28:42 | Camara canon colimador (I) (RELAY 8) | ON | from RPI-Terminal
+2025-05-15 11:28:42 | ....(O) (RELAY 9) | ON | from RPI-Terminal
+2025-05-15 11:28:49 | .....(P) (RELAY 10) | ON | from RPI-Terminal
+2025-05-15 11:28:50 | .....(J) (RELAY 11) | ON | from RPI-Terminal
+2025-05-15 11:28:51 | ......(K) (RELAY 12) | ON | from RPI-Terminal
+2025-05-15 11:28:59 | ......(K) (RELAY 12) | OFF | from RPI-Terminal
+2025-05-15 11:29:01 | .....(J) (RELAY 11) | OFF | from RPI-Terminal
+2025-05-15 11:29:06 | .....(P) (RELAY 10) | OFF | from RPI-Terminal
+2025-05-15 11:29:07 | ....(O) (RELAY 9) | OFF | from RPI-Terminal
+2025-05-15 11:29:08 | Camara canon colimador (I) (RELAY 8) | OFF | from RPI-Terminal
+2025-05-15 11:29:10 | Colimador PI5 (U) (RELAY 7) | OFF | from RPI-Terminal
+2025-05-15 11:29:11 | control Swich USB colimador (G) (RELAY 6) | OFF | from RPI-Terminal
+2025-05-15 11:29:13 | Control Fuente 12V Servos del colimador (T) (RELAY 5) | OFF | from RPI-Terminal
+2025-05-15 11:29:15 | Camara Canon Colimador pi (R) (RELAY 4) | OFF | from RPI-Terminal
+2025-05-15 11:29:16 | Swich Eternet (E) (RELAY 3) | OFF | from RPI-Terminal
+2025-05-15 11:29:18 | Driver Motores Azi y Ele (W) (RELAY 2) | OFF | from RPI-Terminal
+2025-05-15 11:29:20 | ......(K) (RELAY 12) | ON | from RPI-Terminal
+2025-05-15 11:29:24 | ......(K) (RELAY 12) | ON | from RPI-Terminal
+2025-05-15 11:29:26 | ......(K) (RELAY 12) | OFF | from RPI-Terminal
+2025-05-15 11:29:28 | Teensy control motores (Q) (RELAY 1) | OFF | from RPI-Terminal
