@@ -325,7 +325,9 @@ def tracking_loop():
                 
                 pointToSend.age = np.int32((((time.time()-startTime)*1e9)-(sensorTimeStamp+timeOffsetAverage))/1e6)
             
-                sendTargetToTeensy(pointToSend, 33, 15, 50)
+                pointToSend.x = -pointToSend.x
+                pointToSend.y = -pointToSend.y
+                sendTargetToTeensy(pointToSend, 33, 5, 50)
                 
                 print(pointToSend.name, pointToSend.x, pointToSend.y, pointToSend.age, pointToSend.isVisible)
                 printFps()
