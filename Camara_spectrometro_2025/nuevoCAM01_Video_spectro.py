@@ -1,4 +1,4 @@
-from TrackerRPi.Camara_spectrometro_2025.calibracion_CAM03 import pixel_to_wavelength
+from calibracion_CAM03 import pixel_to_wavelength
 
 import os
 import cv2
