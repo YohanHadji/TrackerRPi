@@ -28,7 +28,7 @@ writer_video = None
 os.makedirs("datos", exist_ok=True)
 
 # === CÁMARA ===
-picam2 = Picamera2(0)
+picam2 = Picamera2(1)
 picam2.configure(picam2.create_preview_configuration(main={"size": (1280, 720), "format": "BGR888"}))
 picam2.start()
 
