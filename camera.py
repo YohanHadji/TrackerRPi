@@ -105,7 +105,7 @@ prev_time_sec = 0
 
 def camInit(framerate, vFlipSet, hFlipSet):
     global picam2
-    # Camera Init
+    # Camera Inits
     
     camera_config = picam2.create_video_configuration(main={"format": "BGR888", "size": (800, 606)}, raw={"format": "SRGGB10", "size": (800, 606)}, transform=Transform(hflip=hFlipSet, vflip=vFlipSet))
     picam2.configure(camera_config)

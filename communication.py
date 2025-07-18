@@ -269,8 +269,41 @@ def sendTargetToColimator(pointToSendIn):
             ser = serial.Serial('/dev/ttyACM0', 115200, timeout=1)
         except:
             print("Teensy not found")
-        
-        
+            
+
+def reconnect():
+    global ser
+    try:
+        ser = serial.Serial('/dev/ttyACM0', 115200, timeout=1)
+        print("Connected to Teensy")
+    except serial.SerialException:
+        ser = None
+        print("Teensy not found. Will retry...")
+
+def sendAngleToMirror(angle):
+    global ser
+
+    print(f"Angle: {angle:.4f}")
+
+    if ser is None or not ser.is_open:
+        reconnect()
+
+    if ser is not None and ser.is_open:
+        try:
+            angle_str = f"{angle:.4f}\n"
+            ser.write(angle_str.encode('utf-8'))
+            print("Write success")
+        except serial.SerialException as e:
+            print(f"Serial error: {e}")
+            ser.close()
+            ser = None
+        except Exception as e:
+            print(f"General error: {e}")
+            ser.close()
+            ser = None
+    else:
+        print("Serial connection unavailable")
+
 
 def sendAbsFocToArduino(focus):
     global ser
