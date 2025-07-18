@@ -1,5 +1,0 @@
-A executer depuis home pour pouvoir flasher le teensy
-
-Xvfb :99 -screen 0 1024x768x16 &
-export DISPLAY=:99
-./teensy &
