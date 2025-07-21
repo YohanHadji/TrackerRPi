@@ -9,7 +9,7 @@ import serial
 
 
 class FrameServer:
-    def __init__(self, video_device='/dev/video0'):
+    def __init__(self, video_device='/dev/video8'):
         print(f"Inicializando captura de video con dispositivo: {video_device}")
         self.cap = cv2.VideoCapture(video_device)
         if not self.cap.isOpened():
@@ -76,7 +76,7 @@ def udp_receiver(server):
 
 
 app = Flask(__name__)
-video_device = '/dev/video0'
+video_device = '/dev/video8'
 server = FrameServer(video_device)
 
 arduino_port = '/dev/ttyACM0'
