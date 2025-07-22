@@ -32,7 +32,7 @@ picam2.start()
 
 # === INTERFAZ ===
 root = tk.Tk()
-root.title("Video Espectro en Tiempo Real")
+root.title("Video Espectro en Tiempo Real CAM03")
 
 fig = Figure(figsize=(7, 4), dpi=100)
 ax = fig.add_subplot(111)
