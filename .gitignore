@@ -2,4 +2,4 @@ __pycache__/
 *.pyc
 /datos/
 /Camara_spectrometro_2025/datos/ 
-/Camara_spectrometro_2025/log.txt/ 
+/Camara_spectrometro_2025/logs/ 
