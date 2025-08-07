@@ -72,6 +72,34 @@
         color: #f44;
         border-color: #f44;
     }
+    #videoSpectro {
+    height: 180px;              /* ⚙️ Reduce la altura visible */
+    object-fit: cover;          /* ⚙️ Recorta sin deformar */
+    object-position: center 40%; /* ⚙️ Centra en zona útil */
+}
+.video-container {
+    position: relative;
+    display: inline-block;
+}
+
+#videoRGB {
+    display: block;
+    width: 100%;  /* o un tamaño fijo si preferís */
+}
+
+.marcador-circulo {
+    position: absolute;
+    top: 35%;      /* Ajustá según ubicación real deseada */
+    left: 35%;
+    width: 20%;
+    height: 20%;
+    border: 2px solid red;
+    border-radius: 50%;
+    box-shadow: 0 0 8px red;
+    pointer-events: none;
+}
+
+
 </style>
 
 </head>
@@ -84,10 +112,12 @@
             <h3>📷 Cámara espectral</h3>
             <img id="videoSpectro" src="/video_spectro" alt="Cámara espectro">
         </div>
-        <div>
-            <h3>🎥 Cámara RGB</h3>
-            <img id="videoRGB" src="/video_rgb" alt="Cámara RGB">
-        </div>
+        <div class="video-container">
+            <h3>📷 Cámara RGB</h3>
+    <img id="videoRGB" src="/video_rgb" alt="Cámara RGB">
+    <div class="marcador-circulo"></div>
+</div>
+
     </div>
 
     <div class="grafico">
