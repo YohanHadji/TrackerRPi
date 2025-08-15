@@ -1,4 +1,4 @@
-from calibracion_CAM03 import pixel_to_wavelength
+from calibracion_CAM01 import pixel_to_wavelength
 
 import os
 import cv2
@@ -25,14 +25,22 @@ writer_video = None
 
 os.makedirs("datos", exist_ok=True)
 
-# === CÁMARA ===
+# === CÁMARAS ===
 picam2 = Picamera2(0)
 picam2.configure(picam2.create_preview_configuration(main={"size": (1280, 720), "format": "BGR888"}))
 picam2.start()
 
-# === INTERFAZ ===
+picam_rgb = Picamera2(1)
+picam_rgb.configure(picam_rgb.create_preview_configuration(main={"size": (1280, 720), "format": "BGR888"}))
+picam_rgb.start()
+
+# === INTERFAZ GRÁFICA ===
 root = tk.Tk()
-root.title("Video Espectro en Tiempo Real")
+root.withdraw()  # Ocultamos ventana raíz
+
+# === Ventana flotante del gráfico espectral ===
+ventana_grafico = tk.Toplevel()
+ventana_grafico.title("Gráfico espectral")
 
 fig = Figure(figsize=(7, 4), dpi=100)
 ax = fig.add_subplot(111)
@@ -42,12 +50,12 @@ ax.set_xlabel("Longitud de onda (nm)")
 ax.set_ylabel("Intensidad")
 for ref in [408, 531.8, 652]:
     ax.axvline(x=ref, color='gray', linestyle='--')
-canvas = FigureCanvasTkAgg(fig, master=root)
+
+canvas = FigureCanvasTkAgg(fig, master=ventana_grafico)
 canvas.draw()
 canvas.get_tk_widget().pack()
 
-# === SLIDERS DE RANGO ESPECTRAL ===
-frame_slider = tk.Frame(root)
+frame_slider = tk.Frame(ventana_grafico)
 frame_slider.pack()
 xmin_slider = tk.Scale(frame_slider, from_=350, to=850, orient="horizontal", label="X min (nm)")
 xmin_slider.set(400)
@@ -56,36 +64,55 @@ xmax_slider = tk.Scale(frame_slider, from_=400, to=900, orient="horizontal", lab
 xmax_slider.set(780)
 xmax_slider.pack(side="left")
 
-# === VIDEO ===
-video_label = tk.Label(root)
-video_label.pack()
+# === Ventana flotante de video ===
+ventana_video = tk.Toplevel()
+ventana_video.title("Cámaras en vivo")
 
-# === CONTROLES ===
-controls = tk.Frame(root)
-controls.pack()
+frame_videos = tk.Frame(ventana_video)
+frame_videos.pack(padx=10, pady=10)
+
+video_label = tk.Label(frame_videos)
+video_label.pack(side="left", padx=10)
+
+video_rgb_label = tk.Label(frame_videos)
+video_rgb_label.pack(side="left", padx=10)
+
+# === Ventana flotante de controles ===
+ventana_controles = tk.Toplevel()
+ventana_controles.title("Controles del espectrómetro")
+
+controls = tk.Frame(ventana_controles)
+controls.pack(pady=10)
 
 def toggle_pause():
     global paused
     paused = not paused
     pause_button.config(text="Reanudar" if paused else "Pausar")
 
+def grabar_video_rgb(nombre_base, duracion):
+    writer = cv2.VideoWriter(f"datos/{nombre_base}_rgb.avi", cv2.VideoWriter_fourcc(*'XVID'), 10, (1280, 720))
+    t0 = time.time()
+    while time.time() - t0 < duracion:
+        frame_rgb = picam_rgb.capture_array()
+        writer.write(cv2.cvtColor(frame_rgb, cv2.COLOR_RGB2BGR))
+        time.sleep(0.1)
+    writer.release()
+    print(f"Video RGB guardado: {nombre_base}_rgb.avi")
+
 def guardar_datos(frame, perfil):
     timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
     base = f"espectro_{timestamp}"
     cv2.imwrite(f"datos/{base}.jpg", cv2.cvtColor(frame, cv2.COLOR_RGB2BGR))
-
-    # Convertir a lista de pares [λ, intensidad] y ordenar por longitud de onda
     datos = [(pixel_to_wavelength(i), val) for i, val in enumerate(perfil)]
     datos.sort(key=lambda x: x[0])
-
-    # Guardar CSV ordenado
     with open(f"datos/{base}.csv", "w", newline="") as f:
         writer = csv.writer(f)
         writer.writerow(["Longitud de onda (nm)", "Intensidad"])
         for wl, val in datos:
             writer.writerow([wl, val])
-
     print(f"Guardado: {base}")
+    duracion = video_rgb_duracion_slider.get()
+    threading.Thread(target=grabar_video_rgb, args=(base, duracion), daemon=True).start()
 
 def iniciar_integracion():
     global integrando, integracion_frames
@@ -120,7 +147,7 @@ def activar_autodisparo():
     autodisparo = not autodisparo
     auto_button.config(text="Desactivar autodisparo" if autodisparo else "Activar autodisparo")
 
-# === BOTONES ===
+# === Controles ===
 pause_button = tk.Button(controls, text="Pausar", command=toggle_pause)
 pause_button.pack(side="left", padx=5)
 
@@ -141,6 +168,10 @@ umbral_slider.pack(side="left")
 
 auto_button = tk.Button(controls, text="Activar autodisparo", command=activar_autodisparo)
 auto_button.pack(side="left", padx=5)
+
+video_rgb_duracion_slider = tk.Scale(controls, from_=1, to=10, orient="horizontal", label="Video RGB post-captura (s)")
+video_rgb_duracion_slider.set(3)
+video_rgb_duracion_slider.pack(side="left", padx=5)
 
 # === LOOP PRINCIPAL ===
 def update_frame():
@@ -168,6 +199,11 @@ def update_frame():
         video_label.imgtk = ImageTk.PhotoImage(image=img_pil)
         video_label.configure(image=video_label.imgtk)
 
+        frame_rgb = picam_rgb.capture_array()
+        img_rgb_pil = Image.fromarray(frame_rgb)
+        video_rgb_label.imgtk = ImageTk.PhotoImage(image=img_rgb_pil)
+        video_rgb_label.configure(image=video_rgb_label.imgtk)
+
         if integrando:
             integracion_frames.append(profile)
 
@@ -181,4 +217,7 @@ def update_frame():
 
 update_frame()
 root.mainloop()
+
+# === DETENER CÁMARAS ===
 picam2.stop()
+picam_rgb.stop()

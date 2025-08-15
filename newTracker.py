@@ -393,7 +393,7 @@ def update_variable():
 
 if __name__ == '__main__':
     try:
-        server = FrameServer(picam2,'new')
+        server = FrameServer(picam2,'main')
         server.start()
         
         thread1 = Thread(target=tracking_loop)

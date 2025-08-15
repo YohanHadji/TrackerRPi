@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Control de Zoom</title>
+  <style>
+    body { font-family: sans-serif; padding: 30px; background: #f0f0f0; }
+    .slider-container { margin-top: 40px; }
+    input[type=range] { width: 80%; }
+    .voltage-display { font-size: 1.5em; margin-top: 10px; }
+    .button-stop {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #d9534f;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .button-stop:hover {
+      background-color: #c9302c;
+    }
+  </style>
+</head>
+<body>
+  <h2>Control de Zoom Analógico JVC</h2>
+  <h1>Video Feed with Controls</h1>
+    <img src="{{ url_for('video_feed') }}" alt="Video Feed" style="width:100%; max-width:800px;">
+
+
+  <div class="slider-container">
+    <label for="zoomSlider">Ajuste de zoom (0.0 - 3.0 V):</label><br>
+    <input type="range" min="0" max="3" value="1.55" step="0.01" id="zoomSlider">
+    <div class="voltage-display">
+      Tensión actual: <span id="voltageValue">1.55</span> V
+    </div>
+  </div>
+
+  
+
+  <script>
+    const slider = document.getElementById("zoomSlider");
+    const voltageText = document.getElementById("voltageValue");
+    let resetTimer = null;
+
+    slider.addEventListener("input", () => {
+      voltageText.textContent = parseFloat(slider.value).toFixed(2);
+    });
+
+    slider.addEventListener("change", () => {
+      const voltage = parseFloat(slider.value).toFixed(2);
+
+      fetch("/set_zoom", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: "voltage=" + voltage
+      });
+
+      clearTimeout(resetTimer);
+      resetTimer = setTimeout(() => {
+        slider.value = 1.5;
+        voltageText.textContent = "1.55";
+        fetch("/set_zoom", {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: "voltage=1.55"
+        });
+      }, 1000);
+    });
+
+   
+  </script>
+</body>
+</html>

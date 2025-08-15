@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Interfaz Web Espectrómetro</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.min.js"></script>
+    <style>
+    body {
+        font-family: Arial, sans-serif;
+        background: #f4f4f4;
+        margin: 20px;
+        transition: background 0.3s, color 0.3s;
+    }
+    body.noche {
+        background: #000;
+        color: #f44;
+    }
+    h1, h3 { text-align: center; }
+
+    .videos, .grafico, .controles {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+    }
+
+    .botonera {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .slider {
+        margin: 10px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    img {
+        border: 2px solid #444;
+        max-width: 100%;
+    }
+
+    #spectro-plot {
+        width: 90vw;
+        height: 50vh;
+        margin: auto;
+    }
+
+    button {
+        padding: 10px 15px;
+        font-size: 16px;
+        cursor: pointer;
+    }
+
+    #logOutput {
+        width: 90vw;
+        max-height: 250px;
+        overflow-y: auto;
+        background: #fff;
+        border: 1px solid #999;
+        padding: 10px;
+        font-family: monospace;
+    }
+
+    body.noche #logOutput {
+        background: #111;
+        color: #f44;
+        border-color: #f44;
+    }
+    #videoSpectro {
+    height: 180px;              /* ⚙️ Reduce la altura visible */
+    object-fit: cover;          /* ⚙️ Recorta sin deformar */
+    object-position: center 40%; /* ⚙️ Centra en zona útil */
+}
+.video-container {
+    position: relative;
+    display: inline-block;
+}
+
+#videoRGB {
+    display: block;
+    width: 100%;  /* o un tamaño fijo si preferís */
+}
+
+.marcador-circulo {
+    position: absolute;
+    top: 35%;      /* Ajustá según ubicación real deseada */
+    left: 35%;
+    width: 20%;
+    height: 20%;
+    border: 2px solid red;
+    border-radius: 50%;
+    box-shadow: 0 0 8px red;
+    pointer-events: none;
+}
+
+
+</style>
+
+</head>
+<body>
+
+    <h1>🧪 Interfaz Web del Espectrómetro</h1>
+
+    <div class="videos">
+        <div>
+            <h3>📷 Cámara espectral</h3>
+            <img id="videoSpectro" src="/video_spectro" alt="Cámara espectro">
+        </div>
+        <div class="video-container">
+            <h3>📷 Cámara RGB</h3>
+    <img id="videoRGB" src="/video_rgb" alt="Cámara RGB">
+    <div class="marcador-circulo"></div>
+</div>
+
+    </div>
+
+    <div class="grafico">
+        <div id="spectro-plot"></div>
+    </div>
+
+    <div class="controles">
+        
+     <div class="botonera">
+    <button id="pauseBtn">⏸ Pausar</button>
+    <button id="guardarBtn">💾 Guardar espectro</button>
+    <button id="grabarBtn">🔴 Grabar video</button>
+    <button id="integrarBtn">⏳ Iniciar integración</button>
+    <button id="autoBtn">🟢 Autodisparo: ON</button>
+    <button onclick="alternarModo()">🌙 Modo nocturno</button>
+</div>
+
+<div class="botonera">
+    <div class="slider">
+        <label for="umbral">Umbral autodisparo: <span id="umbralVal">50</span></label>
+        <input type="range" id="umbral" min="1" max="200" value="50">
+    </div>
+    <div class="slider">
+        <label for="xmin">X min (nm): <span id="xminVal">400</span></label>
+        <input type="range" id="xmin" min="350" max="850" value="400">
+    </div>
+    <div class="slider">
+        <label for="xmax">X max (nm): <span id="xmaxVal">780</span></label>
+        <input type="range" id="xmax" min="400" max="900" value="780">
+    </div>
+    <div class="slider">
+        <label for="videoDuracion">Video RGB (seg): <span id="duracionVal">3</span></label>
+        <input type="range" id="videoDuracion" min="1" max="10" value="3">
+    </div>
+    <div class="slider">
+    <label for="integracionDuracion">Integración (s): <span id="integracionVal">3</span></label>
+    <input type="range" id="integracionDuracion" min="1" max="10" value="3">
+    </div>
+
+</div>
+
+<h3>📋 Log del sistema</h3>
+<div id="logOutput" style="width: 90vw; max-height: 250px; overflow-y: auto; background: #fff; border: 1px solid #999; padding: 10px; font-family: monospace;"></div>
+<button onclick="limpiarLog()">🧹 Borrar log</button>
+
+    <script>
+        const socket = io();
+
+        let paused = false;
+        let autodisparo = true;
+        let integrando = false;
+        let grabando = false;
+        let xmin = 400;
+        let xmax = 780;
+        let umbral = 50;
+        let duracionVideo = 3;
+        let duracionIntegracion = 3;
+
+document.getElementById('integracionDuracion').oninput = function () {
+    duracionIntegracion = parseInt(this.value);
+    document.getElementById('integracionVal').textContent = duracionIntegracion;
+};
+
+        // === Gráfico espectral inicial ===
+        Plotly.newPlot('spectro-plot', [{
+            x: [], y: [], mode: 'lines', line: { color: 'blue' }
+        }], {
+            title: 'Intensidad espectral',
+            xaxis: { title: 'Longitud de onda (nm)', range: [xmin, xmax] },
+            yaxis: { title: 'Intensidad', range: [0, 100] }
+        });
+
+        socket.on('espectro_data', function(data) {
+            if (paused) return;
+            Plotly.update('spectro-plot', {
+                x: [data.x],
+                y: [data.y]
+            }, {
+                xaxis: { range: [xmin, xmax] },
+                yaxis: { range: [0, Math.max(...data.y) * 1.1] }
+            });
+        });
+
+        // === Enviar parámetros al backend ===
+        function enviarControl() {
+            fetch('/api/control', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    pause: paused,
+                    autodisparo: autodisparo,
+                    umbral: umbral,
+                    xmin: xmin,
+                    xmax: xmax,
+                    duracionVideo: duracionVideo
+                })
+            });
+        }
+
+        function actualizarEstado() {
+            document.getElementById('pauseBtn').textContent = paused ? '▶ Reanudar' : '⏸ Pausar';
+            document.getElementById('autoBtn').textContent = autodisparo ? '🟢 Autodisparo: ON' : '🔴 Autodisparo: OFF';
+            document.getElementById('grabarBtn').textContent = grabando ? '⏹️ Detener video' : '🔴 Grabar video';
+            document.getElementById('integrarBtn').textContent = integrando ? '⏳ Integrando...' : '⏳ Iniciar integración';
+        }
+
+        // === EVENTOS DE BOTONES ===
+
+        document.getElementById('pauseBtn').onclick = function() {
+            paused = !paused;
+            actualizarEstado();
+            enviarControl();
+        };
+
+        document.getElementById('autoBtn').onclick = function() {
+            autodisparo = !autodisparo;
+            actualizarEstado();
+            enviarControl();
+        };
+
+        document.getElementById('grabarBtn').onclick = function() {
+            fetch('/api/grabar', { method: 'POST' });
+            grabando = !grabando;
+            actualizarEstado();
+        };
+
+        document.getElementById('guardarBtn').onclick = function() {
+            fetch('/api/guardar', { method: 'POST' });
+        };
+
+        document.getElementById('integrarBtn').onclick = function() {
+            fetch('/api/integrar', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ duracion: 3 })
+            });
+            integrando = true;
+            actualizarEstado();
+            setTimeout(() => {
+                integrando = false;
+                actualizarEstado();
+            }, 3000);
+        };
+
+        // === SLIDERS ===
+
+        document.getElementById('umbral').oninput = function() {
+            umbral = parseInt(this.value);
+            document.getElementById('umbralVal').textContent = umbral;
+            enviarControl();
+        };
+
+        document.getElementById('xmin').oninput = function() {
+            xmin = parseInt(this.value);
+            document.getElementById('xminVal').textContent = xmin;
+            enviarControl();
+        };
+
+        document.getElementById('xmax').oninput = function() {
+            xmax = parseInt(this.value);
+            document.getElementById('xmaxVal').textContent = xmax;
+            enviarControl();
+        };
+
+        document.getElementById('videoDuracion').oninput = function() {
+            duracionVideo = parseInt(this.value);
+            document.getElementById('duracionVal').textContent = duracionVideo;
+            enviarControl();
+        };
+        document.getElementById('integrarBtn').onclick = function () {
+        fetch('/api/integrar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ duracion: duracionIntegracion })
+        });
+        integrando = true;
+        actualizarEstado();
+        setTimeout(() => {
+        integrando = false;
+        actualizarEstado();
+        }, duracionIntegracion * 1000);
+        };
+
+        // === Cargar log inicial al entrar ===
+     fetch("/api/log")
+    .then(res => res.json())
+    .then(data => {
+        data.log.forEach(entrada => agregarAlLog(entrada));
+    });
+
+function agregarAlLog(texto) {
+    const log = document.getElementById("logOutput");
+    const linea = document.createElement("div");
+    linea.textContent = texto;
+    log.appendChild(linea);
+    log.scrollTop = log.scrollHeight;  // Auto-scroll
+}
+
+// === Recibir nuevos eventos en tiempo real ===
+socket.on("nuevo_log", function(data) {
+    agregarAlLog(data.mensaje);
+});
+
+// === Botón borrar log ===
+function limpiarLog() {
+    fetch("/api/clear_log", { method: "POST" })
+        .then(() => {
+            document.getElementById("logOutput").innerHTML = "";
+        });
+}
+function alternarModo() {
+    const body = document.body;
+    const esNoche = body.classList.toggle('noche');
+    const plot = document.getElementById('spectro-plot');
+
+    const config = {
+        layout: {
+            paper_bgcolor: esNoche ? "#000" : "#fff",
+            plot_bgcolor: esNoche ? "#000" : "#fff",
+            font: { color: esNoche ? "#f44" : "#000" },
+            xaxis: { color: esNoche ? "#f44" : "#000" },
+            yaxis: { color: esNoche ? "#f44" : "#000" }
+        }
+    };
+    Plotly.relayout(plot, config.layout);
+}
+
+    </script>
+</body>
+</html>
