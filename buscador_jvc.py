@@ -5,12 +5,38 @@ from threading import Thread
 import socket
 import struct
 import serial
+from flask_socketio import SocketIO, emit
 
+# ======= UDP TX (igual que en joysti_virtual.py) =======
+PRA = 0xFF
+PRB = 0xFA
+udp_target_ip = '192.168.1.100'   # <-- AJUSTA a la IP real de tu receptor
+udp_target_port = 8888
+udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
+def send_udp_packet(packet: bytes):
+    try:
+        udp_socket.sendto(packet, (udp_target_ip, udp_target_port))
+    except OSError as e:
+        if e.errno == 101:
+            print("[UDP] La red no es accesible (errno 101).")
+        else:
+            raise
 
+def create_packet(x, y, throttle, trigger):
+    # MISMO layout que joysti_virtual.py (nativo). Si tu receptor espera little-endian, cambia por '<iiiiiiff'
+    joystick_data = struct.pack(
+        'iiiiiiff', 1, int(trigger), int(x * 100), int(y * 100), 0, 99, float(throttle), 30.0
+    )
+    encoded_packet = bytes([PRA, PRB, 1, len(joystick_data)]) + joystick_data
+    checksum = sum(joystick_data) & 0xFF
+    encoded_packet += bytes([checksum])
+    return encoded_packet
+
+# ======= Video =======
 class FrameServer:
-    def __init__(self, video_device='/dev/video8'):
-        print(f"Inicializando captura de video con dispositivo: {video_device}")
+    def __init__(self, video_device='/dev/video0'):
+        print(f"[Video] Inicializando captura en: {video_device}")
         self.cap = cv2.VideoCapture(video_device)
         if not self.cap.isOpened():
             raise RuntimeError(f"No se pudo abrir el dispositivo de video: {video_device}")
@@ -52,15 +78,13 @@ class FrameServer:
         self.running = False
         self.cap.release()
 
-
-def udp_receiver(server):
+# ======= UDP RX (telemetría para azimut/elevación) =======
+def udp_receiver(server: FrameServer):
     udp_ip = '0.0.0.0'
     udp_port = 8888
-
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.bind((udp_ip, udp_port))
-    print(f"Escuchando datos UDP en {udp_ip}:{udp_port}...")
-
+    print(f"[UDP RX] Escuchando en {udp_ip}:{udp_port} ...")
     while server.running:
         try:
             data, _ = sock.recvfrom(1024)
@@ -70,46 +94,54 @@ def udp_receiver(server):
                     azimut, elevacion = struct.unpack_from('<ff', data, offset=4)
                     server.update_values(azimut, elevacion)
         except Exception as e:
-            print(f"Error en UDP receiver: {e}")
-
+            print(f"[UDP RX] Error: {e}")
     sock.close()
 
+# ======= Flask / Socket.IO =======
+app = Flask(__name__, template_folder='templates')
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode="threading")
 
-app = Flask(__name__)
-video_device = '/dev/video8'
+video_device = '/dev/video0'
 server = FrameServer(video_device)
 
+# ======= Arduino (zoom analógico) =======
 arduino_port = '/dev/ttyACM0'
-arduino_baudrate = 115200      #921620
-arduino = serial.Serial(arduino_port, arduino_baudrate, timeout=1)
-time.sleep(2)
+arduino_baudrate = 115200
+try:
+    arduino = serial.Serial(arduino_port, arduino_baudrate, timeout=1)
+    time.sleep(2)
+    # print(f"[Arduino] Conectado en {arduino_port} @ {arduino_baudrate} bps")
+except Exception as e:
+    arduino = None
+    print(f"[Arduino][WARN] No se pudo abrir {arduino_port}: {e}")
 
-
-
-def send_to_arduino(command):
+def send_to_arduino(command: str):
+    if arduino is None:
+        print(f"[Arduino][WARN] No conectado. Ignoro cmd: {command!r}")
+        return
     try:
         if not command.endswith('\n'):
             command += '\n'
         arduino.write(command.encode())
         arduino.flush()
-        print(f"Comando enviado al Arduino: {repr(command)}")
+        print(f"[Arduino] TX: {command.strip()}")
     except Exception as e:
-        print(f"Error al enviar comando al Arduino: {e}")
+        print(f"[Arduino][ERR] {e}")
 
-@app.route('/set_zoom', methods=['POST'])
-def set_zoom():
-    voltage = request.form.get('voltage', type=float)
-    if 0.0 <= voltage <= 3.0:
-        send_to_arduino(f"{voltage:.2f}")
-        return "OK", 200
-    return "Valor fuera de rango", 400
-
-
-
+# ======= Rutas HTTP =======
 @app.route('/')
 def index():
     return render_template('jvc_index.html')
 
+@app.route('/set_zoom', methods=['POST'])
+def set_zoom():
+    voltage = request.form.get('voltage', type=float)
+    if voltage is None:
+        return "Falta parámetro 'voltage'", 400
+    if 0.0 <= voltage <= 3.0:
+        send_to_arduino(f"{voltage:.2f}")
+        return "OK", 200
+    return "Valor fuera de rango", 400
 
 @app.route('/video_feed')
 def video_feed():
@@ -122,15 +154,32 @@ def video_feed():
                    b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
     return Response(generate(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
+# ======= Socket.IO (Joystick) =======
+@socketio.on('joystick_update')
+def handle_joystick_update(data):
+    try:
+        # data: {x: [-14..14], y: [-14..14], throttle: [0.10..30], trigger: 0/1}
+        x = float(data.get('x', 0.0))
+        y = float(data.get('y', 0.0))
+        throttle = float(data.get('throttle', 0.10))
+        trigger = int(data.get('trigger', 0))
 
+        pkt = create_packet(x, y, throttle, trigger)
+        send_udp_packet(pkt)
+        print(f"[JSK] x={x:.2f} y={y:.2f} thr={throttle:.2f} trig={trigger} -> UDP {udp_target_ip}:{udp_target_port} ({len(pkt)} bytes)")
 
+        emit('ack', {'ok': True}, broadcast=False)
+    except Exception as e:
+        print("[JSK][ERR]", e)
+        emit('ack', {'ok': False, 'error': str(e)}, broadcast=False)
+
+# ======= Main =======
 if __name__ == '__main__':
     try:
-        udp_thread = Thread(target=udp_receiver, args=(server,))
-        udp_thread.daemon = True
+        udp_thread = Thread(target=udp_receiver, args=(server,), daemon=True)
         udp_thread.start()
-
-        app.run(host='0.0.0.0', port=5002, threaded=True)
+        socketio.run(app, host='0.0.0.0', port=5002)  # sin eventlet, sin threaded=True
     finally:
         server.stop()
-        arduino.close()
+        if arduino:
+            arduino.close()
