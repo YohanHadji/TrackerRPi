@@ -96,6 +96,7 @@
       <!-- Debug XY opcional -->
       <div id="dbg" style="font-family:monospace;margin-top:6px;"></div>
     </div>
+    
   </div>
 
   <!-- Arrastre de ventana (Pointer Events) -->
@@ -165,7 +166,20 @@
   <!-- Joystick (Socket.IO) -->
   <script>
     // Fuerza WebSocket para evitar long-polling
-    const socket = io({ transports: ["websocket"], upgrade: false });
+    // PLAN B: forzar long-polling y desactivar upgrade a WebSocket
+   const socket = io({
+         transports: ["polling"],
+         upgrade: false
+     });
+    socket.on('connect', () => {
+    console.log('[socket] conectado (polling). id=', socket.id);
+    });
+     socket.on('connect_error', (err) => {
+     console.log('[socket] connect_error:', err);
+    });
+     socket.on('disconnect', (reason) => {
+     console.log('[socket] disconnect:', reason);
+    });
 
     const joy = document.getElementById('joy');
     const knob = document.getElementById('knob');
