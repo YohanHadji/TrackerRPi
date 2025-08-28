@@ -19,6 +19,23 @@ SEEING_ARCSEC = 1.8
 TRACKLET_PERIOD_MS     = 100      # 10 Hz máx.
 TRACKLET_DELTA_MIN_DEG = 0.02     # umbral de cambio
 TRACKLET_HEARTBEAT_MS  = 1000     # 1/s como mínimo
+# Velocidad comandada en overlay: deg/s = x * throttle * JOY_GAIN
+JOY_GAIN = 1.0
+# --- IDs de paquetes que manda el Teensy ---
+PACKET_ID_ANGLE  = 33   # <ff> az, el
+PACKET_ID_OMEGAS = 34   # <ffff> wcmd_az, wcmd_el, wmeas_az, wmeas_el  (deg/s)
+
+# --- Joystick -> deg/s (fallback para ωcmd) ---
+JOY_DEG_PER_UNIT = 1.0  # cada unidad de X/Y vale 1 deg/s cuando throttle=1.0 (ajustá a gusto)
+
+def joy_to_deg_s(x, y, throttle):
+    try:
+        return (float(x) * float(throttle) * JOY_DEG_PER_UNIT,
+                float(y) * float(throttle) * JOY_DEG_PER_UNIT)
+    except Exception:
+        return (0.0, 0.0)
+
+
 
 # --- Carpeta absoluta para logs JSONL ---
 from pathlib import Path
@@ -104,8 +121,11 @@ def create_packet(x, y, throttle, trigger):
     return encoded_packet
 
 # ======= Video =======
+# ======= Video =======
 class FrameServer:
-    """Captura de video + overlay de telemetría (Az/El) y tracklets (RA/Dec, timestamp)."""
+    """Captura de video + overlay de telemetría (Az/El), tracklets (RA/Dec, timestamp)
+    y velocidades (comandada y medida) en °/s.
+    """
 
     def __init__(self, video_device='/dev/video0'):
         print(f"[Video] Inicializando captura en: {video_device}")
@@ -124,14 +144,20 @@ class FrameServer:
         self.dec_deg = None
         self.ts_iso = ""
 
-    # --- Helpers internos ---
+        # Velocidades (comandada y medida)
+        self.v_cmd_az = 0.0
+        self.v_cmd_el = 0.0
+        self.v_meas_az = 0.0
+        self.v_meas_el = 0.0
+
+    # --- Helpers ---
     @staticmethod
-    def _norm_az_360(az):
+    def _norm_az_360(az: float) -> float:
         az = az % 360.0
         return az if az >= 0 else az + 360.0
 
     @staticmethod
-    def _deg_to_hms(deg):
+    def _deg_to_hms(deg: float) -> str:
         total_seconds = (deg / 360.0) * 24.0 * 3600.0
         h = int(total_seconds // 3600)
         m = int((total_seconds % 3600) // 60)
@@ -139,7 +165,7 @@ class FrameServer:
         return f"{h:02d}:{m:02d}:{s:05.2f}"
 
     @staticmethod
-    def _deg_to_dms(deg):
+    def _deg_to_dms(deg: float) -> str:
         sign = '-' if deg < 0 else '+'
         d = abs(deg)
         dd = int(d)
@@ -154,12 +180,21 @@ class FrameServer:
         except Exception:
             return False
 
-    # --- API para actualizar datos ---
-    def update_values(self, azimut, elevacion):
+    # Setters de velocidades para overlay
+    def update_command_speed(self, vcmd_az_deg_s: float, vcmd_el_deg_s: float) -> None:
+        self.v_cmd_az = float(vcmd_az_deg_s)
+        self.v_cmd_el = float(vcmd_el_deg_s)
+
+    def update_measured_speed(self, vmeas_az_deg_s: float, vmeas_el_deg_s: float) -> None:
+        self.v_meas_az = float(vmeas_az_deg_s)
+        self.v_meas_el = float(vmeas_el_deg_s)
+
+    # API para actualizar datos
+    def update_values(self, azimut: float, elevacion: float) -> None:
         self.azimut = azimut
         self.elevacion = elevacion
 
-    def update_tracklet(self, ra_deg, dec_deg, ts_iso):
+    def update_tracklet(self, ra_deg, dec_deg, ts_iso: str) -> None:
         try:
             self.ra_deg = float(ra_deg) if ra_deg is not None else None
             self.dec_deg = float(dec_deg) if dec_deg is not None else None
@@ -168,7 +203,7 @@ class FrameServer:
             self.dec_deg = None
         self.ts_iso = ts_iso or ""
 
-    # --- Generación de frame con overlay ---
+    # Generación de frame con overlay
     def get_frame(self):
         if not self.running:
             return None
@@ -195,27 +230,42 @@ class FrameServer:
             cv2.putText(frame, az_el_text, (10, frame_height - 10),
                         cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
 
-        # RA/Dec + timestamp del último tracklet
+        # RA/Dec + timestamp del último tracklet (si hay)
+        y = 110
         if self.ra_deg is not None and self.dec_deg is not None:
             ra_txt = self._deg_to_hms(self.ra_deg)
             dec_txt = self._deg_to_dms(self.dec_deg)
-            cv2.putText(frame, f"RA: {ra_txt}  Dec: {dec_txt}", (10, 110),
+            cv2.putText(frame, f"RA:  {ra_txt}", (10, y),
                         cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
-
+            y += 40
+            cv2.putText(frame, f"Dec: {dec_txt}", (10, y),
+                        cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+            y += 40
             ts_label = self.ts_iso
             if self._ts_unsynced(ts_label):
                 ts_label += " (unsynced)"
-            cv2.putText(frame, f"T:  {ts_label}", (10, 150),
+            cv2.putText(frame, f"T:   {ts_label}", (10, y),
                         cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+            y += 40
+        else:
+            # Si aún no hay RA/Dec, reservamos el espacio para que no “salte” el layout
+            y = 150
+
+        # SIEMPRE dibujar velocidades (antes dependía de RA/Dec)
+        txt_w = (
+            f"wcmd Az/El: {self.v_cmd_az:+.2f}/{self.v_cmd_el:+.2f} deg/s   "
+            f"wmeas Az/El: {self.v_meas_az:+.2f}/{self.v_meas_el:+.2f} deg/s"
+        )
+        cv2.putText(frame, txt_w, (10, y),
+                    cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
 
         _, buffer = cv2.imencode('.jpg', frame)
         return buffer.tobytes()
 
-    def stop(self):
+    def stop(self) -> None:
         self.running = False
         self.cap.release()
 
-# ======= UDP RX (telemetría para azimut/elevación) =======
 # ======= UDP RX (telemetría para azimut/elevación) =======
 def udp_receiver(server: FrameServer):
     udp_ip = '0.0.0.0'
@@ -224,26 +274,49 @@ def udp_receiver(server: FrameServer):
     sock.bind((udp_ip, udp_port))
     print(f"[UDP RX] Escuchando en {udp_ip}:{udp_port} ...")
 
-    # Estado para gating
+    # Estado para gating (RA/Dec -> JSONL/UI)
     last_send_ms = 0
     last_hb_ms   = 0
     last_ra = None
     last_dec = None
 
+    # Estado para velocidad medida (desde Az/El)
+    last_az = None
+    last_el = None
+    last_t_ms = None
+    EMA_ALPHA = 0.2  # suavizado de ωmeas
+
     while server.running:
         try:
             data, _ = sock.recvfrom(4096)
+            if not data:
+                continue
 
-            # --- Paquete binario id=33: <ff> az, el ---
-            if len(data) >= 12 and data[2] == 33:
+            # --- Paquete 33: <ff> az, el ---
+            if len(data) >= 12 and data[2] == PACKET_ID_ANGLE:
                 azimut, elevacion = struct.unpack_from('<ff', data, offset=4)
                 server.update_values(azimut, elevacion)
 
-                # Calcular RA/Dec con UTC real de la Pi
+                # ωmeas (deg/s) con wrap en Az (359->0)
+                now_ms = int(time.time() * 1000)
+                if last_az is not None and last_el is not None and last_t_ms is not None:
+                    dt = max(1e-3, (now_ms - last_t_ms) / 1000.0)
+                    delta_az = (azimut - last_az) % 360.0
+                    if delta_az > 180.0:
+                        delta_az -= 360.0
+                    v_az = delta_az / dt
+                    v_el = (elevacion - last_el) / dt
+                    v_az_f = EMA_ALPHA * v_az + (1 - EMA_ALPHA) * server.v_meas_az
+                    v_el_f = EMA_ALPHA * v_el + (1 - EMA_ALPHA) * server.v_meas_el
+                    server.update_measured_speed(v_az_f, v_el_f)
+                last_az, last_el, last_t_ms = azimut, elevacion, now_ms
+
+                # RA/Dec con UTC de la Pi -> SIEMPRE refresca overlay
                 ra_deg, dec_deg, now_ms = altaz_to_radec_pi(azimut, elevacion)
                 ts_iso = iso8601_from_ms(now_ms)
+                server.update_tracklet(ra_deg, dec_deg, ts_iso)
 
-                # Gating: periodo + delta + heartbeat
+                # Gating sólo para persistir/emitir tracklet
                 send_ok = False
                 if (now_ms - last_send_ms) >= TRACKLET_PERIOD_MS:
                     delta_ok = (last_ra is None or
@@ -251,16 +324,13 @@ def udp_receiver(server: FrameServer):
                                 abs(dec_deg - last_dec) >= TRACKLET_DELTA_MIN_DEG)
                     heartbeat = (now_ms - last_hb_ms) >= TRACKLET_HEARTBEAT_MS
                     send_ok = delta_ok or heartbeat
-                    if heartbeat: last_hb_ms = now_ms
+                    if heartbeat:
+                        last_hb_ms = now_ms
 
                 if send_ok:
                     last_send_ms = now_ms
                     last_ra, last_dec = ra_deg, dec_deg
 
-                    # Actualizar overlay
-                    server.update_tracklet(ra_deg, dec_deg, ts_iso)
-
-                    # Construir tracklet (Pi como fuente)
                     obj = {
                         "timestamp": ts_iso,
                         "ra_deg": float(f"{ra_deg:.6f}"),
@@ -273,23 +343,42 @@ def udp_receiver(server: FrameServer):
                         "instrument_id": INSTRUMENT_ID,
                         "exp_ms": EXP_MS,
                         "seeing_arcsec": SEEING_ARCSEC,
-                        # útil para debugging:
-                        "az_deg": float(f"{((azimut%360)+360)%360:.2f}"),
+                        "az_deg": float(f"{((azimut % 360) + 360) % 360:.2f}"),
                         "el_deg": float(f"{elevacion:.2f}"),
-                        "source": "pi"
+                        "source": "pi",
+                        # ωcmd: fallback desde joystick o sobrescrito por paquete 34
+                        "wcmd_az_deg_s":  float(f"{server.v_cmd_az:.3f}"),
+                        "wcmd_el_deg_s":  float(f"{server.v_cmd_el:.3f}"),
+                        # ωmeas: EMA desde Az/El
+                        "wmeas_az_deg_s": float(f"{server.v_meas_az:.3f}"),
+                        "wmeas_el_deg_s": float(f"{server.v_meas_el:.3f}")
                     }
 
-                    # Guardar JSONL del día
                     p = current_tracklet_path()
                     with p.open('a', encoding='utf-8') as f:
                         f.write(json.dumps(obj) + "\n")
-                    # Emitir a la UI
                     socketio.emit('tracklet', obj)
 
-            # (Ignoramos cualquier otra cosa, incluido JSON del Teensy si lo hubiera)
+            # --- Paquete 34: <ffff> wcmd_az, wcmd_el, wmeas_az, wmeas_el ---
+            elif len(data) >= 4 + 16 and data[2] == PACKET_ID_OMEGAS:
+                plen = data[3]
+                if plen >= 16 and len(data) >= 4 + plen:
+                    payload  = data[4:4+plen]
+                    recv_chk = data[4+plen] if len(data) >= 5 + plen else None
+                    if recv_chk is None or ((sum(payload) & 0xFF) != recv_chk):
+                        print("[UDP RX][ω] checksum inválido")
+                    else:
+                        v_cmd_az, v_cmd_el, v_meas_az, v_meas_el = struct.unpack_from('<ffff', payload, offset=0)
+                        server.update_command_speed(v_cmd_az, v_cmd_el)
+                        server.update_measured_speed(v_meas_az, v_meas_el)
+                        # print(f"[ω] cmd=({v_cmd_az:+.2f},{v_cmd_el:+.2f}) meas=({v_meas_az:+.2f},{v_meas_el:+.2f})")
+
+            # (Ignoramos cualquier otra cosa)
         except Exception as e:
             print(f"[UDP RX] Error: {e}")
+
     sock.close()
+
 
 
 # ======= Flask / Socket.IO =======
@@ -361,12 +450,16 @@ def handle_joystick_update(data):
 
         pkt = create_packet(x, y, throttle, trigger)
         send_udp_packet(pkt)
-        #print(f"[JSK] x={x:.2f} y={y:.2f} thr={throttle:.2f} trig={trigger} -> UDP {udp_target_ip}:{udp_target_port} ({len(pkt)} bytes)")
+
+        # >>> Fallback en la Pi: inferimos ωcmd para overlay y JSONL inmediatamente
+        vcmd_az, vcmd_el = joy_to_deg_s(x, y, throttle)
+        server.update_command_speed(vcmd_az, vcmd_el)
 
         emit('ack', {'ok': True}, broadcast=False)
     except Exception as e:
         print("[JSK][ERR]", e)
         emit('ack', {'ok': False, 'error': str(e)}, broadcast=False)
+
         
 @app.route('/tracklets/today')
 def tracklets_today():
