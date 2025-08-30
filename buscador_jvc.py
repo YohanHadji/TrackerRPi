@@ -271,8 +271,15 @@ def udp_receiver(server: FrameServer):
     udp_ip = '0.0.0.0'
     udp_port = 8888
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    try:
+        sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
+    except (AttributeError, OSError):
+        pass
     sock.bind((udp_ip, udp_port))
     print(f"[UDP RX] Escuchando en {udp_ip}:{udp_port} ...")
+    ...
+
 
     # Estado para gating (RA/Dec -> JSONL/UI)
     last_send_ms = 0
