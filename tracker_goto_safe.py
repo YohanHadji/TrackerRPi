@@ -158,10 +158,12 @@ def main():
     e.add_argument("--lightThreshold", type=int, default=200)
     e.add_argument("--gain", type=int, default=1)
     e.add_argument("--exposureTime", type=int, default=100)
-    # parser:
+
+    # abs-direct (packet_id=0x03)
     d = sub.add_parser("abs-direct", help="GOTO absoluto nativo: envía packet_id=0x03 (2 floats)")
     d.add_argument("--az", type=float, required=True)
     d.add_argument("--el", type=float, required=True)
+
     # rel
     r = sub.add_parser("rel", help="Mover relativo (0x01)")
     r.add_argument("--dx", type=float, required=True)
@@ -211,6 +213,11 @@ def main():
                       invert_az=args.invert_az, invert_el=args.invert_el, swap=args.swap,
                       verbose=args.verbose)
 
+    elif args.cmd == "abs-direct":
+        # ya está importado arriba: sendAbsPosToTeensy
+        sendAbsPosToTeensy(args.az, args.el)
+        print(f"[OK] ABS_DIRECT -> az={args.az:.3f} el={args.el:.3f}")
+
     elif args.cmd == "pose":
         th = threading.Thread(target=_listen_capsules, daemon=True)
         th.start()
@@ -233,9 +240,7 @@ def main():
     elif args.cmd == "stop":
         send_stop()
 
-
 if __name__ == "__main__":
     main()
-elif args.cmd == "abs-direct":
-    sendAbsPosToTeensy(args.az, args.el)
-    print(f"[OK] ABS_DIRECT -> az={args.az:.3f} el={args.el:.3f}")
+
+
