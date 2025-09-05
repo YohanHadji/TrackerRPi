@@ -21,6 +21,8 @@ camRes = (img_width, img_height)
 
 # azimuth = 270
 # elevation = 90
+INVERT_X = +1   # pon -1 si ves que va al revés en AZ
+INVERT_Y = +1   # pon -1 si va al revés en EL
 
 xPos = 0
 yPos = 0
@@ -305,7 +307,11 @@ def tracking_loop():
                         elvError = elvSetpoint-trackerElvGlobal
                         
                         gain = 50
-                        
+                        u_x = int(INVERT_X * gain * (azmSetpoint - trackerAzmGlobal))
+                        u_y = int(INVERT_Y * gain * (elvSetpoint - trackerElvGlobal))
+                        pointToSendControl = LightPoint(name="ABCD", isVisible=True, x=u_x, y=u_y, age=0)
+                        sendTargetToTeensy(pointToSendControl, 33, 30, 3)
+
                         pointToSendControl = LightPoint(name="ABCD", isVisible=True, x=azmError*gain, y=elvError*gain, age=0)
                         sendTargetToTeensy(pointToSendControl, 33, 30, 3)
                         
@@ -325,10 +331,12 @@ def tracking_loop():
                 
                 pointToSend.age = np.int32((((time.time()-startTime)*1e9)-(sensorTimeStamp+timeOffsetAverage))/1e6)
             
-                pointToSend.x = -pointToSend.x
-                pointToSend.y = -pointToSend.y
+                #pointToSend.x = -pointToSend.x
+                #pointToSend.y = -pointToSend.y
+                pointToSend.x = int(INVERT_X * pointToSend.x)
+                pointToSend.y = int(INVERT_Y * pointToSend.y)
                 sendTargetToTeensy(pointToSend, 33, 5, 50)
-                
+                                
                 print(pointToSend.name, pointToSend.x, pointToSend.y, pointToSend.age, pointToSend.isVisible)
                 printFps()
             
