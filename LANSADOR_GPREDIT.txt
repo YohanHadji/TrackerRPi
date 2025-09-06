@@ -1,0 +1,25 @@
+para lansar Gpredid , se necesita :
+que tracker_goto_safe.py este en la misma carpeta que:
+python3 easycomm_pty_bridge.py   terminal 1
+
+este va a dar esta indicacion :
+^Cpi@raspberrypi:~/TrackerRPi $ python3 easycomm_pty_bridge.py 
+[easycomm-pty] PTY listo en: /dev/pts/18
+[easycomm-pty] Enlace estable: /run/rotor_pty
+[OK] ENABLE ON settings=(25, 100, 200, 200, 1, 100, 1)
+[GUIDE] hilo de guiado ACTIVO
+
+ahora e deve tomar el numero de  /dev/pts/XX y poenrlo en el otra terminal 2
+rotctld -m 202 -r /dev/pts/18 -s 115200 -T 0.0.0.0 -t 4533 -vvvv
+
+y recien en la terminal 3 el comando :
+
+
+pi@raspberrypi:~ $ rotctl -m 2 -r 127.0.0.1:4533 p
+49.80   AZI
+15.00   ELE 
+la p minuscula en el comando devuelve azimut y elavcion 
+la P mayuscula se guida  de dos valores  indica los grados 
+siempre el primer valor es Azimut y el segundo Elevacion  
+pi@raspberrypi:~ $ rotctl -m 2 -r 127.0.0.1:4533 P 50 15
+

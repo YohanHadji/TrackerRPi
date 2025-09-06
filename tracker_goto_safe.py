@@ -6,6 +6,9 @@ from communication import (
     newPacketReceived, newPacketReceivedType, returnLastPacketData
 )
 from communication import sendAbsPosToTeensy
+import communication as comm
+comm.UDP_IP_TRACKER = '127.0.0.1'
+comm.UDP_PORT = 9103
 # ----------------- Telemetría (id=33) -----------------
 _current = {"az": None, "el": None}
 
@@ -68,7 +71,8 @@ def goto_abs_safe(az_set, el_set, *,
                   invert_az=False, invert_el=False, swap=False,
                   verbose=False):
     # Listener
-    t = threading.Thread(target=_listen_capsules, daemon=True)
+    #t = threading.Thread(target=_listen_capsules, daemon=True)
+    t = threading.Thread(target=_listen_capsules, kwargs={'bind_ip':'127.0.0.1','port':9003}, daemon=True)
     t.start()
 
     # Pose inicial
@@ -219,7 +223,8 @@ def main():
         print(f"[OK] ABS_DIRECT -> az={args.az:.3f} el={args.el:.3f}")
 
     elif args.cmd == "pose":
-        th = threading.Thread(target=_listen_capsules, daemon=True)
+        #th = threading.Thread(target=_listen_capsules, daemon=True)
+        th = threading.Thread(target=_listen_capsules, kwargs={'bind_ip':'127.0.0.1','port':9003}, daemon=True)
         th.start()
         az, el = get_tracker_pose(wait=True, timeout=2.0)
         if az is None:

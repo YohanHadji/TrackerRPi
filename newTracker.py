@@ -24,6 +24,10 @@ camRes = (img_width, img_height)
 INVERT_X = +1   # pon -1 si ves que va al revés en AZ
 INVERT_Y = +1   # pon -1 si va al revés en EL
 
+# --- Override UDP target to local hub ---
+UDP_IP_TRACKER = '127.0.0.1'
+UDP_PORT = 9101
+
 xPos = 0
 yPos = 0
 
@@ -82,8 +86,8 @@ def udp_receiver():
     """
     Hilo para recibir datos UDP y actualizar azimut y elevación en el servidor.
     """
-    udp_ip = '0.0.0.0'
-    udp_port = 8888
+    udp_ip = '127.0.0.1' # antigua ip 0.0.0.0 
+    udp_port = 9001   #--8888
 
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.bind((udp_ip, udp_port))

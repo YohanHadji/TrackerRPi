@@ -106,6 +106,7 @@ def smooth_target(taz, tel):
     return az, el
 # === Listener único de telemetría (evita EADDRINUSE) ===
 _listener_once = False
+
 def ensure_listener_once():
     """Arranca un ÚNICO listener de telemetría y neutraliza el interno."""
     global _listener_once
@@ -114,9 +115,13 @@ def ensure_listener_once():
 
     def _run():
         try:
-            T._listen_capsules()
+            # === IMPORTANTE ===
+            # Escuchar telemetría desde el HUB (fanout #3):
+            #   bind_ip: 127.0.0.1
+            #   port:    9003
+            T._listen_capsules(bind_ip="127.0.0.1", port=9003)
         except OSError as e:
-            # 98 = Address already in use (ya hay uno corriendo)
+            # 98 = Address already in use (puerto ocupado)
             if getattr(e, "errno", None) != 98:
                 print(f"[TELEM] listener error: {e}", flush=True)
 

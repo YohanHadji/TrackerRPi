@@ -97,8 +97,12 @@ def iso8601_from_ms(ms):
 # ======= UDP TX (igual que en joysti_virtual.py) =======
 PRA = 0xFF
 PRB = 0xFA
-udp_target_ip = '192.168.1.100'   # <-- AJUSTA a la IP real de tu receptor
-udp_target_port = 8888
+#udp_target_ip = '192.168.1.100'   # <-- AJUSTA a la IP real de tu receptor
+#udp_target_port = 8888
+udp_target_ip = '127.0.0.1'   # <-- envio al hub de teensy
+udp_target_port = 9102
+
+
 udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
 def send_udp_packet(packet: bytes):
@@ -268,8 +272,10 @@ class FrameServer:
 
 # ======= UDP RX (telemetría para azimut/elevación) =======
 def udp_receiver(server: FrameServer):
-    udp_ip = '0.0.0.0'
-    udp_port = 8888
+    #udp_ip = '0.0.0.0'
+    #udp_port = 8888
+    udp_ip = '127.0.0.1'    # recpcion teensy
+    udp_port = 9002
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     try:
