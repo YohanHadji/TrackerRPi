@@ -1,0 +1,104 @@
+[UDP-RX] bind 0.0.0.0:[CAM] opening /dev/video0
+ 8888
+[HTTP] serving on 0.0.0.0:5010
+ * Serving Flask app 'buscador_tracking_jvc'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5010
+ * Running on http://192.168.1.220:5010
+Press CTRL+C to quit
+[%H:%M:%S] [UDP-RX] Az/El=197.12596130371094/5.359499931335449 wmeas=0.0/0.0 pkts/2s=21
+192.168.1.185 - - [06/Sep/2025 22:46:01] "GET /socket.io/?EIO=4&transport=polling&t=PaWns2d HTTP/1.1" 200 -
+[IO] connect
+192.168.1.185 - - [06/Sep/2025 22:46:01] "POST /socket.io/?EIO=4&transport=polling&t=PaWns2u&sid=uzx3JQW6qlcS2AfEAAAA HTTP/1.1" 200 -
+192.168.1.185 - - [06/Sep/2025 22:46:01] "GET /socket.io/?EIO=4&transport=polling&t=PaWns2v&sid=uzx3JQW6qlcS2AfEAAAA HTTP/1.1" 200 -
+[%H:%M:%S] [UDP-RX] Az/El=197.12596130371094/5.359499931335449 wmeas=0.0/0.0 pkts/2s=20
+[%H:%M:%S] [CAM] fps~29.5
+[2025-09-06 22:46:02,809] ERROR in app: Exception on / [GET]
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/flask/app.py", line 2525, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/flask/app.py", line 1822, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/flask/app.py", line 1820, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/flask/app.py", line 1796, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/pi/TrackerRPi/buscador_tracking_jvc.py", line 225, in index
+    return render_template("Ojvc_index.html")
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/flask/templating.py", line 147, in render_template
+    return _render(app, template, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/flask/templating.py", line 130, in _render
+    rv = template.render(context)
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/jinja2/environment.py", line 1301, in render
+    self.environment.handle_exception()
+  File "/usr/lib/python3/dist-packages/jinja2/environment.py", line 936, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "/home/pi/TrackerRPi/templates/Ojvc_index.html", line 356, in top-level template code
+    fetch("{{ url_for('calibrate') }}",{method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({spd:spd,dur:dur})})
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/flask/app.py", line 2031, in url_for
+    return self.handle_url_build_error(error, endpoint, values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/flask/app.py", line 2020, in url_for
+    rv = url_adapter.build(  # type: ignore[union-attr]
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/werkzeug/routing/map.py", line 917, in build
+    raise BuildError(endpoint, values, method, self)
+werkzeug.routing.exceptions.BuildError: Could not build url for endpoint 'calibrate'. Did you mean 'index' instead?
+192.168.1.185 - - [06/Sep/2025 22:46:02] "GET / HTTP/1.1" 500 -
+[2025-09-06 22:46:03,932] ERROR in app: Exception on / [GET]
+Traceback (most recent call last):
+  File "/usr/lib/python3/dist-packages/flask/app.py", line 2525, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/flask/app.py", line 1822, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/flask/app.py", line 1820, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/flask/app.py", line 1796, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/pi/TrackerRPi/buscador_tracking_jvc.py", line 225, in index
+    return render_template("Ojvc_index.html")
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/flask/templating.py", line 147, in render_template
+    return _render(app, template, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/flask/templating.py", line 130, in _render
+    rv = template.render(context)
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/jinja2/environment.py", line 1301, in render
+    self.environment.handle_exception()
+  File "/usr/lib/python3/dist-packages/jinja2/environment.py", line 936, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "/home/pi/TrackerRPi/templates/Ojvc_index.html", line 356, in top-level template code
+    fetch("{{ url_for('calibrate') }}",{method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({spd:spd,dur:dur})})
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/flask/app.py", line 2031, in url_for
+    return self.handle_url_build_error(error, endpoint, values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/flask/app.py", line 2020, in url_for
+    rv = url_adapter.build(  # type: ignore[union-attr]
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/werkzeug/routing/map.py", line 917, in build
+    raise BuildError(endpoint, values, method, self)
+werkzeug.routing.exceptions.BuildError: Could not build url for endpoint 'calibrate'. Did you mean 'index' instead?
+192.168.1.185 - - [06/Sep/2025 22:46:03] "GET / HTTP/1.1" 500 -
+[%H:%M:%S] [UDP-RX] Az/El=197.12596130371094/5.359499931335449 wmeas=0.0/0.0 pkts/2s=20
+[%H:%M:%S] [UDP-RX] Az/El=197.12596130371094/5.359499931335449 wmeas=0.0/0.0 pkts/2s=20
+[%H:%M:%S] [CAM] fps~29.7
+[%H:%M:%S] [UDP-RX] Az/El=197.12596130371094/5.359499931335449 wmeas=0.0/0.0 pkts/2s=20
+[%H:%M:%S] [UDP-RX] Az/El=197.12596130371094/5.359499931335449 wmeas=0.0/0.0 pkts/2s=20
+[%H:%M:%S] [CAM] fps~29.8
+[%H:%M:%S] [UDP-RX] Az/El=197.12596130371094/5.359499931335449 wmeas=0.0/0.0 pkts/2s=20
