@@ -1,5 +1,4 @@
-
-import cv2, numpy as np, time, threading, socket, struct, json, traceback, serial
+import cv2, numpy as np, time, threading, socket, struct, json, traceback, serial, os
 from pathlib import Path
 from flask import Flask, Response, request, jsonify, render_template
 from flask_socketio import SocketIO
@@ -9,7 +8,7 @@ PRA, PRB = 0xFF, 0xFA
 PACKET_ID_ANGLE, PACKET_ID_OMEGAS = 33, 34
 FALLBACK_DPX = (0.03, 0.03)   # (H,V) deg/pixel fallback
 
-UDP_TARGET_IP   = "192.168.1.100"   # CAMBIA si corresponde
+UDP_TARGET_IP   = "192.168.1.100"   # <-- AJUSTA si corresponde
 UDP_TARGET_PORT = 8888
 UDP_BROADCAST   = False
 
@@ -41,6 +40,44 @@ track_enabled = False
 
 telemetry_lock = threading.Lock()
 telemetry = dict(az=None, el=None, wcmd_az=0.0, wcmd_el=0.0, wmeas_az=0.0, wmeas_el=0.0)
+
+# ---- tracklets logging ----
+TRACK_LOG_HZ = 10.0   # líneas por segundo mientras está tracking ON
+track_log_fp = None
+track_log_date = None
+track_log_lock = threading.Lock()
+next_track_log_t = 0.0
+
+def _now_ms():
+    t = time.time()
+    return t, int(round(t*1000)), time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(t)) + (".%03d" % int((t%1)*1000))
+
+def _ensure_track_file():
+    """Abre/rota el archivo tracklets_YYYYMMDD.jsonl según fecha local cuando se enciende el tracking."""
+    global track_log_fp, track_log_date
+    ymd = time.strftime("%Y%m%d", time.localtime())
+    if track_log_fp is not None and track_log_date == ymd:
+        return
+    if track_log_fp is not None:
+        try:
+            track_log_fp.flush()
+            track_log_fp.close()
+        except Exception:
+            pass
+    fname = f"tracklets_{ymd}.jsonl"
+    fpath = BASE_DIR / fname
+    track_log_fp = open(fpath, "a", buffering=1, encoding="utf-8")
+    track_log_date = ymd
+    print(f"[TRACK] logging -> {fpath}", flush=True)
+
+def _write_tracklet(rec: dict):
+    with track_log_lock:
+        if track_log_fp is None:
+            return
+        try:
+            track_log_fp.write(json.dumps(rec, ensure_ascii=False) + "\n")
+        except Exception as e:
+            print("[TRACK][ERR] write:", e, flush=True)
 
 # ---- LUT zoom ----
 try:
@@ -214,6 +251,17 @@ def draw_overlay(frm):
     if ema_xy is not None:
         cv2.circle(frm, (int(ema_xy[0]), int(ema_xy[1])), 6, (0, 255, 255), -1, cv2.LINE_AA)
         cv2.circle(frm, (int(ema_xy[0]), int(ema_xy[1])), LOCK_RADIUS_PX, (64, 64, 64), 1, cv2.LINE_AA)
+    # Telemetría + tiempo con milisegundos
+    t, epoch_ms, now_str = _now_ms()
+    with telemetry_lock:
+        az = telemetry.get("az"); el = telemetry.get("el")
+    azs = "—" if az is None else f"{az:.3f}"
+    els = "—" if el is None else f"{el:.3f}"
+    dpx = f"{deg_per_px[0]:.5f}/{deg_per_px[1]:.5f}"
+    txt1 = f"Az:{azs}  El:{els}  dpx:{dpx}"
+    txt2 = now_str
+    cv2.putText(frm, txt1, (10, 18), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,255,0), 1, cv2.LINE_AA)
+    cv2.putText(frm, txt2, (10, 36), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,255,0), 1, cv2.LINE_AA)
     return frm
 
 # ================== Detección/Tracking ==================
@@ -263,7 +311,7 @@ def _send_rate_cmd(v_az_deg_s, v_el_deg_s, throttle=1.0, trigger=1):
         telemetry["wcmd_az"], telemetry["wcmd_el"] = float(x_units*throttle), float(y_units*throttle)
 
 def controller_loop():
-    global ema_xy
+    global ema_xy, next_track_log_t
     last = time.time()
     n = 0
     while True:
@@ -289,6 +337,28 @@ def controller_loop():
                 dy = ema_xy[1] - cy
                 v_az, v_el = compute_command_from_error(dx, dy)
                 _send_rate_cmd(v_az, v_el, 1.0, 1)
+                # --- tracklets JSONL cada 1/TRACK_LOG_HZ s ---
+                t, epoch_ms, now_str = _now_ms()
+                if t >= next_track_log_t:
+                    with telemetry_lock:
+                        rec = {
+                            "ts": now_str,
+                            "epoch_ms": epoch_ms,
+                            "az": telemetry.get("az"),
+                            "el": telemetry.get("el"),
+                            "wcmd_az": telemetry.get("wcmd_az"),
+                            "wcmd_el": telemetry.get("wcmd_el"),
+                            "wmeas_az": telemetry.get("wmeas_az"),
+                            "wmeas_el": telemetry.get("wmeas_el"),
+                            "deg_per_px": {"h": deg_per_px[0], "v": deg_per_px[1]},
+                            "cx": cx, "cy": cy,
+                            "tx": float(ema_xy[0]), "ty": float(ema_xy[1]),
+                            "dx_px": float(dx), "dy_px": float(dy),
+                            "v_az": float(v_az), "v_el": float(v_el),
+                            "zoom_v": zoom_voltage
+                        }
+                    _write_tracklet(rec)
+                    next_track_log_t = t + 1.0/float(TRACK_LOG_HZ)
             n += 1
             if time.time() - last > 1.0:
                 print(time.strftime("[%H:%M:%S]"),
@@ -306,10 +376,8 @@ socketio = SocketIO(app, cors_allowed_origins="*", async_mode="threading")
 
 @app.route("/")
 def index():
-    # Render SIEMPRE jvc_index.html (nombre estable)
     return render_template("Ojvc_index.html")
 
-# compat: si alguien pide /Ojvc_index.html, servir la misma
 @app.route("/Ojvc_index.html")
 def legacy_index():
     return render_template("Ojvc_index.html")
@@ -362,19 +430,30 @@ def snapshot():
 
 @app.route("/status")
 def status():
+    t, epoch_ms, now_str = _now_ms()
     with telemetry_lock:
         s = dict(track=track_enabled,
                  dpx=[deg_per_px[0], deg_per_px[1]],
                  signs=[SIGN_AZ, SIGN_EL],
-                 az=telemetry.get("az"), el=telemetry.get("el"))
+                 az=telemetry.get("az"), el=telemetry.get("el"),
+                 wcmd=[telemetry.get("wcmd_az"), telemetry.get("wcmd_el")],
+                 wmeas=[telemetry.get("wmeas_az"), telemetry.get("wmeas_el")])
+    s["now"] = now_str
+    s["epoch_ms"] = epoch_ms
+    s["zoom_v"] = zoom_voltage
     return jsonify(s)
 
 @app.route("/toggle_tracking", methods=["POST"])
 def toggle_tracking():
-    global track_enabled
+    global track_enabled, next_track_log_t
     track_enabled = not track_enabled
-    if not track_enabled:
+    if track_enabled:
+        _ensure_track_file()
+        next_track_log_t = 0.0
+        print("[TRACK] ON", flush=True)
+    else:
         _send_rate_cmd(0.0, 0.0, 1.0, 1)
+        print("[TRACK] OFF", flush=True)
     return f"Tracking: {'ON' if track_enabled else 'OFF'}"
 
 @app.route("/set_signs", methods=["POST"])
@@ -406,7 +485,7 @@ def set_zoom():
     try: send_to_arduino(f"{zoom_voltage:.2f}")
     except Exception as e: print("[Arduino][ERR] al enviar zoom:", e)
     print("[HTTP] set_zoom ->", zoom_voltage, "deg/px=", deg_per_px, flush=True)
-    return f"Zoom {zoom_voltage:.2f} V | deg/px H/V = {deg_per_px[0]:.4f}/{deg_per_px[1]:.4f}"
+    return f"Zoom {zoom_voltage:.2f} V | deg/px H/V = {deg_per_px[0]:.5f}/{deg_per_px[1]:.5f}"
 
 @app.route("/set_device", methods=["POST"])
 def set_device():
