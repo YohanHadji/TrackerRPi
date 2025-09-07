@@ -1,0 +1,9 @@
+{
+  "SIGN_AZ": -1,
+  "SIGN_EL": -1,
+  "Kp_deg_per_err": 0.6,
+  "MAX_SPEED_DEG_S": 19.5,
+  "JOY_DEG_PER_UNIT": 1.0,
+  "OFFSET_AZ": 0.0,
+  "OFFSET_EL": 0.0
+}

@@ -1,362 +1,201 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <title>Control de Zoom</title>
-  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Control JVC + Tracking</title>
   <style>
-    body { font-family: sans-serif; padding: 30px; background: #f0f0f0; }
-
-    /* Imagen de video */
-    .video-wrap img { width:100%; max-width: 1000px; border:1px solid #444; display:block; }
-
-    /* Ventana flotante */
-    .floating-panel{
-      position: fixed; top: 24px; left: 24px;
-      width: 340px; max-width: calc(100vw - 40px);
-      background: rgba(255,255,255,0.92);
-      border: 1px solid #bbb; border-radius: 12px;
-      box-shadow: 0 10px 24px rgba(0,0,0,.25);
-      z-index: 9999; user-select: none; backdrop-filter: blur(4px);
-    }
-    .panel-header{
-      cursor: move; padding: 10px 12px;
-      background: #222; color: #fff; font-weight: 600;
-      border-top-left-radius: 12px; border-top-right-radius: 12px;
-      display:flex; align-items:center; justify-content:space-between;
-      touch-action: none;   /* importante para arrastrar en touch */
-    }
-    .panel-body{ padding: 12px; }
-
-    /* Bloques internos */
-    .ctrl{ display:flex; flex-direction:column; gap:8px; }
-    .ctrl label{ font-weight:600; }
-
-    /* Joystick */
-    .joy-wrap{
-      width:220px;height:220px;margin:auto;
-      border:2px solid #aaa;border-radius:50%;
-      position:relative;touch-action:none;user-select:none;background:#fff
-    }
-    .joy-knob{
-      width:60px;height:60px;border-radius:50%;
-      background:#ddd;position:absolute;left:50%;top:50%;
-      transform:translate(-50%,-50%);box-shadow:0 0 8px rgba(0,0,0,.25);
-    }
-
-    .slider-container { margin-top: 8px; }
-    input[type=range] { width: 100%; }
-    .voltage-display { font-size: 1.1em; margin-top: 6px; }
+    body{font-family:system-ui,Segoe UI,Arial,sans-serif;background:#111;color:#ddd;margin:0}
+    .wrap{display:flex;gap:16px;padding:12px}
+    .video{flex:1}
+    #video{max-width:100%;border:1px solid #333;background:#000}
+    .panel{width:360px;min-width:320px;background:#1a1a1a;border-left:1px solid #333;padding:12px;position:sticky;top:0;height:100vh;overflow:auto}
+    .card{background:#151515;border:1px solid #303030;border-radius:10px;padding:10px;margin-bottom:12px}
+    .row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+    .btn{padding:6px 10px;border-radius:8px;border:1px solid #444;background:#2a2a2a;color:#eee;cursor:pointer}
+    .btn:active{transform:translateY(1px)}
+    .lbl{opacity:.8}
+    input[type=range]{width:160px}
+    .joy{width:240px;height:240px;border-radius:120px;border:1px solid #444;position:relative;background:#0f0f0f;margin:8px auto}
+    .knob{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:70px;height:70px;border-radius:50%;background:#4448;backdrop-filter:blur(2px)}
+    .pill{position:fixed;right:16px;bottom:16px;background:#0008;color:#0f0;padding:10px 12px;border-radius:10px}
   </style>
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
 </head>
 <body>
-  <h2>Control de Zoom Analógico JVC</h2>
-
-  <!-- Video -->
-  <div class="video-wrap">
-    <img src="{{ url_for('video_feed') }}" alt="Video Feed">
-  </div>
-
-  <!-- Ventana flotante con controles -->
-  <div class="floating-panel" id="controlPanel">
-    <div class="panel-header" id="panelHeader">
-      Controles
-      <span style="opacity:.8;font-size:.9em">arrastra aquí</span>
+  <div class="wrap">
+    <div class="video">
+      <h2>Video</h2>
+      <img id="video" src="/video_feed" alt="Video" onerror="this.onerror=null; this.src='/snapshot?ts='+Date.now()">
     </div>
-    <div class="panel-body">
-      <!-- Joystick -->
-      <div class="ctrl" style="align-items:center">
-        <div>Joystick</div>
-        <div class="joy-wrap" id="joy">
-          <div class="joy-knob" id="knob"></div>
-        </div>
-        <small>X,Y en rango [-14 .. 14]</small>
-      </div>
-
-      <!-- Throttle + Trigger -->
-      <div class="ctrl" style="margin-top:10px">
-        <label for="throttle">Throttle (0.10–30)</label>
-        <input id="throttle" type="range" min="0.10" max="30" step="0.01" value="0.10">
-        <span id="throttleVal">0.10</span>
-
-        <label style="margin-top:8px;">
-          <input type="checkbox" id="trigger"> Trigger
-        </label>
-      </div>
-
-      <!-- Slider de zoom -->
-      <div class="slider-container">
-        <label for="zoomSlider">Ajuste de zoom (0.0 - 3.0 V):</label>
-        <input type="range" min="0" max="3" value="1.55" step="0.01" id="zoomSlider">
-        <div class="voltage-display">
-          Tensión actual: <span id="voltageValue">1.55</span> V
+    <aside class="panel">
+      <div class="card">
+        <div class="row">
+          <button class="btn" id="trackBtn">Tracking ON/OFF</button>
+          <label class="lbl"><input type="checkbox" id="flipAz"> flip AZ</label>
+          <label class="lbl"><input type="checkbox" id="flipEl"> flip EL</label>
         </div>
       </div>
 
-      <!-- Debug XY opcional -->
-      <div id="dbg" style="font-family:monospace;margin-top:6px;"></div>
-    </div>
-    
+      <div class="card">
+        <div class="row">
+          <label class="lbl">Zoom V:</label>
+          <input id="zoomRange" type="range" min="0" max="3" step="0.01" value="1.55">
+          <span id="zoomVal">1.55 V</span>
+        </div>
+        <div class="row" style="margin-top:6px;">
+          <button class="btn" id="zOut">Z− (hold)</button>
+          <label class="lbl">Step</label>
+          <input id="zStep" type="range" min="0.02" max="0.50" step="0.01" value="0.10" style="width:120px">
+          <span id="zStepVal">0.10 V</span>
+          <button class="btn" id="zIn">Z+ (hold)</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Joystick</h3>
+        <div class="joy" id="joy"><div class="knob" id="knob"></div></div>
+        <div class="row">
+          <label class="lbl">Throttle</label>
+          <input id="thr" type="range" min="0.1" max="3.0" step="0.1" value="1.0">
+          <label class="lbl"><input type="checkbox" id="trigger" checked> Trigger</label>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Calibración</h3>
+        <div class="row">
+          <label class="lbl">Calib spd (deg/s)</label><input id="calSpd" type="number" step="0.5" value="5">
+          <label class="lbl">dur (s)</label><input id="calDur" type="number" step="0.1" value="0.8">
+          <button class="btn" id="calBtn">Calibrate</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Control de seguimiento</h3>
+        <div class="row">
+          <label>Kp</label><input id="kpSlider" type="range" min="0.02" max="0.6" step="0.01" value="0.28"><span id="kpVal">0.28</span>
+        </div>
+        <div class="row">
+          <label>Max spd</label><input id="maxSpdSlider" type="range" min="1" max="20" step="0.5" value="10"><span id="maxSpdVal">10</span>
+        </div>
+        <div class="row">
+          <label>Offset AZ</label><input id="offAz" type="range" min="-5" max="5" step="0.1" value="0"><span id="offAzVal">0</span>
+        </div>
+        <div class="row">
+          <label>Offset EL</label><input id="offEl" type="range" min="-5" max="5" step="0.1" value="0"><span id="offElVal">0</span>
+        </div>
+        <div class="row">
+          <button class="btn" id="saveCtrl">Save ctrl</button>
+        </div>
+      </div>
+    </aside>
   </div>
 
-  <!-- Arrastre de ventana (Pointer Events) -->
-  <script>
-    (function(){
-      const panel = document.getElementById('controlPanel');
-      const header = document.getElementById('panelHeader');
-      let dragging = false, offX = 0, offY = 0;
+  <div class="pill" id="pill">track:OFF</div>
 
-      header.addEventListener('pointerdown', (e)=>{
-        dragging = true;
-        header.setPointerCapture(e.pointerId);
-        const rect = panel.getBoundingClientRect();
-        offX = e.clientX - rect.left;
-        offY = e.clientY - rect.top;
-      });
-
-      header.addEventListener('pointermove', (e)=>{
-        if(!dragging) return;
-        let x = e.clientX - offX;
-        let y = e.clientY - offY;
-        // Limita dentro de la ventana
-        x = Math.max(0, Math.min(window.innerWidth  - panel.offsetWidth,  x));
-        y = Math.max(0, Math.min(window.innerHeight - panel.offsetHeight, y));
-        panel.style.left = x + 'px';
-        panel.style.top  = y + 'px';
-      });
-
-      const stopDrag = (e)=>{ dragging = false; try{ header.releasePointerCapture(e.pointerId);}catch{} };
-      header.addEventListener('pointerup', stopDrag);
-      header.addEventListener('pointercancel', stopDrag);
-    })();
-  </script>
-
-  <!-- Control de Zoom (HTTP) -->
-  <script>
-    const slider = document.getElementById("zoomSlider");
-    const voltageText = document.getElementById("voltageValue");
-    let resetTimer = null;
-    const NEUTRO = 1.55; // usa 1.50 si tu cámara lo requiere
-
-    slider.addEventListener("input", () => {
-      voltageText.textContent = parseFloat(slider.value).toFixed(2);
-    });
-
-    slider.addEventListener("change", () => {
-      const voltage = parseFloat(slider.value).toFixed(2);
-      fetch("/set_zoom", {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: "voltage=" + voltage
-      });
-
-      clearTimeout(resetTimer);
-      resetTimer = setTimeout(() => {
-        slider.value = NEUTRO;
-        voltageText.textContent = NEUTRO.toFixed(2);
-        fetch("/set_zoom", {
-          method: "POST",
-          headers: { "Content-Type": "application/x-www-form-urlencoded" },
-          body: "voltage=" + NEUTRO.toFixed(2)
-        });
-      }, 1000);
-    });
-  </script>
-
-  <!-- Joystick (Socket.IO) -->
-  <script>
-    // Fuerza WebSocket para evitar long-polling
-    // PLAN B: forzar long-polling y desactivar upgrade a WebSocket
-   const socket = io({
-         transports: ["polling"],
-         upgrade: false
-     });
-    socket.on('connect', () => {
-    console.log('[socket] conectado (polling). id=', socket.id);
-    });
-     socket.on('connect_error', (err) => {
-     console.log('[socket] connect_error:', err);
-    });
-     socket.on('disconnect', (reason) => {
-     console.log('[socket] disconnect:', reason);
-    });
-
-    const joy = document.getElementById('joy');
-    const knob = document.getElementById('knob');
-    const throttle = document.getElementById('throttle');
-    const throttleVal = document.getElementById('throttleVal');
-    const trigger = document.getElementById('trigger');
-    const dbg = document.getElementById('dbg');
-
-    let center = {x: 0, y: 0}, radius = 0, dragging = false;
-    let joyState = {x:0, y:0, throttle: parseFloat(throttle.value), trigger: 0};
-    let lastSent = 0;
-
-    const INVERT_Y = true; // cambia a false si tu hardware lo prefiere
-
-    function recomputeGeometry(){
-      const r = joy.getBoundingClientRect();
-      center.x = r.left + r.width/2;
-      center.y = r.top + r.height/2;
-      radius = (Math.min(r.width, r.height)/2) - (knob.offsetWidth/2) - 4;
-    }
-    window.addEventListener('resize', recomputeGeometry);
-    window.addEventListener('load', recomputeGeometry);
-
-    function setKnobFromClient(clientX, clientY){
-      // Recalcula SIEMPRE por si se movió la ventana
-      recomputeGeometry();
-
-      const dx = clientX - center.x;
-      const dy = clientY - center.y;
-      const dist = Math.hypot(dx, dy);
-      const k = dist > radius ? radius/dist : 1;
-      const nx = dx * k;
-      const ny = dy * k;
-
-      knob.style.left = `calc(50% + ${nx}px)`;
-      knob.style.top  = `calc(50% + ${ny}px)`;
-
-      const rawX = 14 * (nx / radius);
-      const rawY = 14 * (ny / radius); // +abajo/-arriba
-      joyState.x = rawX;
-      joyState.y = INVERT_Y ? -rawY : rawY;
-
-      if (dbg) dbg.textContent = `x=${joyState.x.toFixed(2)}  y=${joyState.y.toFixed(2)}`;
-    }
-
-    function resetKnob(){
-      knob.style.left = '50%';
-      knob.style.top  = '50%';
-      joyState.x = 0; joyState.y = 0;
-      if (dbg) dbg.textContent = `x=0.00  y=0.00`;
-    }
-
-    function sendIfDue(){
-      const now = performance.now();
-      if (now - lastSent >= 50) { // ~20 Hz
-        socket.emit('joystick_update', {
-          x: joyState.x,
-          y: joyState.y,
-          throttle: joyState.throttle,
-          trigger: joyState.trigger
-        });
-        lastSent = now;
-      }
-      if (dragging) requestAnimationFrame(sendIfDue);
-    }
-
-    function startDrag(e){
-      dragging = true;
-      const p = e.touches ? e.touches[0] : e;
-      if (e.cancelable) e.preventDefault();
-      setKnobFromClient(p.clientX, p.clientY);
-      requestAnimationFrame(sendIfDue);
-    }
-    function moveDrag(e){
-      if (!dragging) return;
-      const p = e.touches ? e.touches[0] : e;
-      if (e.cancelable) e.preventDefault();
-      setKnobFromClient(p.clientX, p.clientY);
-    }
-    function endDrag(e){
-      dragging = false;
-      if (e && e.cancelable) e.preventDefault();
-      resetKnob();
-      socket.emit('joystick_update', {
-        x: 0, y: 0,
-        throttle: joyState.throttle,
-        trigger: joyState.trigger
-      });
-    }
-
-    joy.addEventListener('mousedown', startDrag);
-    window.addEventListener('mousemove', moveDrag);
-    window.addEventListener('mouseup', endDrag);
-    joy.addEventListener('touchstart', startDrag, {passive:false});
-    joy.addEventListener('touchmove', moveDrag, {passive:false});
-    joy.addEventListener('touchend', endDrag, {passive:false});
-
-    throttle.addEventListener('input', () => {
-      throttleVal.textContent = throttle.value;
-      joyState.throttle = parseFloat(throttle.value);
-      socket.emit('joystick_update', {
-        x: joyState.x, y: joyState.y,
-        throttle: joyState.throttle, trigger: joyState.trigger
-      });
-    });
-
-    trigger.addEventListener('change', () => {
-      joyState.trigger = trigger.checked ? 1 : 0;
-      socket.emit('joystick_update', {
-        x: joyState.x, y: joyState.y,
-        throttle: joyState.throttle, trigger: joyState.trigger
-      });
-    });
-  </script>
-
-<!-- === Control panel añadido === -->
-<style>
-#ctrl_panel{position:fixed; right:12px; bottom:12px; z-index:99999;
-  background:rgba(0,0,0,0.65); color:#0f0; padding:10px 12px; border-radius:10px;
-  font-family:monospace; font-size:13px; line-height:1.4; min-width:240px}
-#ctrl_panel input[type=range]{width:160px}
-#ctrl_panel button{margin:2px 0; padding:4px 8px; border-radius:8px; border:1px solid #0f0; background:#030; color:#0f0}
-#ctrl_panel label{margin-right:6px}
-</style>
-<div id="ctrl_panel">
-  <div id="status_line">status…</div>
-  <div style="margin-top:6px">
-    <button id="btn_toggle_tracking">Tracking ON/OFF</button>
-    <label><input type="checkbox" id="flip_az"> flip AZ</label>
-    <label><input type="checkbox" id="flip_el"> flip EL</label>
-    <button id="btn_apply_flips">Apply</button>
-  </div>
-  <div style="margin-top:6px">
-    Zoom V: <input id="zoom_voltage" type="range" min="0" max="3" step="0.02" value="0.00">
-    <span id="zoom_v_val">0.00</span> V
-  </div>
-  <div style="margin-top:6px">
-    Calib spd(deg/s) <input id="cal_spd" type="number" step="0.1" value="1.0" style="width:64px">
-    dur(s) <input id="cal_dur" type="number" step="0.1" value="0.8" style="width:64px">
-    <button id="btn_calibrate">Calibrate</button>
-  </div>
-</div>
 <script>
-(function(){
-  function qs(id){return document.getElementById(id)}
-  function updateStatus(){
-    fetch("{{ url_for('status') }}").then(r=>r.json()).then(s=>{
-      const el = qs("status_line");
-      if (el) el.textContent = `track:${s.track?'ON':'OFF'}  dpx:${s.dpx[0].toFixed(4)}/${s.dpx[1].toFixed(4)}  AZ=${s.az??'---'} EL=${s.el??'---'}`;
-    }).catch(()=>{});
+const NEUTRO = 1.55;
+function $(id){ return document.getElementById(id); }
+
+async function GET(u){ const r = await fetch(u); return r.json ? r.json() : r.text(); }
+async function POST(u, data){
+  const opt = data && data._form
+    ? {method:"POST", headers:{"Content-Type":"application/x-www-form-urlencoded"}, body:data._form}
+    : {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(data||{})};
+  const r = await fetch(u,opt); try{ return await r.json(); }catch{ return await r.text(); }
+}
+
+function initZoom(){
+  const zr = $("zoomRange"), zv=$("zoomVal"), zIn=$("zIn"), zOut=$("zOut"), zStep=$("zStep"), zStepVal=$("zStepVal");
+  let to=null;
+  function send(v){ POST("/set_zoom", {_form:"voltage="+v.toFixed(2)}); }
+  zr.addEventListener("input", ()=>{ zv.textContent = (+zr.value).toFixed(2) + " V"; send(+zr.value); clearTimeout(to); to=setTimeout(()=>send(NEUTRO), 1000); });
+  zStep.addEventListener("input", ()=> zStepVal.textContent = (+zStep.value).toFixed(2)+" V");
+  function press(dir){ const v = NEUTRO + (dir>0?+1:-1)*parseFloat(zStep.value||"0.10"); send(v); }
+  function release(){ send(NEUTRO); }
+  ["mousedown","touchstart"].forEach(ev => zIn.addEventListener(ev, (e)=>{e.preventDefault();press(+1)}, {passive:false}));
+  ["mouseup","mouseleave","touchend"].forEach(ev => zIn.addEventListener(ev, (e)=>{e.preventDefault();release()}, {passive:false}));
+  ["mousedown","touchstart"].forEach(ev => zOut.addEventListener(ev, (e)=>{e.preventDefault();press(-1)}, {passive:false}));
+  ["mouseup","mouseleave","touchend"].forEach(ev => zOut.addEventListener(ev, (e)=>{e.preventDefault();release()}, {passive:false}));
+}
+
+function initCtrl(){
+  const kp=$("kpSlider"), ms=$("maxSpdSlider"), oa=$("offAz"), oe=$("offEl");
+  const kv=$("kpVal"), msv=$("maxSpdVal"), oav=$("offAzVal"), oev=$("offElVal");
+  ["input","change"].forEach(ev=>kp.addEventListener(ev,()=>kv.textContent=kp.value));
+  ["input","change"].forEach(ev=>ms.addEventListener(ev,()=>msv.textContent=ms.value));
+  ["input","change"].forEach(ev=>oa.addEventListener(ev,()=>oav.textContent=oa.value));
+  ["input","change"].forEach(ev=>oe.addEventListener(ev,()=>oev.textContent=oe.value));
+  $("saveCtrl").addEventListener("click", async()=>{
+    await POST("/set_ctrl", {kp:+kp.value, max_speed:+ms.value, offset_az:+oa.value, offset_el:+oe.value});
+  });
+  // cargar prefs
+  fetch("/get_prefs").then(r=>r.json()).then(d=>{
+    if(d.Kp_deg_per_err!=null){kp.value=d.Kp_deg_per_err; kv.textContent=d.Kp_deg_per_err;}
+    if(d.MAX_SPEED_DEG_S!=null){ms.value=d.MAX_SPEED_DEG_S; msv.textContent=d.MAX_SPEED_DEG_S;}
+    if(d.OFFSET_AZ!=null){oa.value=d.OFFSET_AZ; oav.textContent=d.OFFSET_AZ;}
+    if(d.OFFSET_EL!=null){oe.value=d.OFFSET_EL; oev.textContent=d.OFFSET_EL;}
+    if(d.SIGN_AZ!=null){$("flipAz").checked = (d.SIGN_AZ === -1);}
+    if(d.SIGN_EL!=null){$("flipEl").checked = (d.SIGN_EL === -1);}
+  }).catch(()=>{});
+}
+
+function initTrack(){
+  $("trackBtn").addEventListener("click", async()=>{
+    const t = await POST("/toggle_tracking", {});
+    $("pill").textContent = (""+t).includes("ON")? "track:ON":"track:OFF";
+  });
+  $("flipAz").addEventListener("change", ()=>POST("/set_signs",{flip_az:$("flipAz").checked, flip_el:$("flipEl").checked}));
+  $("flipEl").addEventListener("change", ()=>POST("/set_signs",{flip_az:$("flipAz").checked, flip_el:$("flipEl").checked}));
+}
+
+function initCalib(){
+  $("calBtn").addEventListener("click", async()=>{
+    const spd=+$("calSpd").value||5, dur=+$("calDur").value||0.8;
+    const r = await fetch("/calibrate",{method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({spd:spd,dur:dur})});
+    try{ const d=await r.json(); alert(JSON.stringify(d)); }catch{ alert("OK"); }
+  });
+}
+
+// Joystick muy simple
+function initJoy(){
+  const joy=$("joy"), knob=$("knob"), rect=()=>joy.getBoundingClientRect();
+  let down=false;
+  function send(x,y){
+    const thr = +$("thr").value; const trg = $("trigger").checked?1:0;
+    socket.emit("joystick_update", {x:x, y:y, throttle:thr, trigger:trg});
   }
-  setInterval(updateStatus, 1000); updateStatus();
+  function handle(clientX, clientY){
+    const r = rect();
+    const cx = r.left + r.width/2;
+    const cy = r.top + r.height/2;
+    let dx = (clientX - cx)/(r.width/2);
+    let dy = (clientY - cy)/(r.height/2);
+    dx = Math.max(-1, Math.min(1, dx));
+    dy = Math.max(-1, Math.min(1, dy));
+    const unitsX = Math.round(dx*14);
+    const unitsY = Math.round(dy*14);
+    knob.style.left = (50 + dx*50) + "%";
+    knob.style.top  = (50 + dy*50) + "%";
+    send(unitsX, unitsY);
+  }
+  ["mousedown","touchstart"].forEach(ev=>joy.addEventListener(ev, (e)=>{down=true; const t=(e.touches&&e.touches[0])||e; handle(t.clientX,t.clientY);},{passive:false}));
+  ["mousemove","touchmove"].forEach(ev=>document.addEventListener(ev, (e)=>{if(!down)return; const t=(e.touches&&e.touches[0])||e; handle(t.clientX,t.clientY);},{passive:false}));
+  ["mouseup","mouseleave","touchend","touchcancel"].forEach(ev=>document.addEventListener(ev, (e)=>{ if(!down)return; down=false; knob.style.left='50%'; knob.style.top='50%'; send(0,0); }, {passive:false}));
+}
 
-  const btnTrack = qs("btn_toggle_tracking");
-  if (btnTrack) btnTrack.onclick = ()=>fetch("{{ url_for('toggle_tracking') }}",{method:'POST'}).then(r=>r.text()).then(console.log);
+let socket=null;
+function initIO(){
+  socket = io();
+  socket.on("connect", ()=>console.log("IO connected"));
+  socket.on("disconnect", ()=>console.log("IO disconnected"));
+}
 
-  const btnFlip = qs("btn_apply_flips");
-  if (btnFlip) btnFlip.onclick = ()=>{
-    const az = qs("flip_az").checked, el = qs("flip_el").checked;
-    fetch("{{ url_for('set_signs') }}",{method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({flip_az:az, flip_el:el})});
-  };
-
-  const slider = qs("zoom_voltage"), val=qs("zoom_v_val");
-  if (slider) slider.oninput = ()=>{
-    val.textContent = parseFloat(slider.value).toFixed(2);
-    const fd = new URLSearchParams(); fd.set('voltage', parseFloat(slider.value).toFixed(2));
-    fetch("{{ url_for('set_zoom') }}", {method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body:fd});
-  };
-
-  const btnCal = qs("btn_calibrate");
-  if (btnCal) btnCal.onclick = ()=>{
-    const spd = parseFloat(qs("cal_spd").value||'1.0');
-    const dur = parseFloat(qs("cal_dur").value||'0.8');
-    fetch("{{ url_for('calibrate') }}",{method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({spd:spd,dur:dur})})
-      .then(r=>r.json()).then(j=>{ if(j.ok){ alert(`deg/px H=${j.deg_per_px.h.toFixed(5)} V=${j.deg_per_px.v.toFixed(5)}`);} else { alert('Calib ERR: '+j.err); } });
-  };
-})();
+window.addEventListener("load", ()=>{
+  initIO(); initZoom(); initCtrl(); initTrack(); initCalib(); initJoy();
+});
 </script>
 </body>
 </html>
