@@ -310,18 +310,16 @@ def tracking_loop():
                         azmError = azmSetpoint-trackerAzmGlobal
                         elvError = elvSetpoint-trackerElvGlobal
                         
+                        # === SCAN: corrección fina (un único envío, SIEMPRE con inversión) ===
                         gain = 50
-                        u_x = int(INVERT_X * gain * (azmSetpoint - trackerAzmGlobal))
-                        u_y = int(INVERT_Y * gain * (elvSetpoint - trackerElvGlobal))
-                        pointToSendControl = LightPoint(name="ABCD", isVisible=True, x=u_x, y=u_y, age=0)
+                        az_cmd = int(INVERT_X * azmError * gain) if 'azmError' in locals() else int(INVERT_X * gain * (azmSetpoint - trackerAzmGlobal))
+                        el_cmd = int(INVERT_Y * elvError * gain) if 'elvError' in locals() else int(INVERT_Y * gain * (elvSetpoint - trackerElvGlobal))
+                        pointToSendControl = LightPoint(name="ABCD", isVisible=True, x=az_cmd, y=el_cmd, age=0)
                         sendTargetToTeensy(pointToSendControl, 33, 30, 3)
-
-                        pointToSendControl = LightPoint(name="ABCD", isVisible=True, x=azmError*gain, y=elvError*gain, age=0)
-                        sendTargetToTeensy(pointToSendControl, 33, 30, 3)
-                        
                     
                     print("Point reached!")
-                    
+                    print(f"[SCAN] err=({azmError:+.3f},{elvError:+.3f}) cmd=({az_cmd},{el_cmd}) inv=({INVERT_X},{INVERT_Y})")
+
                     time.sleep(input_values["scanWaitTime"])
                 
                 scanInProgress = False
@@ -339,8 +337,10 @@ def tracking_loop():
                 #pointToSend.y = -pointToSend.y
                 pointToSend.x = int(INVERT_X * pointToSend.x)
                 pointToSend.y = int(INVERT_Y * pointToSend.y)
-                sendTargetToTeensy(pointToSend, 33, 5, 50)
-                                
+                if getTrackingEnabled():
+                   sendTargetToTeensy(pointToSend, 33, 5, 50)
+
+                                                
                 print(pointToSend.name, pointToSend.x, pointToSend.y, pointToSend.age, pointToSend.isVisible)
                 printFps()
             

@@ -10,7 +10,7 @@ FALLBACK_DPX = (0.03, 0.03)   # (H,V) deg/pixel fallback
 
 # ------- MODO SIMPLE: cambia solo estas dos líneas -------
 USE_HUB  = True   # False = DIRECTO (Teensy); True = a través del hub
-HUB_SLOT = 1  
+HUB_SLOT = 0 
 UDP_BROADCAST = 4  # 1, 2 o 3 (el canal del hub si USE_HUB=True)
 # ---------------------------------------------------------
 
@@ -30,6 +30,10 @@ else:
 
 VIDEO_DEVICE    = "/dev/video0"
 HTTP_PORT       = 5010
+# --- Joystick keep-alive state ---
+last_joy_pkt = None
+last_joy_ts = 0.0
+last_joy_nonzero = False
 
 # Detección / tracking (defaults; pueden cambiarse por /set_ctrl)
 LOCK_RADIUS_PX, THRESH_VAL, MIN_BLOB_AREA = 120, 220, 3
