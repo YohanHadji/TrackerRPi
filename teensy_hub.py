@@ -25,13 +25,13 @@ TEENSY_PORT = int(os.getenv("TEENSY_PORT", "8888"))
 
 # Telemetry fanout (where local clients listen)
 FANOUT_RX = [
-    ("127.0.0.1", 9001),  # client 1
-    ("127.0.0.1", 9002),  # client 2
-    ("127.0.0.1", 9003),  # client 3
+    ("127.0.0.1", 9001),
+    ("127.0.0.1", 9002),
+    ("127.0.0.1", 9003),
+    ("127.0.0.1", 9004),  # nuevo
+    ("127.0.0.1", 9005),  # nuevo
 ]
-
-# Command intake from local clients
-CLIENT_TX_PORTS = [9101, 9102, 9103]
+CLIENT_TX_PORTS = [9101, 9102, 9103, 9104, 9105]
 
 # Extra port to accept commands via iptables REDIRECT
 REDIRECT_PORT = 9199

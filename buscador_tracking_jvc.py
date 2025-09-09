@@ -8,9 +8,25 @@ PRA, PRB = 0xFF, 0xFA
 PACKET_ID_ANGLE, PACKET_ID_OMEGAS = 33, 34
 FALLBACK_DPX = (0.03, 0.03)   # (H,V) deg/pixel fallback
 
-UDP_TARGET_IP   = "192.168.1.100"   # <-- AJUSTA si corresponde
-UDP_TARGET_PORT = 8888
-UDP_BROADCAST   = False
+# ------- MODO SIMPLE: cambia solo estas dos líneas -------
+USE_HUB  = True   # False = DIRECTO (Teensy); True = a través del hub
+HUB_SLOT = 1  
+UDP_BROADCAST = 4  # 1, 2 o 3 (el canal del hub si USE_HUB=True)
+# ---------------------------------------------------------
+
+if USE_HUB:
+    # Comandos -> hub (TX) y Telemetría <- hub (RX) en loopback
+    UDP_TARGET_IP   = "127.0.0.1"          # a dónde ENVIAMOS comandos
+    UDP_TARGET_PORT = 9104 + HUB_SLOT      # 9101/9102/9103
+    UDP_RX_BIND_IP  = "127.0.0.1"          # dónde ESCUCHAMOS telemetría
+    UDP_RX_PORT     = 9004 + HUB_SLOT      # 9001/9002/9003
+else:
+    # Directo al Teensy (uso exclusivo del puerto 8888)
+    UDP_TARGET_IP   = "192.168.1.100"
+    UDP_TARGET_PORT = 8888
+    UDP_RX_BIND_IP  = "0.0.0.0"
+    UDP_RX_PORT     = 8888
+
 
 VIDEO_DEVICE    = "/dev/video0"
 HTTP_PORT       = 5010
@@ -130,8 +146,10 @@ if UDP_BROADCAST:
     udp_tx.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
 
 def _dest():
-    return ("255.255.255.255", UDP_TARGET_PORT) if UDP_BROADCAST else (UDP_TARGET_IP, UDP_TARGET_PORT)
-
+    if UDP_BROADCAST and not USE_HUB:
+        return ("255.255.255.255", UDP_TARGET_PORT)
+    return (UDP_TARGET_IP, UDP_TARGET_PORT)
+   
 def send_udp_packet(pkt, tag=""):
     try:
         udp_tx.sendto(pkt, _dest())
@@ -147,12 +165,15 @@ def pkt_joy_units(x_units, y_units, throttle, trigger):
     return pkt
 
 def udp_rx_loop():
-    print("[UDP-RX] bind 0.0.0.0:", UDP_TARGET_PORT, flush=True)
+    print(f"[UDP-RX] bind {UDP_RX_BIND_IP}:{UDP_RX_PORT}", flush=True)
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    try: sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
-    except Exception: pass
-    sock.bind(("0.0.0.0", UDP_TARGET_PORT))
+    try:
+        sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
+    except Exception:
+        pass
+    sock.bind((UDP_RX_BIND_IP, UDP_RX_PORT))
+
     last = time.time(); cnt = 0
     while True:
         try:
